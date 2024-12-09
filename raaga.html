@@ -348,7 +348,7 @@
     <audio id="audio" controls></audio>
 
     <script>
-      const queries = [
+     const queries = [
     'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
     'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
     'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
@@ -483,34 +483,49 @@ function shufflePlaylist() {
     audio.play();
 }
 
-// Download the current song
-function downloadSong() {
+// Download the current song using Base64
+function downloadAudio(song) {
+    const audioUrl = song.downloadUrl[4].url; // Replace 4 with the appropriate index
+
+    fetch(audioUrl)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then((blob) => {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const base64Data = reader.result.split(',')[1]; // Extract the Base64 data
+
+                // Create an anchor element to trigger the download
+                const a = document.createElement('a');
+                a.href = `data:audio/mp3;base64,${base64Data}`;
+                a.download = `${song.name}.mp3`; // Set the desired filename
+
+                // Trigger a click event on the anchor to initiate the download
+                a.dispatchEvent(new MouseEvent('click'));
+
+                // Cleanup
+                URL.revokeObjectURL(a.href);
+            };
+            reader.readAsDataURL(blob);
+        })
+        .catch((error) => {
+            console.error('Error downloading audio:', error);
+        });
+}
+
+// Trigger download for the currently playing song
+function downloadCurrentSong() {
     if (songs.length === 0 || currentSongIndex < 0 || currentSongIndex >= songs.length) {
         alert("No song available to download!");
         return;
     }
-
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-
-    // Find the correct download URL for the selected quality
-    const qualityUrlObj = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`);
-    if (!qualityUrlObj || !qualityUrlObj.url) {
-        alert("Download URL not available for the selected quality!");
-        return;
-    }
-
-    const qualityUrl = qualityUrlObj.url;
-
-    // Use anchor element to force download
-    const a = document.createElement('a');
-    a.href = qualityUrl;
-    a.download = `${song.name} - ${song.album.name}.mp3`; // Set the file name for the download
-    a.style.display = 'none'; // Hide the anchor element
-    document.body.appendChild(a);
-    a.click(); // Trigger the download
-    document.body.removeChild(a); // Clean up after download
+    downloadAudio(songs[currentSongIndex]);
 }
+
 
     </script>
 </body>
