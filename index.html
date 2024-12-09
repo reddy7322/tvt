@@ -442,28 +442,17 @@
             document.getElementById("song-name").innerText = song.name;
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
             document.getElementById("album-name").innerText = song.album.name;
-            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+            document.getElementById("album-poster").style.backgroundImage = `url('${song.image}')`;
 
+            // Fetch and display lyrics
             fetchLyrics(song.id).then(lyrics => {
-                if (lyrics) {
-                    lyricsLine.innerText = lyrics.replace(/<br>/g, ' ');
-                    lyricsLine.style.animationDuration = `${lyrics.length / 10}s`; // Adjust the speed based on lyric length
-                }
+                lyricsLine.textContent = lyrics;
+                // Adjust animation duration based on lyrics length
+                lyricsLine.style.animationDuration = `${lyrics.length * 0.05}s`;
             });
-
-            playIcon.innerText = "pause";
         }
 
-        // Play selected song
-        function playSong() {
-            if (songList.value !== "") {
-                currentSongIndex = songList.value;
-                loadSong();
-                audio.play();
-            }
-        }
-
-        // Toggle play/pause
+        // Play or pause the song
         function togglePlay() {
             if (audio.paused) {
                 audio.play();
@@ -474,44 +463,37 @@
             }
         }
 
-        // Seek song based on progress bar
-        function seekSong() {
-            const seekTo = audio.duration * (progressBar.value / 100);
-            audio.currentTime = seekTo;
-        }
-
-        // Update progress bar as song plays
-        audio.ontimeupdate = function () {
-            let progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = progress;
-            let minutes = Math.floor(audio.currentTime / 60);
-            let seconds = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-        };
-
-        // Auto-continue to next song when the current song ends
-        audio.onended = function () {
-            nextSong();
-        };
-
         // Play next song
         function nextSong() {
-            if (currentSongIndex < songs.length - 1) {
-                currentSongIndex++;
-            } else {
-                currentSongIndex = 0;
-            }
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
             loadSong();
             audio.play();
         }
 
         // Play previous song
         function prevSong() {
-            if (currentSongIndex > 0) {
-                currentSongIndex--;
-            } else {
-                currentSongIndex = songs.length - 1;
-            }
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong();
+            audio.play();
+        }
+
+        // Seek the song to a specific time
+        function seekSong() {
+            const seekTime = (audio.duration * progressBar.value) / 100;
+            audio.currentTime = seekTime;
+        }
+
+        // Update progress bar as song plays
+        audio.ontimeupdate = function () {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            const minutes = Math.floor(audio.currentTime / 60);
+            const seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+        }
+
+        // Change song quality
+        function changeQuality() {
             loadSong();
             audio.play();
         }
@@ -522,19 +504,13 @@
             updateSongList();
         }
 
-        // Helper function to shuffle songs array
+        // Helper function to shuffle songs
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]]; // Swap elements
             }
             return array;
-        }
-
-        // Change song quality
-        function changeQuality() {
-            loadSong();
-            audio.play();
         }
 
         // Download the current song
@@ -545,6 +521,5 @@
             window.open(qualityUrl, '_blank');
         }
     </script>
-
 </body>
 </html>
