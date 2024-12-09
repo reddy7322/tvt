@@ -146,12 +146,24 @@
         let currentSongIndex = 0;
         let songs = []; // Store song data from API response
 
+        // Predefined queries to preload music
+        const queries = [
+            'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens', 'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani', 'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu', 'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja', 'Ramajogayya Sastry', 'new remix'
+        ];
+
+        // Preload songs based on queries
+        async function preloadSongs() {
+            for (let query of queries) {
+                await searchSongs(query); // Load songs for each query
+            }
+        }
+
         // Function to search and populate song list based on query
-        async function searchSongs() {
-            const query = document.getElementById("search-bar").value;
-            const response = await fetch(`https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`);
+        async function searchSongs(query = "") {
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
+            const response = await fetch(url);
             const data = await response.json();
-            songs = data.data.results;
+            songs = [...songs, ...data.data.results]; // Append songs from query to main array
             updateSongList();
         }
 
@@ -224,6 +236,9 @@
         function seekSong() {
             audio.currentTime = (progressBar.value / 100) * audio.duration;
         }
+
+        // Initialize by preloading songs
+        preloadSongs();
     </script>
 </body>
 
