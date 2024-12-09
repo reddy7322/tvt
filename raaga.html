@@ -381,7 +381,6 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            playSong(); // Auto-play the first song
         }
 
         // Update song list dropdown
@@ -393,6 +392,13 @@
                 option.innerHTML = song.name;
                 songList.appendChild(option);
             });
+
+            // Auto-play the first song if available
+            if (songs.length > 0) {
+                currentSongIndex = 0;
+                loadSong(); // Load the first song
+                audio.play(); // Play the first song
+            }
         }
 
         // Play selected song
@@ -415,7 +421,7 @@
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
             document.getElementById("album-name").innerText = song.album.name;
             document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-            playIcon.innerText = "pause";
+            playIcon.innerText = "pause";  // Change the play icon to "pause"
         }
 
         // Toggle play/pause
@@ -429,70 +435,64 @@
             }
         }
 
-        // Seek song through progress bar
+        // Seek song based on progress bar
         function seekSong() {
-            let value = progressBar.value;
-            let seekTime = (audio.duration * value) / 100;
-            audio.currentTime = seekTime;
+            const seekTo = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTo;
         }
 
         // Update progress bar as song plays
         audio.ontimeupdate = function() {
-            let value = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = value;
-            let currentTime = formatTime(audio.currentTime);
-            timeDisplay.innerText = currentTime;
+            let progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            let minutes = Math.floor(audio.currentTime / 60);
+            let seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
         }
 
-        // Format time for display
-        function formatTime(seconds) {
-            let min = Math.floor(seconds / 60);
-            let sec = Math.floor(seconds % 60);
-            if (sec < 10) sec = "0" + sec;
-            return `${min}:${sec}`;
-        }
-
-        // Shuffle songs in the list
-        function shufflePlaylist() {
-            songs = songs.sort(() => Math.random() - 0.5);
-            updateSongList();
-        }
-
-        // Change quality and auto-play the song
-        function changeQuality() {
+        // Skip to next song
+        function nextSong() {
+            currentSongIndex++;
+            if (currentSongIndex >= songs.length) {
+                currentSongIndex = 0;
+            }
             loadSong();
             audio.play();
         }
 
-        // Download current song
+        // Skip to previous song
+        function prevSong() {
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = songs.length - 1;
+            }
+            loadSong();
+            audio.play();
+        }
+
+        // Shuffle playlist
+        function shufflePlaylist() {
+            songs = songs.sort(() => Math.random() - 0.5); // Shuffle the songs
+            updateSongList();
+            currentSongIndex = 0; // Reset to the first song after shuffle
+            playSong(); // Play the first song automatically after shuffling
+        }
+
+        // Download song
         function downloadSong() {
             const song = songs[currentSongIndex];
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            fetch(qualityUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `${song.name}.mp3`;
-                    a.click();
-                });
+            window.location.href = qualityUrl;  // Trigger download
         }
 
-        // Toggle search bar
-        function toggleSearchBar() {
-            let searchQuery = document.getElementById("search-bar").value;
-            if (searchQuery) {
-                searchSongs(searchQuery);
-            }
+        // Change quality of the song
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
+            loadSong();
+            audio.play();
         }
-
-        // Show and hide loader
-        window.addEventListener('load', function() {
-            document.getElementById("loader").classList.add("hide-loader");
-            document.getElementById("content").classList.remove("hide-loader");
-        });
     </script>
+
 </body>
 </html>
