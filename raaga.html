@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JioSaavn-like Music Player</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,9 +20,9 @@
         </div>
 
         <div class="controls">
-            <button id="prev" onclick="prevSong()">&#9664;</button>
-            <button id="play" onclick="togglePlay()">&#9654;</button>
-            <button id="next" onclick="nextSong()">&#9654;&#9654;</button>
+            <button id="prev" onclick="prevSong()" class="material-icons">skip_previous</button>
+            <button id="play" onclick="togglePlay()" class="material-icons">play_arrow</button>
+            <button id="next" onclick="nextSong()" class="material-icons">skip_next</button>
         </div>
 
         <div class="progress-container">
@@ -30,7 +31,7 @@
         </div>
 
         <div class="volume-container">
-            <input type="range" id="volume" min="0" max="1" step="0.1" onchange="adjustVolume()" />
+            <input type="range" id="volume" min="0" max="1" step="0.1" onchange="adjustVolume()">
         </div>
 
         <select id="song-list" onchange="playSong()">
