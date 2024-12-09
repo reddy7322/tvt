@@ -452,7 +452,7 @@ function loadSong() {
 
 // Fetch lyrics for the current song
 async function fetchLyrics(songName, artistName) {
-    let url = `https://api.lyrics.ovh/v1/${artistName}/${songName}`;
+    let url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     const response = await fetch(url);
     const data = await response.json();
 
