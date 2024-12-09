@@ -357,11 +357,11 @@
         let progressBar = document.getElementById("progress-bar");
         let timeDisplay = document.getElementById("time-display");
         let qualitySelect = document.getElementById("quality-select");
-        let currentSongIndex = 0;
+        let currentSongIndex = localStorage.getItem('currentSongIndex') || 0; // Fetch from localStorage if available
         let songs = []; // Store song data from API response
         let currentQuality = "96"; // Default to 96 kbps
 
-        // Auto-fetch random query and play the first song on page load
+        // Auto-fetch random query and play the first song or the last played song
         window.onload = async function() {
             const randomQuery = queries[Math.floor(Math.random() * queries.length)];
             searchSongs(randomQuery);
@@ -376,7 +376,7 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            playSong(); // Auto-play the first song
+            playSong(); // Auto-play the first song or the last played song
         }
 
         // Update the song list dropdown
@@ -404,6 +404,7 @@
             if (audio.paused) {
                 audio.play();
                 playIcon.innerText = "pause";
+                localStorage.setItem('currentSongIndex', currentSongIndex); // Store the song index
             } else {
                 audio.pause();
                 playIcon.innerText = "play_arrow";
