@@ -492,6 +492,9 @@ function changeQuality() {
 // Download current song
 function downloadSong() {
     if (songs.length === 0 || currentSongIndex < 0 || currentSongIndex >= songs.length) {
+// Download current song
+function downloadSong() {
+    if (songs.length === 0 || currentSongIndex < 0 || currentSongIndex >= songs.length) {
         alert("No song available to download!");
         return;
     }
@@ -505,11 +508,19 @@ function downloadSong() {
         return;
     }
 
+    // Create an invisible anchor element
     const a = document.createElement("a");
     a.href = qualityUrl;
-    a.download = `${song.name}.mp3`; 
+    a.download = `${song.name}.mp3`; // Set the filename for the download
+
+    // Prevent the default behavior (opening in a new tab)
+    a.style.display = 'none'; // Make it invisible
     document.body.appendChild(a);
+
+    // Trigger the download by clicking the anchor element
     a.click();
+
+    // Clean up by removing the anchor element
     document.body.removeChild(a);
 }
 
