@@ -349,157 +349,215 @@
 
     <script>
     const queries = [
-        'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens', 
-        'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani', 
-        'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu', 
-        'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja', 
-        'Ramajogayya Sastry', 'new remix'
-    ];
+    'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
+    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
+    'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
+    'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
+    'Ramajogayya Sastry', 'new remix'
+];
 
-    let audio = document.getElementById("audio");
-    let playIcon = document.getElementById("play-icon");
-    let songList = document.getElementById("song-list");
-    let progressBar = document.getElementById("progress-bar");
-    let timeDisplay = document.getElementById("time-display");
-    let qualitySelect = document.getElementById("quality-select");
-    let currentSongIndex = 0;
-    let songs = []; // Store song data from API response
-    let currentQuality = "96"; // Default quality is 96 kbps
+let audio = document.getElementById("audio");
+let playIcon = document.getElementById("play-icon");
+let songList = document.getElementById("song-list");
+let progressBar = document.getElementById("progress-bar");
+let timeDisplay = document.getElementById("time-display");
+let qualitySelect = document.getElementById("quality-select");
+let currentSongIndex = 0;
+let songs = []; // Store song data from API response
+let currentQuality = "96"; // Default to 96 kbps
 
-    // Auto-fetch random query and play the first song on page load
-    window.onload = async function () {
-        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-        await searchSongs(randomQuery);
-        // Hide loader once content is ready
-        document.getElementById("loader").classList.add('hide-loader');
-        document.getElementById("content").classList.remove('hide-loader');
-    };
+// Auto-fetch random query and play the first song on page load
+window.onload = async function () {
+    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    searchSongs(randomQuery);
+};
 
-    // Fetch songs based on search query
-    async function searchSongs(query) {
-        if (!query) return;
+// Fetch songs based on search query
+async function searchSongs(query) {
+    if (!query) {
+        alert("Please enter a search query.");
+        return;
+    }
 
-        let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=25`;
+    try {
+        // Display loader while fetching data
+        document.getElementById("loader").classList.remove('hide-loader');
+        document.getElementById("content").classList.add('hide-loader');
+
+        const url = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&page=1&limit=25`;
         const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+
         const data = await response.json();
+
+        // Check if the data contains results
+        if (!data || !data.data || !data.data.results || data.data.results.length === 0) {
+            alert("No songs found for your search. Please try a different query.");
+            songs = [];
+            updateSongList();
+            return;
+        }
+
+        // Process the search results
         songs = data.data.results;
         updateSongList();
-    }
 
-    // Update song list dropdown
-    function updateSongList() {
-        songList.innerHTML = "<option value=''>Select a song</option>";
-        songs.forEach((song, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.innerHTML = song.name;
-            songList.appendChild(option);
-        });
+        // Auto-play the first song
+        playSong(0);
 
-        // Auto-play the first song if available
-        if (songs.length > 0) {
-            currentSongIndex = 0;
-            loadSong(); // Load the first song
-            audio.play(); // Play the first song
-        }
-    }
-
-    // Play selected song
-    function playSong() {
-        if (songList.value !== "") {
-            currentSongIndex = parseInt(songList.value);
-            loadSong();
-            audio.play();
-        }
-    }
-
-    // Load song info
-    function loadSong() {
-        const song = songs[currentSongIndex];
-        const qualityUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
-
-        audio.src = qualityUrl;
-        document.getElementById("song-name").innerText = song.name;
-        document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-        document.getElementById("album-name").innerText = song.album.name;
-        document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-        playIcon.innerText = "pause"; // Change the play icon to "pause"
-    }
-
-    // Toggle play/pause
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play();
-            playIcon.innerText = "pause";
-        } else {
-            audio.pause();
-            playIcon.innerText = "play_arrow";
-        }
-    }
-
-    // Seek song based on progress bar
-    function seekSong() {
-        const seekTo = audio.duration * (progressBar.value / 100);
-        audio.currentTime = seekTo;
-    }
-
-    // Update progress bar as song plays
-    audio.ontimeupdate = function () {
-        let progress = (audio.currentTime / audio.duration) * 100;
-        progressBar.value = progress;
-        let minutes = Math.floor(audio.currentTime / 60);
-        let seconds = Math.floor(audio.currentTime % 60);
-        timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-    };
-
-    // Play next song when current one ends
-    audio.onended = function () {
-        nextSong();
-    };
-
-    // Skip to next song
-    function nextSong() {
-        currentSongIndex++;
-        if (currentSongIndex >= songs.length) {
-            currentSongIndex = 0; // Loop back to the first song
-        }
-        loadSong();
-        audio.play();
-    }
-
-    // Skip to previous song
-    function prevSong() {
-        currentSongIndex--;
-        if (currentSongIndex < 0) {
-            currentSongIndex = songs.length - 1; // Loop back to the last song
-        }
-        loadSong();
-        audio.play();
-    }
-
-    // Shuffle playlist
-    function shufflePlaylist() {
-        songs = songs.sort(() => Math.random() - 0.5); // Shuffle the songs
+        // Hide loader and show content
+        document.getElementById("loader").classList.add('hide-loader');
+        document.getElementById("content").classList.remove('hide-loader');
+    } catch (error) {
+        console.error("Error during song search:", error);
+        alert("Failed to fetch songs. Please try again later.");
+        songs = [];
         updateSongList();
-        currentSongIndex = 0; // Reset to the first song after shuffle
+
+        // Hide loader to allow retry
+        document.getElementById("loader").classList.add('hide-loader');
+        document.getElementById("content").classList.remove('hide-loader');
+    }
+}
+
+// Update song list dropdown
+function updateSongList() {
+    songList.innerHTML = "<option value=''>Select a song</option>";
+
+    if (songs.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.innerHTML = "No songs available";
+        songList.appendChild(option);
+        return;
     }
 
-    // Download the current song
-    function downloadSong() {
-        const song = songs[currentSongIndex];
-        const qualityUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
-        const a = document.createElement('a');
-        a.href = qualityUrl;
-        a.download = `${song.name}.mp3`;
-        a.click();
+    songs.forEach((song, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.innerHTML = song.name;
+        songList.appendChild(option);
+    });
+}
+
+// Play selected or indexed song
+function playSong(index = currentSongIndex) {
+    if (songs.length === 0 || index < 0 || index >= songs.length) {
+        alert("No song to play.");
+        return;
     }
 
-    // Change song quality and auto-play current song
-    function changeQuality() {
-        currentQuality = qualitySelect.value; // Update the selected quality
-        loadSong(); // Reload the current song with new quality
-        audio.play(); // Auto-play the song after quality change
+    currentSongIndex = index;
+    loadSong();
+    audio.play();
+}
+
+// Load song details and prepare for playback
+function loadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+    audio.src = qualityUrl;
+    document.getElementById("song-name").innerText = song.name;
+    document.getElementById("song-artist").innerText = song.artists.primary[0].name;
+    document.getElementById("album-name").innerText = song.album.name;
+    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+    playIcon.innerText = "pause";
+}
+
+// Toggle play/pause
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
     }
+}
+
+// Move to the next song in the playlist
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    playSong();
+}
+
+// Move to the previous song in the playlist
+function prevSong() {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    playSong();
+}
+
+// Seek song through progress bar
+function seekSong() {
+    const value = progressBar.value;
+    const seekTime = (audio.duration * value) / 100;
+    audio.currentTime = seekTime;
+}
+
+// Update progress bar as song plays
+audio.ontimeupdate = function () {
+    if (audio.duration) {
+        const value = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = value;
+        timeDisplay.innerText = formatTime(audio.currentTime);
+    }
+};
+
+// Play the next song when the current one ends
+audio.onended = function () {
+    nextSong();
+};
+
+// Format time for display
+function formatTime(seconds) {
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${min}:${sec < 10 ? "0" : ""}${sec}`;
+}
+
+// Shuffle the playlist
+function shufflePlaylist() {
+    songs = songs.sort(() => Math.random() - 0.5);
+    updateSongList();
+    playSong(0); // Start with the first shuffled song
+}
+
+// Change quality and apply it to all songs
+function changeQuality() {
+    currentQuality = qualitySelect.value;
+    loadSong();
+    audio.play(); // Auto-play after quality change
+}
+
+// Download the current song
+function downloadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+    fetch(qualityUrl)
+        .then(res => res.blob())
+        .then(blob => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `${song.name}.mp3`;
+            a.click();
+        });
+}
+
+// Trigger search on button click or input keyup
+function toggleSearchBar() {
+    const searchQuery = document.getElementById("search-bar").value;
+    if (searchQuery) {
+        searchSongs(searchQuery);
+    }
+}
+
 </script>
 
 </body>
