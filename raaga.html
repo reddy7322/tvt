@@ -1,40 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
-    <link rel="stylesheet" href="style.css">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        /* Basic Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #player-container {
+            width: 350px;
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #search-bar {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        #song-list {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        #song-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #song-artwork {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #controls button {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        #progress-bar {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #time-display {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 400px) {
+            #player-container {
+                width: 90%;
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <!-- Search Bar -->
-    <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
+    <div id="player-container">
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
 
-    <!-- Song List Dropdown -->
-    <select id="song-list">
-        <option value="">Select a song</option>
-    </select>
+        <!-- Song List Dropdown -->
+        <select id="song-list" onchange="playSong()">
+            <option value="">Select a song</option>
+        </select>
 
-    <!-- Player Controls -->
-    <div id="player-controls">
-        <button id="prev" onclick="prevSong()">Prev</button>
-        <button id="play" onclick="togglePlay()">Play</button>
-        <button id="next" onclick="nextSong()">Next</button>
-
+        <!-- Song Info -->
         <div id="song-info">
             <img id="song-artwork" src="" alt="Artwork" />
             <div>
-                <span id="song-name"></span>
-                <span id="song-artist"></span>
+                <span id="song-name">Song Name</span><br>
+                <span id="song-artist">Artist Name</span>
             </div>
         </div>
 
+        <!-- Audio Controls -->
+        <div id="controls">
+            <button id="prev" onclick="prevSong()">
+                <i class="material-icons">skip_previous</i>
+            </button>
+            <button id="play" onclick="togglePlay()">
+                <i class="material-icons" id="play-icon">play_arrow</i>
+            </button>
+            <button id="next" onclick="nextSong()">
+                <i class="material-icons">skip_next</i>
+            </button>
+        </div>
+
+        <!-- Progress Bar and Time Display -->
         <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
         <span id="time-display">0:00</span>
     </div>
 
+    <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-    <script src="script.js"></script>
+    <!-- JavaScript -->
+    <script>
+        let audio = document.getElementById("audio");
+        let playIcon = document.getElementById("play-icon");
+        let songList = document.getElementById("song-list");
+        let progressBar = document.getElementById("progress-bar");
+        let timeDisplay = document.getElementById("time-display");
+        let currentSongIndex = 0;
+        let songs = []; // Store song data from API response
+
+        // Function to search and populate song list based on query
+        async function searchSongs() {
+            const query = document.getElementById("search-bar").value;
+            const response = await fetch(`https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`);
+            const data = await response.json();
+            songs = data.data.results;
+            updateSongList();
+        }
+
+        // Function to update the dropdown with song options
+        function updateSongList() {
+            songList.innerHTML = "<option value=''>Select a song</option>";
+            songs.forEach((song, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.innerHTML = song.name;
+                songList.appendChild(option);
+            });
+        }
+
+        // Function to play the selected song
+        function playSong() {
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Function to load song and update UI
+        function loadSong() {
+            const song = songs[currentSongIndex];
+            audio.src = song.url;
+            document.getElementById("song-name").innerText = song.name;
+            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
+            document.getElementById("song-artwork").src = song.artists.primary[0].image[2].url;
+            playIcon.innerText = "pause";
+        }
+
+        // Toggle play/pause
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.innerText = "pause";
+            } else {
+                audio.pause();
+                playIcon.innerText = "play_arrow";
+            }
+        }
+
+        // Move to next song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong();
+            audio.play();
+        }
+
+        // Move to previous song
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong();
+            audio.play();
+        }
+
+        // Update progress bar and time display
+        audio.addEventListener("timeupdate", function () {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+
+            const minutes = Math.floor(audio.currentTime / 60);
+            const seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        });
+
+        // Seek song when clicking on progress bar
+        function seekSong() {
+            audio.currentTime = (progressBar.value / 100) * audio.duration;
+        }
+    </script>
 </body>
+
 </html>
