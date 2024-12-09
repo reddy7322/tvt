@@ -67,14 +67,10 @@
             justify-content: space-between;
         }
 
-        /* Menu Icon */
-        #menu-toggle {
-            width: 30px;
+        /* Small Page Logo */
+        #page-logo {
             height: 30px;
-            background-image: url('https://tvtelugu.github.io/images/tvtelugu.ico');
-            background-size: contain;
-            background-repeat: no-repeat;
-            cursor: pointer;
+            width: auto;
         }
 
         /* Search Bar */
@@ -272,9 +268,9 @@
 
     <div class="container" id="content">
 
-        <!-- Header: Menu & Search Bar -->
+        <!-- Header: Small Page Logo -->
         <div id="header">
-            <button id="menu-toggle" onclick="toggleMenu()"></button>
+            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" id="page-logo" alt="Logo" />
             <div id="search-container">
                 <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
                 <button id="search-btn" onclick="toggleSearchBar()">
@@ -376,7 +372,12 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            playSong(); // Auto-play the first song
+            
+            // Auto-play the first song after fetching the song list
+            if (songs.length > 0) {
+                currentSongIndex = 0; // Set the first song as the current song
+                playSong(); // Play the first song
+            }
         }
 
         // Update song list dropdown
@@ -453,41 +454,40 @@
             updateSongList();
         }
 
-        // Change quality and auto-play the song
-        function changeQuality() {
-            loadSong();
-            audio.play();
-        }
-
         // Download current song
         function downloadSong() {
             const song = songs[currentSongIndex];
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            fetch(qualityUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `${song.name}.mp3`;
-                    a.click();
-                });
+            window.location.href = qualityUrl;
         }
 
-        // Toggle search bar
-        function toggleSearchBar() {
-            let searchQuery = document.getElementById("search-bar").value;
-            if (searchQuery) {
-                searchSongs(searchQuery);
+        // Change audio quality
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
+            loadSong();
+            if (!audio.paused) {
+                audio.play();
             }
         }
 
-        // Show and hide loader
-        window.addEventListener('load', function() {
-            document.getElementById("loader").classList.add("hide-loader");
-            document.getElementById("content").classList.remove("hide-loader");
-        });
+        // Toggle search bar visibility
+        function toggleSearchBar() {
+            const searchBar = document.getElementById("search-bar");
+            if (searchBar.style.display === "block") {
+                searchBar.style.display = "none";
+            } else {
+                searchBar.style.display = "block";
+            }
+        }
+
+        // Hide the loader after page load
+        window.onload = function() {
+            document.getElementById('loader').classList.add('hide-loader');
+            document.getElementById('content').style.display = 'block';
+        }
+
     </script>
+
 </body>
 </html>
