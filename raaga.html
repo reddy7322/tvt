@@ -222,30 +222,41 @@
         let qualitySelect = document.getElementById("quality-select");
         let songArtwork = document.getElementById("song-artwork");
         let currentSongIndex = 0;
-        let songs = [];
-        let currentQuality = "96"; // Default quality
 
-        // Fetch songs from API based on search query
-        async function searchSongs(query = "") {
-            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
-            const response = await fetch(url);
-            const data = await response.json();
-            songs = data.data.results;
-            updateSongList();
-        }
+        // Mock song data
+        const songs = [
+            {
+                name: "Shape of You",
+                artist: "Ed Sheeran",
+                albumArt: "https://link.to/album-art1.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            },
+            {
+                name: "Blinding Lights",
+                artist: "The Weeknd",
+                albumArt: "https://link.to/album-art2.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+            },
+            {
+                name: "Levitating",
+                artist: "Dua Lipa",
+                albumArt: "https://link.to/album-art3.jpg",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+            }
+        ];
 
-        // Update dropdown with song options
+        // Update song list in dropdown
         function updateSongList() {
             songList.innerHTML = "<option value=''>Select a song</option>";
             songs.forEach((song, index) => {
                 const option = document.createElement("option");
                 option.value = index;
-                option.innerHTML = song.name;
+                option.innerHTML = `${song.name} - ${song.artist}`;
                 songList.appendChild(option);
             });
         }
 
-        // Play the selected song
+        // Play selected song
         function playSong() {
             if (songList.value !== "") {
                 currentSongIndex = songList.value;
@@ -254,16 +265,11 @@
             }
         }
 
-        // Load selected song and update UI
+        // Load the selected song
         function loadSong() {
             const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            audio.src = qualityUrl; // Set audio source
-            document.getElementById("song-name").innerText = song.name;
-            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            songArtwork.src = song.album.image[2].url; // Set album artwork
+            audio.src = song.audioUrl;
+            songArtwork.src = song.albumArt;
             playIcon.innerText = "pause";
         }
 
@@ -278,9 +284,9 @@
             }
         }
 
-        // Change music quality
+        // Change music quality (mock function for now)
         function changeQuality() {
-            loadSong();
+            console.log("Changing quality to:", qualitySelect.value);
         }
 
         // Seek song position when clicking on progress bar
@@ -316,8 +322,8 @@
             }
         }
 
-        // Initialize with default search
-        searchSongs();
+        // Initialize song list
+        updateSongList();
     </script>
 </body>
 
