@@ -20,9 +20,9 @@ async function searchSongs() {
     }
 
     try {
-        let response = await fetch(`${apiUrl}${query}&page=1&limit=10`);
+        let response = await fetch(`${apiUrl}${query}&page=1&limit=100`);
         let data = await response.json();
-        songs = data.songs;
+        songs = data.data.results;
 
         songListDropdown.innerHTML = "<option value=''>Select a song</option>";
         songs.forEach((song, index) => {
@@ -43,14 +43,17 @@ function playSong() {
     currentSongIndex = selectedIndex;
     let selectedSong = songs[currentSongIndex];
 
-    audio.src = selectedSong.downloadUrl[3].url;  // 160kbps quality
+    // Use a high-quality download URL (pick the best one available)
+    const downloadUrl = selectedSong.album ? selectedSong.album.url : selectedSong.url;
+
+    audio.src = downloadUrl;
     audio.play();
     playButton.textContent = "pause"; // Change icon to pause when playing
 
     // Update song info
     songName.textContent = selectedSong.name;
-    songArtist.textContent = selectedSong.primary_artists;
-    songArtwork.src = selectedSong.image[2].url;  // 500x500 image
+    songArtist.textContent = selectedSong.artists.primary.map(artist => artist.name).join(", ");
+    songArtwork.src = selectedSong.album ? selectedSong.album.url : selectedSong.album.image[2].url;  // Get album artwork or artist image
 }
 
 function togglePlay() {
