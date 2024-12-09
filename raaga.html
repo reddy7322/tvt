@@ -292,6 +292,14 @@
     <audio id="audio" controls></audio>
 
     <script>
+        const queries = [
+            'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens', 
+            'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani', 
+            'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu', 
+            'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja', 
+            'Ramajogayya Sastry', 'new remix'
+        ];
+
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
         let songList = document.getElementById("song-list");
@@ -310,6 +318,8 @@
         // Search songs
         async function searchSongs() {
             let query = document.getElementById("search-bar").value;
+            if (!query) return;
+
             let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
@@ -376,9 +386,10 @@
             audio.play();
         }
 
-        // Change song quality
+        // Change song quality and auto-play
         function changeQuality() {
-            loadSong(); // Reload the song with the selected quality
+            loadSong();
+            audio.play();
         }
 
         // Seek through the song
