@@ -273,7 +273,7 @@
         <div class="spinner"></div>
     </div>
 
-    <div class="container" id="content">
+    <div class="container" id="content" class="hide-loader">
 
         <!-- Header: Page Logo & Search Bar -->
         <div id="header">
@@ -369,14 +369,17 @@
         // Auto-fetch random query and play the first song on page load
         window.onload = async function() {
             const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-            searchSongs(randomQuery);
+            await searchSongs(randomQuery);
+            // Hide loader once content is ready
+            document.getElementById("loader").classList.add('hide-loader');
+            document.getElementById("content").classList.remove('hide-loader');
         }
 
         // Fetch songs based on search query
         async function searchSongs(query) {
             if (!query) return;
             
-            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
             const response = await fetch(url);
             const data = await response.json();
             songs = data.data.results;
@@ -475,29 +478,23 @@
             songs = songs.sort(() => Math.random() - 0.5); // Shuffle the songs
             updateSongList();
             currentSongIndex = 0; // Reset to the first song after shuffle
-            playSong(); // Play the first song automatically after shuffling
         }
 
-        // Download song
+        // Download the current song
         function downloadSong() {
             const song = songs[currentSongIndex];
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-            window.location.href = qualityUrl;  // Trigger download
+            const a = document.createElement('a');
+            a.href = qualityUrl;
+            a.download = song.name + ".mp3";
+            a.click();
         }
 
-        // Change quality of the song
+        // Change song quality
         function changeQuality() {
-            currentQuality = qualitySelect.value;
             loadSong();
-            audio.play();
-        }
-
-        // Automatically play next song when the current one ends
-        audio.onended = function() {
-            nextSong();
         }
     </script>
-
 </body>
 </html>
