@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
-
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <!-- Custom CSS -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -65,9 +60,8 @@
         #song-info {
             display: flex;
             align-items: center;
-            justify-content: center;
             margin-bottom: 20px;
-            text-align: center;
+            width: 100%;
         }
 
         #song-artwork {
@@ -79,10 +73,9 @@
 
         #controls {
             display: flex;
-            justify-content: space-evenly;
+            justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-top: 20px;
         }
 
         #controls button {
@@ -91,11 +84,6 @@
             color: #333;
             font-size: 30px;
             cursor: pointer;
-            padding: 10px;
-        }
-
-        #controls button:focus {
-            outline: none;
         }
 
         #progress-bar {
@@ -106,8 +94,6 @@
         #time-display {
             font-size: 14px;
             color: #333;
-            text-align: center;
-            width: 100%;
         }
 
         #quality-select {
@@ -115,7 +101,6 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 5px;
-            margin-top: 15px;
         }
 
         @media (max-width: 400px) {
@@ -123,14 +108,9 @@
                 width: 90%;
                 padding: 15px;
             }
-
-            #controls button {
-                font-size: 24px;
-            }
         }
     </style>
 </head>
-
 <body>
     <div id="player-container">
         <!-- Menu Toggle Button -->
@@ -185,7 +165,6 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-    <!-- JavaScript -->
     <script>
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
@@ -291,9 +270,8 @@
 
         // Initialize by loading songs for popular queries
         window.onload = () => {
-            searchSongs('telugu');
+            searchSongs('Amma');
         };
     </script>
 </body>
-
 </html>
