@@ -42,17 +42,22 @@
             background-position: center;
         }
 
+        /* Menu Toggle Icon (Updated) */
         #menu-toggle {
             position: absolute;
             top: 10px;
             left: 10px;
             background: none;
             border: none;
-            font-size: 30px;
-            color: white;
             cursor: pointer;
         }
 
+        #menu-toggle img {
+            width: 40px;
+            height: 40px;
+        }
+
+        /* Search Bar */
         #search-bar {
             width: 100%;
             padding: 10px;
@@ -63,6 +68,7 @@
             background-color: #444;
             color: white;
             display: none; /* Initially hidden */
+            transition: all 0.3s ease;
         }
 
         #search-btn {
@@ -187,14 +193,14 @@
 </head>
 <body>
     <div id="player-container">
-        <!-- Menu Toggle Button -->
+        <!-- Menu Toggle Button (Updated with Image) -->
         <button id="menu-toggle" onclick="toggleMenu()">
-            <i class="material-icons">menu</i>
+            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu">
         </button>
 
         <!-- Search Bar -->
         <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
-        <button id="search-btn" onclick="searchSongs()">
+        <button id="search-btn" onclick="toggleSearchBar()">
             <i class="material-icons">search</i>
         </button>
 
@@ -261,6 +267,18 @@
         function toggleMenu() {
             const searchBar = document.getElementById("search-bar");
             searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+        }
+
+        // Toggle the search bar with animation
+        function toggleSearchBar() {
+            const searchBar = document.getElementById("search-bar");
+            if (searchBar.style.display === "none" || searchBar.style.display === "") {
+                searchBar.style.display = "block";
+                setTimeout(() => searchBar.style.opacity = "1", 10); // Animation effect
+            } else {
+                searchBar.style.opacity = "0";
+                setTimeout(() => searchBar.style.display = "none", 300); // Hide after fade-out
+            }
         }
 
         // Fetch songs from API based on search query
