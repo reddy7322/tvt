@@ -42,6 +42,17 @@
             background-position: center;
         }
 
+        #menu-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
         #search-bar {
             width: 100%;
             padding: 10px;
@@ -51,17 +62,13 @@
             font-size: 16px;
             background-color: #444;
             color: white;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        #search-bar.open {
-            opacity: 1;
-            visibility: visible;
+            display: none; /* Initially hidden */
         }
 
         #search-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background: none;
             border: none;
             color: white;
@@ -69,28 +76,15 @@
             cursor: pointer;
         }
 
-        #suggestions {
+        #song-list {
             width: 100%;
-            background-color: #444;
-            border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-            display: none;
             padding: 10px;
-        }
-
-        #suggestions.open {
-            display: block;
-        }
-
-        #suggestions div {
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        #suggestions div:hover {
-            background-color: #333;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: none;
+            font-size: 16px;
+            background-color: #444;
+            color: white;
         }
 
         #song-info {
@@ -193,16 +187,16 @@
 </head>
 <body>
     <div id="player-container">
-        <!-- Search Icon -->
-        <button id="search-btn" onclick="toggleSearchBar()">
-            <i class="material-icons">search</i>
+        <!-- Menu Toggle Button -->
+        <button id="menu-toggle" onclick="toggleMenu()">
+            <i class="material-icons">menu</i>
         </button>
 
         <!-- Search Bar -->
         <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
-        
-        <!-- Suggestions Dropdown -->
-        <div id="suggestions"></div>
+        <button id="search-btn" onclick="searchSongs()">
+            <i class="material-icons">search</i>
+        </button>
 
         <!-- Album Poster -->
         <div id="album-poster" style="background-image: url('');"></div>
@@ -213,6 +207,11 @@
             <span id="song-artist">Artist Name</span>
             <span id="album-name">Album Name</span>
         </div>
+
+        <!-- Song List Dropdown -->
+        <select id="song-list" onchange="playSong()">
+            <option value="">Select a song</option>
+        </select>
 
         <!-- Audio Controls -->
         <div id="controls">
@@ -258,47 +257,45 @@
         let songs = []; // Store song data from API response
         let currentQuality = "96"; // Default to 96 kbps
 
-        // Toggle search bar visibility with animation
-        function toggleSearchBar() {
+        // Toggle menu visibility
+        function toggleMenu() {
             const searchBar = document.getElementById("search-bar");
-            searchBar.classList.toggle("open");
-            searchBar.focus();
+            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
         }
 
         // Fetch songs from API based on search query
         async function searchSongs() {
             let query = document.getElementById("search-bar").value;
-            if (query.length < 3) {
-                document.getElementById("suggestions").classList.remove("open");
-                return;
-            }
-
-            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=5`;
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
             songs = data.data.results;
-            showSuggestions();
+            updateSongList();
         }
 
-        // Show song suggestions
-        function showSuggestions() {
-            const suggestionsContainer = document.getElementById("suggestions");
-            suggestionsContainer.innerHTML = '';
-            songs.forEach(song => {
-                const suggestionItem = document.createElement("div");
-                suggestionItem.innerText = song.name;
-                suggestionItem.onclick = () => {
-                    document.getElementById("search-bar").value = song.name;
-                    document.getElementById("suggestions").classList.remove("open");
-                    playSong(song);
-                };
-                suggestionsContainer.appendChild(suggestionItem);
+        // Function to update the dropdown with song options
+        function updateSongList() {
+            songList.innerHTML = "<option value=''>Select a song</option>";
+            songs.forEach((song, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.innerHTML = song.name;
+                songList.appendChild(option);
             });
-            document.getElementById("suggestions").classList.add("open");
         }
 
-        // Play song after selection from suggestions
-        function playSong(song) {
+        // Function to play the selected song
+        function playSong() {
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Function to load song and update UI
+        function loadSong() {
+            const song = songs[currentSongIndex];
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
@@ -308,7 +305,6 @@
             document.getElementById("album-name").innerText = song.album.name; // Add album name
             document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
             playIcon.innerText = "pause";
-            audio.play();
         }
 
         // Toggle play/pause
