@@ -54,25 +54,30 @@
             cursor: pointer;
         }
 
-        /* Search Container */
-        #search-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 10px;
+        #menu-toggle img {
+            width: 30px;
+            height: 30px;
         }
 
-        /* Search Bar */
+        /* Search Bar and Icon */
+        #search-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
         #search-bar {
-            width: 80%;
-            padding: 5px;
+            width: 120px;
+            padding: 8px;
             border-radius: 5px;
+            margin-right: 10px;
             border: none;
             font-size: 14px;
             background-color: #444;
             color: white;
-            margin-right: 10px;
+            display: inline-block;
         }
 
         #search-btn {
@@ -83,18 +88,7 @@
             cursor: pointer;
         }
 
-        /* Song List Dropdown */
-        #song-list {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: none;
-            font-size: 16px;
-            background-color: #444;
-            color: white;
-        }
-
+        /* Song Info */
         #song-info {
             display: flex;
             flex-direction: column;
@@ -120,6 +114,7 @@
             margin-top: 5px;
         }
 
+        /* Audio Controls */
         #controls {
             display: flex;
             justify-content: space-between;
@@ -200,12 +195,12 @@
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
         </button>
 
-        <!-- Search Container with Menu Icon and Search Icon -->
+        <!-- Search Bar and Icon -->
         <div id="search-container">
+            <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
             <button id="search-btn" onclick="toggleSearchBar()">
                 <i class="material-icons">search</i>
             </button>
-            <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
         </div>
 
         <!-- Album Poster -->
@@ -271,6 +266,13 @@
         function toggleMenu() {
             const searchBar = document.getElementById("search-bar");
             searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+        }
+
+        // Toggle search bar visibility with animation
+        function toggleSearchBar() {
+            const searchBar = document.getElementById("search-bar");
+            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+            searchBar.style.transition = "all 0.3s ease";
         }
 
         // Fetch songs from API based on search query
@@ -354,29 +356,32 @@
 
             const minutes = Math.floor(audio.currentTime / 60);
             const seconds = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         });
 
-        // Seek song when clicking on progress bar
+        // Seek through the song using progress bar
         function seekSong() {
             audio.currentTime = (progressBar.value / 100) * audio.duration;
         }
 
-        // Download the song as .m3u playlist
+        // Download song in base64 format
         function downloadSong() {
             const song = songs[currentSongIndex];
-            const playlistContent = `#EXTM3U\n#EXTINF:0,${song.name} - ${song.artists.primary[0].name}\n${song.downloadUrl[0].url}`;
-            const blob = new Blob([playlistContent], { type: 'audio/x-mpegurl' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${song.name}.m3u`;
-            link.click();
+            fetch(song.audioUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64Data = reader.result.split(',')[1];
+                        const a = document.createElement("a");
+                        a.href = `data:audio/mp3;base64,${base64Data}`;
+                        a.download = `${song.name}.mp3`;
+                        a.click();
+                    };
+                    reader.readAsDataURL(blob);
+                })
+                .catch(error => console.error("Error downloading song", error));
         }
-
-        // Initialize by loading songs for popular queries
-        window.onload = () => {
-            searchSongs('Amma');
-        };
     </script>
 </body>
 </html>
