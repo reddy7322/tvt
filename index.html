@@ -143,7 +143,6 @@
             padding: 15px;
             background-color: rgba(0, 0, 0, 0.5);
             border-radius: 15px;
-            opacity: 0.9;
         }
 
         .highlight {
@@ -172,6 +171,17 @@
             font-size: 14px;
             color: #888;
             margin-top: 5px;
+        }
+
+        /* Song List */
+        #song-list {
+            width: 100%;
+            padding: 10px;
+            background-color: #1F1F1F;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            color: white;
         }
 
         /* Controls */
@@ -305,7 +315,7 @@
             <!-- Album Poster -->
             <div id="album-poster" style="background-image: url('');">
                 <div id="lyrics-container">
-                    <div id="lyrics-text">Loading lyrics...</div>
+                    <p id="lyrics-text">Loading lyrics...</p>
                 </div>
             </div>
 
@@ -380,7 +390,6 @@
         let currentSongIndex = 0;
         let songs = []; // Store song data from API response
         let currentQuality = "96"; // Default to 96 kbps
-        let lyrics = []; // Store lyrics
 
         // Auto-fetch random query and play the first song on page load
         window.onload = async function () {
@@ -411,20 +420,14 @@
             const lyricsText = document.getElementById("lyrics-text");
 
             if (data.data) {
-                lyrics = data.data.lyrics.split('\n').map(line => {
-                    return { text: line, time: parseFloat(data.data.timestamps[lyrics.length] || 0) };
-                });
-                renderLyrics();
+                const lyrics = data.data.lyrics.split('\n');
+                let formattedLyrics = lyrics.map(line => `<p class="lyrics-line">${line}</p>`).join('');
+                lyricsText.innerHTML = formattedLyrics;
+                lyricsContainer.style.display = 'block';
             } else {
                 lyricsText.innerText = 'Lyrics not available.';
                 lyricsContainer.style.display = 'none';
             }
-        }
-
-        // Render lyrics
-        function renderLyrics() {
-            const lyricsText = document.getElementById("lyrics-text");
-            lyricsText.innerHTML = lyrics.map(line => `<p class="lyrics-line">${line.text}</p>`).join('');
         }
 
         // Update song list dropdown
@@ -439,6 +442,15 @@
 
             if (songs.length > 0) {
                 currentSongIndex = 0;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Play selected song
+        function playSong() {
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
                 loadSong();
                 audio.play();
             }
@@ -461,7 +473,7 @@
             fetchLyrics(song.id);
         }
 
-        // Play/Pause toggle
+        // Toggle play/pause
         function togglePlay() {
             if (audio.paused) {
                 audio.play();
@@ -472,36 +484,22 @@
             }
         }
 
-        // Update progress bar
+        // Seek song based on progress bar
+        function seekSong() {
+            const seekTo = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTo;
+        }
+
+        // Update progress bar as song plays
         audio.ontimeupdate = function () {
             let progress = (audio.currentTime / audio.duration) * 100;
             progressBar.value = progress;
-
-            // Highlight the current lyric line
-            const currentTime = audio.currentTime;
-            const currentLine = lyrics.find(line => currentTime >= line.time);
-            if (currentLine) {
-                const lines = document.querySelectorAll('.lyrics-line');
-                lines.forEach(line => line.classList.remove('highlight'));
-                const currentLineElement = Array.from(lines).find(line => line.innerText === currentLine.text);
-                if (currentLineElement) {
-                    currentLineElement.classList.add('highlight');
-                }
-            }
-
-            // Update time display
             let minutes = Math.floor(audio.currentTime / 60);
             let seconds = Math.floor(audio.currentTime % 60);
             timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         };
 
-        // Seek song
-        function seekSong() {
-            const newTime = (progressBar.value / 100) * audio.duration;
-            audio.currentTime = newTime;
-        }
-
-        // Change quality
+        // Switch audio quality
         function changeQuality() {
             if (audio.src) {
                 loadSong();
@@ -537,5 +535,6 @@
             window.open(qualityUrl);
         }
     </script>
+
 </body>
 </html>
