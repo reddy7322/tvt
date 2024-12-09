@@ -61,25 +61,31 @@
 
         /* Search Bar */
         #search-bar {
-            width: 100%;
-            padding: 10px;
+            width: 60%;
+            padding: 5px;
             border-radius: 5px;
-            margin-top: 20px;
             border: none;
-            font-size: 16px;
+            font-size: 14px;
             background-color: #444;
             color: white;
+            margin-right: 10px;
         }
 
         #search-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             background: none;
             border: none;
             color: white;
             font-size: 30px;
             cursor: pointer;
+        }
+
+        /* Search Icon + Menu Icon Container */
+        #search-container {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            width: 100%;
+            justify-content: space-between;
         }
 
         #song-list {
@@ -198,11 +204,13 @@
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
         </button>
 
-        <!-- Search Bar -->
-        <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
-        <button id="search-btn" onclick="toggleSearchBar()">
-            <i class="material-icons">search</i>
-        </button>
+        <!-- Search Container with Menu Icon and Search Icon -->
+        <div id="search-container">
+            <button id="search-btn" onclick="toggleSearchBar()">
+                <i class="material-icons">search</i>
+            </button>
+            <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
+        </div>
 
         <!-- Album Poster -->
         <div id="album-poster" style="background-image: url('');"></div>
