@@ -369,189 +369,150 @@
     <audio id="audio" controls></audio>
 
     <script>
-        const queries = [
-    'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
-    'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
-    'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'new remix'
-];
+        const apiUrl = 'https://saavn.dev/api/search/songs?query=';
+        let audio = document.getElementById("audio");
+        let playIcon = document.getElementById("play-icon");
+        let songList = document.getElementById("song-list");
+        let progressBar = document.getElementById("progress-bar");
+        let timeDisplay = document.getElementById("time-display");
+        let qualitySelect = document.getElementById("quality-select");
+        let lyricsContainer = document.getElementById("lyrics");
+        let currentSongIndex = 0;
+        let songs = []; // Store song data here
 
-let audio = document.getElementById("audio");
-let playIcon = document.getElementById("play-icon");
-let songList = document.getElementById("song-list");
-let progressBar = document.getElementById("progress-bar");
-let timeDisplay = document.getElementById("time-display");
-let qualitySelect = document.getElementById("quality-select");
-let lyricsContainer = document.getElementById("lyrics");
-let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "96"; // Default to 96 kbps
+        // Initialize the player and fetch songs
+        async function loadSongs(query) {
+            const response = await fetch(apiUrl + query + "&page=1&limit=50");
+            const data = await response.json();
+            songs = data.songs;
+            populateSongList();
+            hideLoader();
+        }
 
-// Auto-fetch random query and play the first song on page load
-window.onload = async function () {
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    await searchSongs(randomQuery);
-    document.getElementById("loader").classList.add('hide-loader');
-    document.getElementById("content").classList.remove('hide-loader');
-};
+        // Populate the song list dropdown
+        function populateSongList() {
+            songList.innerHTML = "<option value=''>Select a song</option>";
+            songs.forEach((song, index) => {
+                let option = document.createElement("option");
+                option.value = song.id;
+                option.textContent = song.name;
+                songList.appendChild(option);
+            });
+        }
 
-// Fetch songs based on search query
-async function searchSongs(query) {
-    if (!query) return;
+        // Hide the loader after loading
+        function hideLoader() {
+            document.getElementById("loader").classList.add("hide-loader");
+            document.getElementById("content").classList.remove("hide-loader");
+        }
 
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    const response = await fetch(url);
-    const data = await response.json();
-    songs = data.data.results;
-    updateSongList();
-}
+        // Play or Pause the song
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.innerText = "pause";
+            } else {
+                audio.pause();
+                playIcon.innerText = "play_arrow";
+            }
+        }
 
-// Update song list dropdown
-function updateSongList() {
-    songList.innerHTML = "<option value=''>Select a song</option>";
-    songs.forEach((song, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.innerHTML = song.name;
-        songList.appendChild(option);
-    });
+        // Play selected song from the song list
+        function playSong() {
+            const song = songs.find(s => s.id === songList.value);
+            loadSong(song);
+        }
 
-    if (songs.length > 0) {
-        currentSongIndex = 0;
-        loadSong();
-        audio.play();
-    }
-}
+        // Load song and update UI
+        function loadSong(song) {
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+            audio.src = qualityUrl;
+            document.getElementById("song-name").innerText = song.name;
+            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
+            document.getElementById("album-name").innerText = song.album.name;
+            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+            playIcon.innerText = "pause";
+            fetchLyrics(song.id);
+        }
 
-// Play selected song
-function playSong() {
-    if (songList.value !== "") {
-        currentSongIndex = songList.value;
-        loadSong();
-        audio.play();
-    }
-}
+        // Fetch and display lyrics for the current song
+        async function fetchLyrics(songId) {
+            const response = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
+            const data = await response.json();
 
-// Load song info
-function loadSong() {
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+            if (data.lyrics) {
+                lyricsContainer.innerText = data.lyrics;
+            } else {
+                lyricsContainer.innerText = "Lyrics not available.";
+            }
+        }
 
-    audio.src = qualityUrl;
-    document.getElementById("song-name").innerText = song.name;
-    document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-    document.getElementById("album-name").innerText = song.album.name;
-    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-    playIcon.innerText = "pause";
+        // Handle changing quality
+        function changeQuality() {
+            const song = songs[currentSongIndex];
+            loadSong(song);
+        }
 
-    // Fetch and display lyrics
-    fetchLyrics(song.name, song.artists.primary[0].name);
-}
+        // Seek song
+        function seekSong() {
+            const seekTime = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTime;
+        }
 
-// Fetch lyrics for the current song
-async function fetchLyrics(songName, artistName) {
-    let url = `https://saavn.dev/api/songs/${songId}/lyrics`;
-    const response = await fetch(url);
-    const data = await response.json();
+        // Update progress bar as the song plays
+        audio.addEventListener("timeupdate", () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            timeDisplay.innerText = formatTime(audio.currentTime);
+        });
 
-    if (data.lyrics) {
-        lyricsContainer.innerText = data.lyrics;
-    } else {
-        lyricsContainer.innerText = "Lyrics not available.";
-    }
-}
+        // Format time to mm:ss
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+        }
 
-// Toggle play/pause
-function togglePlay() {
-    if (audio.paused) {
-        audio.play();
-        playIcon.innerText = "pause";
-    } else {
-        audio.pause();
-        playIcon.innerText = "play_arrow";
-    }
-}
+        // Handle shuffle button
+        function shufflePlaylist() {
+            currentSongIndex = Math.floor(Math.random() * songs.length);
+            playSong();
+        }
 
-// Seek song based on progress bar
-function seekSong() {
-    const seekTo = audio.duration * (progressBar.value / 100);
-    audio.currentTime = seekTo;
-}
+        // Handle next song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            playSong();
+        }
 
-// Update progress bar as song plays
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-};
+        // Handle previous song
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            playSong();
+        }
 
-// Auto-continue to next song when the current song ends
-audio.onended = function () {
-    nextSong();
-};
+        // Download current song
+        function downloadSong() {
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+            const a = document.createElement("a");
+            a.href = qualityUrl;
+            a.download = song.name;
+            a.click();
+        }
 
-// Skip to next song
-function nextSong() {
-    currentSongIndex++;
-    if (currentSongIndex >= songs.length) {
-        currentSongIndex = 0;
-    }
-    loadSong();
-    audio.play();
-}
+        // Search songs by query
+        function searchSongs(query) {
+            if (!query) return;
+            query = query.toLowerCase();
+            loadSongs(query);
+        }
 
-// Skip to previous song
-function prevSong() {
-    currentSongIndex--;
-    if (currentSongIndex < 0) {
-        currentSongIndex = songs.length - 1;
-    }
-    loadSong();
-    audio.play();
-}
-
-// Shuffle the playlist
-function shufflePlaylist() {
-    currentSongIndex = Math.floor(Math.random() * songs.length);
-    loadSong();
-    audio.play();
-}
-
-// Download current song
-function downloadSong() {
-    if (songs.length === 0 || currentSongIndex < 0 || currentSongIndex >= songs.length) {
-        alert("No song available to download!");
-        return;
-    }
-
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-    if (!qualityUrl) {
-        alert("Download URL not available for the selected quality!");
-        return;
-    }
-
-    // Create an invisible anchor element
-    const a = document.createElement("a");
-    a.href = qualityUrl;
-    a.download = `${song.name}.mp3`; // Set the filename for the download
-
-    // Prevent the default behavior (opening in a new tab)
-    a.style.display = 'none'; // Hide the anchor
-    document.body.appendChild(a);
-
-    // Programmatically click the anchor to trigger the download
-    a.click();
-
-    // Remove the anchor element after the download
-    document.body.removeChild(a);
-}
+        // Load songs on page load
+        window.onload = () => loadSongs("Ooru Palletooru");
     </script>
+
 </body>
 </html>
