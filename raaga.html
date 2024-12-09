@@ -370,129 +370,100 @@
         window.onload = async function() {
             const randomQuery = queries[Math.floor(Math.random() * queries.length)];
             searchSongs(randomQuery);
-        }
+        };
 
-        // Fetch songs based on search query
-        async function searchSongs(query) {
-            if (!query) return;
+        // Function to simulate song search
+        async function searchSongs(query = '') {
+            // Simulate song fetching from API
+            let response = await fetch(`https://saavn.dev/api/search/songs?query=${query}`);
+            songs = await response.json();
+
+            // Populate song list
+            songList.innerHTML = songs.map(song => `<option value="${song.id}">${song.title}</option>`).join("");
             
-            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
-            const response = await fetch(url);
-            const data = await response.json();
-            songs = data.data.results;
-            updateSongList();
-            playSong(); // Auto-play the first song
+            // Hide loader after content is loaded
+            document.getElementById('loader').classList.add('hide-loader');
+            document.getElementById('content').classList.remove('hide-loader');
         }
 
-        // Update song list dropdown
-        function updateSongList() {
-            songList.innerHTML = "<option value=''>Select a song</option>";
-            songs.forEach((song, index) => {
-                const option = document.createElement("option");
-                option.value = index;
-                option.innerHTML = song.name;
-                songList.appendChild(option);
-            });
-        }
-
-        // Play selected song
-        function playSong() {
-            if (songList.value !== "") {
-                currentSongIndex = songList.value;
-                loadSong();
-                audio.play();
+        // Function to change quality
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
+            if (audio.paused) {
+                audio.src = `song_url_${currentQuality}.mp3`; 
+                audio.load();
             }
         }
 
-        // Load song info
-        function loadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            audio.src = qualityUrl;
-            document.getElementById("song-name").innerText = song.name;
-            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            document.getElementById("album-name").innerText = song.album.name;
-            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-            playIcon.innerText = "pause";
-        }
-
-        // Toggle play/pause
+        // Function to play/pause song
         function togglePlay() {
             if (audio.paused) {
                 audio.play();
-                playIcon.innerText = "pause";
+                playIcon.innerText = 'pause';
             } else {
                 audio.pause();
-                playIcon.innerText = "play_arrow";
+                playIcon.innerText = 'play_arrow';
             }
         }
 
-        // Seek song through progress bar
-        function seekSong() {
-            let value = progressBar.value;
-            let seekTime = (audio.duration * value) / 100;
-            audio.currentTime = seekTime;
+        // Function to play selected song
+        function playSong() {
+            let song = songs[songList.selectedIndex - 1];
+            if (song) {
+                audio.src = song.url;
+                audio.play();
+                playIcon.innerText = 'pause';
+                document.getElementById('album-poster').style.backgroundImage = `url(${song.albumArtUrl})`;
+                document.getElementById('song-name').innerText = song.title;
+                document.getElementById('song-artist').innerText = song.artist;
+                document.getElementById('album-name').innerText = song.album;
+            }
         }
 
-        // Update progress bar as song plays
+        // Update progress bar
         audio.ontimeupdate = function() {
-            let value = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = value;
-            let currentTime = formatTime(audio.currentTime);
-            timeDisplay.innerText = currentTime;
+            let progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+
+            let minutes = Math.floor(audio.currentTime / 60);
+            let seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        };
+
+        // Seek song
+        function seekSong() {
+            audio.currentTime = (progressBar.value / 100) * audio.duration;
         }
 
-        // Format time for display
-        function formatTime(seconds) {
-            let min = Math.floor(seconds / 60);
-            let sec = Math.floor(seconds % 60);
-            if (sec < 10) sec = "0" + sec;
-            return `${min}:${sec}`;
+        // Play next song
+        function nextSong() {
+            if (currentSongIndex < songs.length - 1) {
+                currentSongIndex++;
+                playSong();
+            }
         }
 
-        // Shuffle songs in the list
+        // Play previous song
+        function prevSong() {
+            if (currentSongIndex > 0) {
+                currentSongIndex--;
+                playSong();
+            }
+        }
+
+        // Shuffle playlist
         function shufflePlaylist() {
             songs = songs.sort(() => Math.random() - 0.5);
-            updateSongList();
-        }
-
-        // Change quality and auto-play the song
-        function changeQuality() {
-            loadSong();
-            audio.play();
+            songList.innerHTML = songs.map(song => `<option value="${song.id}">${song.title}</option>`).join("");
         }
 
         // Download current song
         function downloadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            fetch(qualityUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `${song.name}.mp3`;
-                    a.click();
-                });
-        }
-
-        // Toggle search bar
-        function toggleSearchBar() {
-            let searchQuery = document.getElementById("search-bar").value;
-            if (searchQuery) {
-                searchSongs(searchQuery);
+            let song = songs[songList.selectedIndex - 1];
+            if (song) {
+                window.open(song.url, '_blank');
             }
         }
-
-        // Show and hide loader
-        window.addEventListener('load', function() {
-            document.getElementById("loader").classList.add("hide-loader");
-            document.getElementById("content").classList.remove("hide-loader");
-        });
     </script>
 </body>
 </html>
