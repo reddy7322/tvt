@@ -3,29 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Music Player</title>
+    <title>JioSaavn-like Music Player</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="player-container">
-        <h1>Web Music Player</h1>
-        <!-- Search Bar -->
-        <input type="text" id="search-bar" placeholder="Search for songs" oninput="searchSongs()" />
+        <div class="header">
+            <input type="text" id="search-bar" placeholder="Search for songs..." oninput="searchSongs()">
+        </div>
 
-        <!-- Song List Dropdown -->
+        <div class="song-info">
+            <img id="song-artwork" src="" alt="Song Artwork">
+            <h2 id="song-name">Song Name</h2>
+            <p id="song-artist">Artist Name</p>
+        </div>
+
+        <div class="controls">
+            <button id="prev" onclick="prevSong()">&#9664;</button>
+            <button id="play" onclick="togglePlay()">&#9654;</button>
+            <button id="next" onclick="nextSong()">&#9654;&#9654;</button>
+        </div>
+
+        <div class="progress-container">
+            <input type="range" id="progress-bar" value="0" max="100" step="1" onchange="seekSong()">
+            <p id="time-display">0:00</p>
+        </div>
+
+        <div class="volume-container">
+            <input type="range" id="volume" min="0" max="1" step="0.1" onchange="adjustVolume()" />
+        </div>
+
         <select id="song-list" onchange="playSong()">
             <option value="">Select a song</option>
         </select>
 
-        <!-- Music Player Controls -->
-        <div class="controls">
-            <button id="prev" onclick="prevSong()">Prev</button>
-            <button id="play" onclick="togglePlay()">Play</button>
-            <button id="next" onclick="nextSong()">Next</button>
-            <input type="range" id="volume" min="0" max="1" step="0.1" onchange="adjustVolume()" />
-        </div>
-
-        <!-- Audio Element -->
         <audio id="audio" controls>
             Your browser does not support the audio element.
         </audio>
