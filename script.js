@@ -11,27 +11,41 @@ const progressContainer = document.getElementById('progress-area');
 const songListContainer = document.getElementById('songList');
 const downloadButton = document.getElementById('downloadButton');
 const looperButton = document.getElementById('looper');
+const loader = document.getElementById('loader');
 
 let songs = [];
 let currentSongIndex = 0;
 let isLooping = false;
 
-const queries = [
-  'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Ilaiyaraaja', 'Thaman S', 'Annamayya Keerthana'
-];
+const queries = ['Telugu', 'SPB', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Ilaiyaraaja'];
+
+function showLoader() {
+  loader.style.display = 'flex';
+}
+
+function hideLoader() {
+  loader.style.display = 'none';
+}
 
 function fetchSongs(query) {
+  showLoader();
   const url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
+      hideLoader();
       if (data.data && data.data.results) {
         songs = data.data.results;
         populateSongList();
         loadSong(currentSongIndex);
+      } else {
+        alert('No songs found!');
       }
     })
-    .catch((error) => console.error('Error fetching songs:', error));
+    .catch((error) => {
+      hideLoader();
+      console.error('Error fetching songs:', error);
+    });
 }
 
 function populateSongList() {
@@ -40,7 +54,7 @@ function populateSongList() {
     const listItem = document.createElement('li');
     listItem.className = 'song-item';
     listItem.innerHTML = `
-      <img src="${song.image[1].url}" alt="${song.name}" class="song-image">
+      <img src="${song.image[1].url}" alt="${song.name}">
       <div>
         <span>${song.name}</span>
         <p>${song.primaryArtists}</p>
@@ -111,7 +125,8 @@ progressContainer.addEventListener('click', (e) => {
 });
 
 searchButton.addEventListener('click', () => {
-  fetchSongs(searchInput.value.trim());
+  const query = searchInput.value.trim();
+  if (query) fetchSongs(query);
 });
 
 // Initial fetch of random songs
