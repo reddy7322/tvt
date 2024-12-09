@@ -64,17 +64,16 @@
             align-items: center;
             padding: 15px;
             background-color: #1F1F1F;
-            justify-content: space-between;
+            justify-content: center;
         }
 
-        /* Menu Icon */
-        #menu-toggle {
-            width: 30px;
-            height: 30px;
+        /* Small Logo */
+        #logo {
+            width: 50px;
+            height: 50px;
             background-image: url('https://tvtelugu.github.io/images/tvtelugu.ico');
             background-size: contain;
             background-repeat: no-repeat;
-            cursor: pointer;
         }
 
         /* Search Bar */
@@ -86,6 +85,7 @@
             padding: 5px 15px;
             width: 200px;
             transition: all 0.3s ease;
+            margin-left: 20px;
         }
 
         #search-bar {
@@ -272,9 +272,9 @@
 
     <div class="container" id="content">
 
-        <!-- Header: Menu & Search Bar -->
+        <!-- Header: Small Logo & Search Bar -->
         <div id="header">
-            <button id="menu-toggle" onclick="toggleMenu()"></button>
+            <div id="logo"></div> <!-- Small Logo -->
             <div id="search-container">
                 <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
                 <button id="search-btn" onclick="toggleSearchBar()">
@@ -379,37 +379,23 @@
             playSong(); // Auto-play the first song
         }
 
-        // Update song list dropdown
+        // Update the song list dropdown
         function updateSongList() {
-            songList.innerHTML = "<option value=''>Select a song</option>";
+            songList.innerHTML = '<option value="">Select a song</option>';
             songs.forEach((song, index) => {
-                const option = document.createElement("option");
+                let option = document.createElement("option");
                 option.value = index;
-                option.innerHTML = song.name;
+                option.innerText = song.name;
                 songList.appendChild(option);
             });
         }
 
         // Play selected song
         function playSong() {
-            if (songList.value !== "") {
-                currentSongIndex = songList.value;
-                loadSong();
-                audio.play();
-            }
-        }
-
-        // Load song info
-        function loadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            audio.src = qualityUrl;
-            document.getElementById("song-name").innerText = song.name;
-            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            document.getElementById("album-name").innerText = song.album.name;
-            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+            let song = songs[currentSongIndex];
+            let audioUrl = song.url.find(url => url.quality === `${currentQuality}kbps`).url;
+            audio.src = audioUrl;
+            audio.play();
             playIcon.innerText = "pause";
         }
 
@@ -424,22 +410,20 @@
             }
         }
 
-        // Seek song through progress bar
-        function seekSong() {
-            let value = progressBar.value;
-            let seekTime = (audio.duration * value) / 100;
-            audio.currentTime = seekTime;
-        }
-
-        // Update progress bar as song plays
+        // Update song progress
         audio.ontimeupdate = function() {
             let value = (audio.currentTime / audio.duration) * 100;
             progressBar.value = value;
-            let currentTime = formatTime(audio.currentTime);
-            timeDisplay.innerText = currentTime;
+            timeDisplay.innerText = formatTime(audio.currentTime);
         }
 
-        // Format time for display
+        // Seek song through progress bar
+        function seekSong() {
+            let value = progressBar.value;
+            audio.currentTime = (audio.duration * value) / 100;
+        }
+
+        // Format time display
         function formatTime(seconds) {
             let min = Math.floor(seconds / 60);
             let sec = Math.floor(seconds % 60);
@@ -447,40 +431,31 @@
             return `${min}:${sec}`;
         }
 
-        // Shuffle songs in the list
+        // Shuffle song list
         function shufflePlaylist() {
             songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
         }
 
-        // Change quality and auto-play the song
-        function changeQuality() {
-            loadSong();
-            audio.play();
-        }
-
-        // Download current song
+        // Download song
         function downloadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            fetch(qualityUrl)
+            let song = songs[currentSongIndex];
+            let audioUrl = song.url.find(url => url.quality === `${currentQuality}kbps`).url;
+            
+            fetch(audioUrl)
                 .then(res => res.blob())
                 .then(blob => {
-                    const a = document.createElement('a');
+                    let a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = `${song.name}.mp3`;
                     a.click();
                 });
         }
 
-        // Toggle search bar
-        function toggleSearchBar() {
-            let searchQuery = document.getElementById("search-bar").value;
-            if (searchQuery) {
-                searchSongs(searchQuery);
-            }
+        // Change audio quality
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
+            playSong();
         }
 
         // Show and hide loader
