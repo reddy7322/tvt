@@ -159,6 +159,11 @@
                 padding: 15px;
             }
         }
+
+        /* Hide audio element */
+        #audio {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -217,7 +222,7 @@
         <button id="download-btn" onclick="downloadSong()">Download Song</button>
     </div>
 
-    <!-- Audio Player -->
+    <!-- Audio Player (Hidden) -->
     <audio id="audio" controls></audio>
 
     <script>
