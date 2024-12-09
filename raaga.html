@@ -492,6 +492,11 @@
             loadSong();
             audio.play();
         }
+
+        // Automatically play next song when the current one ends
+        audio.onended = function() {
+            nextSong();
+        }
     </script>
 
 </body>
