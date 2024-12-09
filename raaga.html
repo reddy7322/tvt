@@ -67,14 +67,17 @@
             justify-content: space-between;
         }
 
-        /* Menu Icon */
-        #menu-toggle {
+        /* Logo Container */
+        #logo-container {
             width: 30px;
             height: 30px;
-            background-image: url('https://tvtelugu.github.io/images/tvtelugu.ico');
-            background-size: contain;
-            background-repeat: no-repeat;
-            cursor: pointer;
+        }
+
+        /* Page Logo */
+        #page-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         /* Search Bar */
@@ -272,9 +275,11 @@
 
     <div class="container" id="content">
 
-        <!-- Header: Menu & Search Bar -->
+        <!-- Header: Page Logo & Search Bar -->
         <div id="header">
-            <button id="menu-toggle" onclick="toggleMenu()"></button>
+            <div id="logo-container">
+                <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
+            </div>
             <div id="search-container">
                 <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
                 <button id="search-btn" onclick="toggleSearchBar()">
