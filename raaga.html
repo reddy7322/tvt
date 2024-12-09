@@ -54,9 +54,14 @@
             cursor: pointer;
         }
 
+        #menu-toggle img {
+            width: 30px;
+            height: 30px;
+        }
+
         /* Search Bar */
         #search-bar {
-            width: 250px; /* Medium size */
+            width: 100%;
             padding: 10px;
             border-radius: 5px;
             margin-top: 20px;
@@ -64,15 +69,12 @@
             font-size: 16px;
             background-color: #444;
             color: white;
-            position: fixed;
-            top: 10%;
-            right: 10%;
         }
 
         #search-btn {
-            position: fixed;
-            top: 10%;
-            right: 5%;
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background: none;
             border: none;
             color: white;
@@ -196,6 +198,12 @@
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
         </button>
 
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
+        <button id="search-btn" onclick="toggleSearchBar()">
+            <i class="material-icons">search</i>
+        </button>
+
         <!-- Album Poster -->
         <div id="album-poster" style="background-image: url('');"></div>
 
@@ -244,12 +252,6 @@
     <!-- Audio Player (Hidden) -->
     <audio id="audio" controls></audio>
 
-    <!-- Always Show Search Bar -->
-    <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
-    <button id="search-btn" onclick="toggleSearchBar()">
-        <i class="material-icons">search</i>
-    </button>
-
     <script>
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
@@ -265,12 +267,6 @@
         function toggleMenu() {
             const searchBar = document.getElementById("search-bar");
             searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
-        }
-
-        // Always show search bar without animation
-        function toggleSearchBar() {
-            const searchBar = document.getElementById("search-bar");
-            searchBar.style.display = "block";
         }
 
         // Fetch songs from API based on search query
