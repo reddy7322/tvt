@@ -42,9 +42,10 @@ function playSong() {
     currentSongIndex = selectedIndex;
     let selectedSong = songs[currentSongIndex];
 
-    // Get the audio source URL for the song (API provides this directly or fallback)
-    const downloadUrl = selectedSong.url || selectedSong.album.url || selectedSong.album.image[2].url; // Use album or fallback to artist image if no album is found.
+    // Get the audio source URL for the song
+    const downloadUrl = selectedSong.url || selectedSong.album.url || selectedSong.album.image[2].url;
 
+    // Update the player with song details
     audio.src = downloadUrl;
     audio.play();
     playButton.textContent = "pause"; // Change icon to pause when playing
@@ -52,17 +53,17 @@ function playSong() {
     // Update song info
     songName.textContent = selectedSong.name;
     songArtist.textContent = selectedSong.artists.primary.map(artist => artist.name).join(", ");
-    songArtwork.src = selectedSong.album ? selectedSong.album.image[2].url : selectedSong.artists.primary[0].image[2].url; // Get album artwork or artist image
-    songArtwork.style.display = "block";  // Make sure the artwork is visible
+    songArtwork.src = selectedSong.album ? selectedSong.album.image[2].url : selectedSong.artists.primary[0].image[2].url;
+    songArtwork.style.display = "block";  // Show artwork
 }
 
 function togglePlay() {
     if (audio.paused) {
         audio.play();
-        playButton.textContent = "pause"; // Change to pause icon
+        playButton.textContent = "pause";
     } else {
         audio.pause();
-        playButton.textContent = "play_arrow"; // Change to play icon
+        playButton.textContent = "play_arrow";
     }
 }
 
@@ -76,10 +77,6 @@ function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     songListDropdown.value = currentSongIndex;
     playSong();
-}
-
-function adjustVolume() {
-    audio.volume = volumeControl.value;
 }
 
 function seekSong() {
