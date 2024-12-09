@@ -3,122 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JioSaavn Style Music Player</title>
+    <title>YouTube Music Style Player</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+        /* General Reset and Layout */
+        body, html {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-
-        #player-container {
-            width: 350px;
-            background-color: #2e2e2e;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
             color: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
+            height: 100%;
+        }
+
+        .container {
             display: flex;
             flex-direction: column;
+            height: 100%;
+        }
+
+        /* Header */
+        #header {
+            display: flex;
             align-items: center;
-            text-align: center;
+            padding: 15px;
+            background-color: #1F1F1F;
+            justify-content: space-between;
         }
 
-        /* Album Poster */
-        #album-poster {
-            width: 200px;
-            height: 200px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Menu Toggle Button */
+        /* Menu Icon */
         #menu-toggle {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: none;
-            border: none;
             font-size: 30px;
-            color: white;
             cursor: pointer;
+            color: white;
         }
 
-        #menu-toggle img {
-            width: 30px;
-            height: 30px;
-        }
-
-        /* Search Bar and Icon */
+        /* Search Bar */
         #search-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             display: flex;
             align-items: center;
+            background-color: #333;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 200px;
+            transition: all 0.3s ease;
         }
 
         #search-bar {
-            width: 120px;
-            padding: 8px;
-            border-radius: 5px;
-            margin-right: 10px;
+            background: none;
             border: none;
-            font-size: 14px;
-            background-color: #444;
             color: white;
-            display: inline-block;
+            font-size: 14px;
+            outline: none;
+            padding: 5px;
+            width: 150px;
         }
 
         #search-btn {
             background: none;
             border: none;
             color: white;
-            font-size: 30px;
+            font-size: 24px;
             cursor: pointer;
+        }
+
+        /* Main Player */
+        #player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
         }
 
         /* Song Info */
         #song-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
             margin-bottom: 20px;
-            width: 100%;
         }
 
         #song-name {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            margin-top: 10px;
+            margin: 10px 0;
         }
 
         #song-artist {
-            font-size: 14px;
-            color: #ccc;
+            font-size: 16px;
+            color: #999;
         }
 
         #album-name {
             font-size: 14px;
-            color: #ccc;
+            color: #888;
             margin-top: 5px;
         }
 
-        /* Audio Controls */
+        /* Song List */
+        #song-list {
+            width: 100%;
+            padding: 10px;
+            background-color: #1F1F1F;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            color: white;
+        }
+
+        /* Album Image */
+        #album-poster {
+            width: 250px;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Controls */
         #controls {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             width: 100%;
             margin-top: 20px;
         }
@@ -126,59 +132,87 @@
         #controls button {
             background: none;
             border: none;
-            color: #fff;
-            font-size: 35px;
+            color: white;
+            font-size: 40px;
             cursor: pointer;
         }
 
+        /* Progress Bar */
         #progress-bar {
             width: 100%;
-            margin: 10px 0;
-            background: #444;
+            height: 10px;
+            background-color: #333;
             border-radius: 5px;
+            margin: 10px 0;
+            outline: none;
+            cursor: pointer;
         }
 
-        #time-display {
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        #quality-select {
-            font-size: 16px;
+        #progress-bar::-webkit-slider-thumb {
+            background: #FF4081;
             border: none;
-            background-color: #444;
-            color: white;
-            padding: 5px;
-            margin-top: 10px;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
-        #download-btn {
-            background: none;
-            border: 2px solid #fff;
-            padding: 5px 10px;
+        /* Quality Dropdown */
+        #quality-select {
+            background: #333;
             color: white;
-            font-size: 14px;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        /* Download Button */
+        #download-btn {
+            background: #FF4081;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
             margin-top: 20px;
         }
 
-        .icon-color {
-            color: #FF4081;
-        }
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            #search-container {
+                width: 150px;
+            }
 
-        .icon-color2 {
-            color: #3D5AFE;
-        }
-
-        .icon-color3 {
-            color: #00C853;
-        }
-
-        @media (max-width: 400px) {
-            #player-container {
+            #song-list {
                 width: 90%;
-                padding: 15px;
+            }
+
+            #song-name {
+                font-size: 18px;
+            }
+
+            #song-artist {
+                font-size: 14px;
+            }
+
+            #controls button {
+                font-size: 30px;
+            }
+
+            #quality-select {
+                font-size: 14px;
+            }
+
+            #album-poster {
+                width: 200px;
+                height: 200px;
+            }
+
+            #download-btn {
+                font-size: 14px;
             }
         }
 
@@ -189,63 +223,69 @@
     </style>
 </head>
 <body>
-    <div id="player-container">
-        <!-- Menu Toggle Button with Icon -->
-        <button id="menu-toggle" onclick="toggleMenu()">
-            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
-        </button>
 
-        <!-- Search Bar and Icon -->
-        <div id="search-container">
-            <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
-            <button id="search-btn" onclick="toggleSearchBar()">
-                <i class="material-icons">search</i>
-            </button>
+    <div class="container">
+
+        <!-- Header: Menu & Search Bar -->
+        <div id="header">
+            <button id="menu-toggle" onclick="toggleMenu()">☰</button>
+            <div id="search-container">
+                <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
+                <button id="search-btn" onclick="toggleSearchBar()">
+                    <i class="material-icons">search</i>
+                </button>
+            </div>
         </div>
 
-        <!-- Album Poster -->
-        <div id="album-poster" style="background-image: url('');"></div>
+        <!-- Main Player -->
+        <div id="player-container">
 
-        <!-- Song Info -->
-        <div id="song-info">
-            <span id="song-name">Song Name</span>
-            <span id="song-artist">Artist Name</span>
-            <span id="album-name">Album Name</span>
+            <!-- Album Poster -->
+            <div id="album-poster" style="background-image: url('');"></div>
+
+            <!-- Song Info -->
+            <div id="song-info">
+                <span id="song-name">Song Name</span>
+                <span id="song-artist">Artist Name</span>
+                <span id="album-name">Album Name</span>
+            </div>
+
+            <!-- Song List Dropdown -->
+            <select id="song-list" onchange="playSong()">
+                <option value="">Select a song</option>
+            </select>
+
+            <!-- Controls -->
+            <div id="controls">
+                <button id="prev" onclick="prevSong()">
+                    <i class="material-icons">skip_previous</i>
+                </button>
+                <button id="play" onclick="togglePlay()">
+                    <i class="material-icons" id="play-icon">play_arrow</i>
+                </button>
+                <button id="next" onclick="nextSong()">
+                    <i class="material-icons">skip_next</i>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
+            <span id="time-display">0:00</span>
+
+            <!-- Quality Dropdown -->
+            <select id="quality-select" onchange="changeQuality()">
+                <option value="12">Low Quality (12 kbps)</option>
+                <option value="48">Medium Quality (48 kbps)</option>
+                <option value="96" selected>High Quality (96 kbps)</option>
+                <option value="160">Very High Quality (160 kbps)</option>
+                <option value="320">Ultra High Quality (320 kbps)</option>
+            </select>
+
+            <!-- Download Button -->
+            <button id="download-btn" onclick="downloadSong()">Download Song</button>
+
         </div>
 
-        <!-- Song List Dropdown -->
-        <select id="song-list" onchange="playSong()">
-            <option value="">Select a song</option>
-        </select>
-
-        <!-- Audio Controls -->
-        <div id="controls">
-            <button id="prev" onclick="prevSong()">
-                <i class="material-icons icon-color">skip_previous</i>
-            </button>
-            <button id="play" onclick="togglePlay()">
-                <i class="material-icons icon-color2" id="play-icon">play_arrow</i>
-            </button>
-            <button id="next" onclick="nextSong()">
-                <i class="material-icons icon-color3">skip_next</i>
-            </button>
-        </div>
-
-        <!-- Music Quality Selection -->
-        <select id="quality-select" onchange="changeQuality()">
-            <option value="12">Low Quality (12 kbps)</option>
-            <option value="48">Medium Quality (48 kbps)</option>
-            <option value="96" selected>High Quality (96 kbps)</option>
-            <option value="160">Very High Quality (160 kbps)</option>
-            <option value="320">Ultra High Quality (320 kbps)</option>
-        </select>
-
-        <!-- Progress Bar and Time Display -->
-        <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
-        <span id="time-display">0:00</span>
-
-        <!-- Download Button -->
-        <button id="download-btn" onclick="downloadSong()">Download Song</button>
     </div>
 
     <!-- Audio Player (Hidden) -->
@@ -264,18 +304,10 @@
 
         // Toggle menu visibility
         function toggleMenu() {
-            const searchBar = document.getElementById("search-bar");
-            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+            console.log("Menu toggled");
         }
 
-        // Toggle search bar visibility with animation
-        function toggleSearchBar() {
-            const searchBar = document.getElementById("search-bar");
-            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
-            searchBar.style.transition = "all 0.3s ease";
-        }
-
-        // Fetch songs from API based on search query
+        // Search songs
         async function searchSongs() {
             let query = document.getElementById("search-bar").value;
             let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
@@ -285,7 +317,7 @@
             updateSongList();
         }
 
-        // Function to update the dropdown with song options
+        // Update song list dropdown
         function updateSongList() {
             songList.innerHTML = "<option value=''>Select a song</option>";
             songs.forEach((song, index) => {
@@ -296,7 +328,7 @@
             });
         }
 
-        // Function to play the selected song
+        // Play song
         function playSong() {
             if (songList.value !== "") {
                 currentSongIndex = songList.value;
@@ -305,16 +337,16 @@
             }
         }
 
-        // Function to load song and update UI
+        // Load song info
         function loadSong() {
             const song = songs[currentSongIndex];
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
-            audio.src = qualityUrl; // Set the audio source with the selected quality
+            audio.src = qualityUrl;
             document.getElementById("song-name").innerText = song.name;
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            document.getElementById("album-name").innerText = song.album.name; // Add album name
+            document.getElementById("album-name").innerText = song.album.name;
             document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
             playIcon.innerText = "pause";
         }
@@ -330,23 +362,28 @@
             }
         }
 
-        // Move to next song
+        // Skip to next song
         function nextSong() {
             currentSongIndex = (currentSongIndex + 1) % songs.length;
             loadSong();
             audio.play();
         }
 
-        // Move to previous song
+        // Skip to previous song
         function prevSong() {
             currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
             loadSong();
             audio.play();
         }
 
-        // Change music quality
+        // Change song quality
         function changeQuality() {
-            loadSong(); // Re-load the song with the selected quality
+            loadSong(); // Reload the song with the selected quality
+        }
+
+        // Seek through the song
+        function seekSong() {
+            audio.currentTime = (progressBar.value / 100) * audio.duration;
         }
 
         // Update progress bar and time display
@@ -359,12 +396,7 @@
             timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
         });
 
-        // Seek through the song using progress bar
-        function seekSong() {
-            audio.currentTime = (progressBar.value / 100) * audio.duration;
-        }
-
-        // Download song in base64 format
+        // Download song
         function downloadSong() {
             const song = songs[currentSongIndex];
             fetch(song.audioUrl)
@@ -383,5 +415,6 @@
                 .catch(error => console.error("Error downloading song", error));
         }
     </script>
+
 </body>
 </html>
