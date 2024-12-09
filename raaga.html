@@ -349,7 +349,7 @@
 
     <script>
     const queries = [
-    'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
+    'Telugu', 'SPB', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
     'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
     'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
     'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
@@ -363,16 +363,16 @@ let progressBar = document.getElementById("progress-bar");
 let timeDisplay = document.getElementById("time-display");
 let qualitySelect = document.getElementById("quality-select");
 let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "96"; // Default to 96 kbps
+let songs = []; // To store song data from API response
+let currentQuality = "96"; // Default quality
 
-// Auto-fetch random query and play the first song on page load
+// Auto-fetch random query on page load
 window.onload = async function () {
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    searchSongs(randomQuery);
+    await searchSongs(randomQuery);
 };
 
-// Fetch songs based on search query
+// Fetch songs based on the search query
 async function searchSongs(query) {
     if (!query) {
         alert("Please enter a search query.");
@@ -380,7 +380,6 @@ async function searchSongs(query) {
     }
 
     try {
-        // Display loader while fetching data
         document.getElementById("loader").classList.remove('hide-loader');
         document.getElementById("content").classList.add('hide-loader');
 
@@ -393,7 +392,6 @@ async function searchSongs(query) {
 
         const data = await response.json();
 
-        // Check if the data contains results
         if (!data || !data.data || !data.data.results || data.data.results.length === 0) {
             alert("No songs found for your search. Please try a different query.");
             songs = [];
@@ -401,14 +399,10 @@ async function searchSongs(query) {
             return;
         }
 
-        // Process the search results
         songs = data.data.results;
         updateSongList();
-
-        // Auto-play the first song
         playSong(0);
 
-        // Hide loader and show content
         document.getElementById("loader").classList.add('hide-loader');
         document.getElementById("content").classList.remove('hide-loader');
     } catch (error) {
@@ -417,7 +411,6 @@ async function searchSongs(query) {
         songs = [];
         updateSongList();
 
-        // Hide loader to allow retry
         document.getElementById("loader").classList.add('hide-loader');
         document.getElementById("content").classList.remove('hide-loader');
     }
@@ -426,15 +419,6 @@ async function searchSongs(query) {
 // Update song list dropdown
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
-
-    if (songs.length === 0) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.innerHTML = "No songs available";
-        songList.appendChild(option);
-        return;
-    }
-
     songs.forEach((song, index) => {
         const option = document.createElement("option");
         option.value = index;
@@ -443,19 +427,15 @@ function updateSongList() {
     });
 }
 
-// Play selected or indexed song
+// Play the selected song
 function playSong(index = currentSongIndex) {
-    if (songs.length === 0 || index < 0 || index >= songs.length) {
-        alert("No song to play.");
-        return;
-    }
-
+    if (songs.length === 0) return;
     currentSongIndex = index;
     loadSong();
     audio.play();
 }
 
-// Load song details and prepare for playback
+// Load the song details
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
@@ -480,58 +460,45 @@ function togglePlay() {
     }
 }
 
-// Move to the next song in the playlist
-function nextSong() {
+// Play the next song automatically
+audio.addEventListener("ended", () => {
     currentSongIndex = (currentSongIndex + 1) % songs.length;
-    playSong();
-}
-
-// Move to the previous song in the playlist
-function prevSong() {
-    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    playSong();
-}
+    playSong(currentSongIndex);
+});
 
 // Seek song through progress bar
 function seekSong() {
-    const value = progressBar.value;
-    const seekTime = (audio.duration * value) / 100;
+    let value = progressBar.value;
+    let seekTime = (audio.duration * value) / 100;
     audio.currentTime = seekTime;
 }
 
 // Update progress bar as song plays
 audio.ontimeupdate = function () {
-    if (audio.duration) {
-        const value = (audio.currentTime / audio.duration) * 100;
-        progressBar.value = value;
-        timeDisplay.innerText = formatTime(audio.currentTime);
-    }
-};
-
-// Play the next song when the current one ends
-audio.onended = function () {
-    nextSong();
+    let value = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = value;
+    timeDisplay.innerText = formatTime(audio.currentTime);
 };
 
 // Format time for display
 function formatTime(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${min}:${sec < 10 ? "0" : ""}${sec}`;
+    let min = Math.floor(seconds / 60);
+    let sec = Math.floor(seconds % 60);
+    if (sec < 10) sec = "0" + sec;
+    return `${min}:${sec}`;
 }
 
 // Shuffle the playlist
 function shufflePlaylist() {
     songs = songs.sort(() => Math.random() - 0.5);
     updateSongList();
-    playSong(0); // Start with the first shuffled song
 }
 
-// Change quality and apply it to all songs
+// Change quality and auto-play the song
 function changeQuality() {
     currentQuality = qualitySelect.value;
     loadSong();
-    audio.play(); // Auto-play after quality change
+    audio.play();
 }
 
 // Download the current song
@@ -543,7 +510,7 @@ function downloadSong() {
     fetch(qualityUrl)
         .then(res => res.blob())
         .then(blob => {
-            const a = document.createElement("a");
+            const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = `${song.name}.mp3`;
             a.click();
@@ -552,9 +519,11 @@ function downloadSong() {
 
 // Trigger search on button click or input keyup
 function toggleSearchBar() {
-    const searchQuery = document.getElementById("search-bar").value;
+    const searchQuery = document.getElementById("search-bar").value.trim();
     if (searchQuery) {
         searchSongs(searchQuery);
+    } else {
+        alert("Please enter a search query.");
     }
 }
 
