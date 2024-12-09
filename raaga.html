@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div id="menu"></div>
+  <input type="text" id="searchInput" placeholder="Search for songs...">
+  <button id="searchButton">Search</button>
+  <div id="player">
+    <img id="songImage" src="" alt="Song Cover">
+    <audio id="audioPlayer" controls></audio>
+    <div id="songDetails">
+      <p id="name">Song Name</p>
+      <p id="artist">Artist Name</p>
+    </div>
+    <div id="controls">
+      <button id="prevButton">Prev</button>
+      <button id="playButton">Play</button>
+      <button id="nextButton">Next</button>
+      <button id="looper">Repeat</button>
+    </div>
+    <div id="progress-area">
+      <div id="progress-bar"></div>
+      <span id="current-time">0:00</span> / 
+      <span id="max-duration">0:00</span>
+    </div>
+  </div>
+  <button id="downloadButton">Download</button>
+  <div id="songList"></div>
+
+  <script>
+    // Define variables
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const playButton = document.getElementById('playButton');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const songImage = document.getElementById('songImage');
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+    const progressBar = document.getElementById('progress-bar');
+    const currentTimeElement = document.getElementById('current-time');
+    const progressContainer = document.getElementById('progress-area');
+    let songs = [];
+    let currentSongIndex = 0;
+    let looped = false;
+
+    const queries = ['Telugu', 'SBP', 'Devi Sri Prasad', 'love', 'remix'];
+
+    // Populate menu
+    function populateMenu() {
+      const menu = document.getElementById('menu');
+      const categories = ['Telugu', 'Trending Telugu', 'Devotional Telugu'];
+
+      menu.innerHTML = '';
+      categories.forEach(category => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = "#";
+        link.textContent = category;
+        link.onclick = () => {
+          songs = [];
+          fetchSongs(category);
+        };
+        li.appendChild(link);
+        menu.appendChild(li);
+      });
+    }
+
+    // Fetch songs
+    function fetchSongs(query, random = false, url = '') {
+      url = url || `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=500`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.data && data.data.results) {
+            songs = random ? shuffleArray([...songs, ...data.data.results]) : [...songs, ...data.data.results];
+            updateUI();
+          }
+        })
+        .catch(error => console.error('Error fetching songs:', error));
+    }
+
+    // Shuffle array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Update UI
+    function updateUI() {
+      loadSongDetails(currentSongIndex);
+      populateSongList();
+    }
+
+    // Populate song list
+    function populateSongList() {
+      const songListContainer = document.getElementById('songList');
+      songListContainer.innerHTML = '';
+      songs.forEach((song, index) => {
+        const listItem = document.createElement('div');
+        listItem.classList.add('song-item');
+        listItem.innerHTML = `
+          <li onclick="currentSongIndex=${index}; updateUI();">
+            <img src="${song.image[1].url}" alt="${song.name}" height="40">
+            <div>
+              <span>${song.name}</span>
+              <p>${song.primaryArtists}</p>
+            </div>
+            <span>${secondsToMinSec(song.duration)}</span>
+          </li>`;
+        songListContainer.appendChild(listItem);
+      });
+    }
+
+    // Convert seconds to MM:SS
+    function secondsToMinSec(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Load song details
+    function loadSongDetails(index) {
+      const selectedSong = songs[index];
+      if (selectedSong) {
+        audioPlayer.src = selectedSong.downloadUrl[4].url;
+        songImage.src = selectedSong.image[2].url;
+        document.getElementById('name').textContent = selectedSong.album.name;
+        document.getElementById('artist').textContent = selectedSong.primaryArtists;
+        document.getElementById('max-duration').textContent = secondsToMinSec(selectedSong.duration);
+        document.title = selectedSong.name;
+      }
+    }
+
+    // Initialize events
+    window.onload = () => {
+      populateMenu();
+      fetchSongs(queries[Math.floor(Math.random() * queries.length)], true);
+    };
+
+    searchButton.onclick = () => {
+      songs = [];
+      fetchSongs(searchInput.value.trim());
+    };
+
+    playButton.onclick = () => {
+      if (audioPlayer.paused) {
+        audioPlayer.play();
+        playButton.textContent = 'Pause';
+      } else {
+        audioPlayer.pause();
+        playButton.textContent = 'Play';
+      }
+    };
+
+    prevButton.onclick = () => {
+      if (currentSongIndex > 0) currentSongIndex--;
+      updateUI();
+    };
+
+    nextButton.onclick = () => {
+      if (currentSongIndex < songs.length - 1) currentSongIndex++;
+      updateUI();
+    };
+
+    audioPlayer.onended = () => {
+      if (looped) audioPlayer.play();
+      else if (currentSongIndex < songs.length - 1) currentSongIndex++;
+      updateUI();
+    };
+
+    progressContainer.onclick = event => {
+      const clickX = event.clientX - progressContainer.getBoundingClientRect().left;
+      audioPlayer.currentTime = (clickX / progressContainer.offsetWidth) * audioPlayer.duration;
+    };
+
+    document.getElementById('looper').onclick = () => {
+      looped = !looped;
+      document.getElementById('looper').textContent = looped ? 'Repeat One' : 'Repeat';
+    };
+  </script>
+</body>
+</html>
