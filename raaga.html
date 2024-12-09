@@ -13,7 +13,7 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             height: 100vh;
             flex-direction: column;
         }
@@ -30,6 +30,16 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+        }
+
+        /* Album Poster */
+        #album-poster {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background-size: cover;
+            background-position: center;
         }
 
         #search-bar {
@@ -59,52 +69,53 @@
             cursor: pointer;
         }
 
-        #song-queue {
+        #suggestions {
             width: 100%;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            background-color: #333;
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        #song-queue div {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 10px;
             background-color: #444;
             border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+        }
+
+        #suggestions.open {
+            display: block;
+        }
+
+        #suggestions div {
+            padding: 5px;
             cursor: pointer;
         }
 
-        #song-queue div:hover {
-            background-color: #555;
+        #suggestions div:hover {
+            background-color: #333;
         }
 
-        #song-queue img {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-            border-radius: 5px;
-        }
-
-        #song-queue .song-info {
-            flex-grow: 1;
+        #song-info {
             display: flex;
             flex-direction: column;
-        }
-
-        .quality-icons {
-            display: flex;
             align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
         }
 
-        .quality-icons i {
+        #song-name {
             font-size: 20px;
-            margin-left: 5px;
-            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #song-artist {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        #album-name {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
         }
 
         #controls {
@@ -133,6 +144,15 @@
         #time-display {
             font-size: 14px;
             color: #ccc;
+        }
+
+        #quality-select {
+            font-size: 16px;
+            border: none;
+            background-color: #444;
+            color: white;
+            padding: 5px;
+            margin-top: 10px;
         }
 
         #download-btn {
@@ -181,8 +201,18 @@
         <!-- Search Bar -->
         <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
         
-        <!-- Song Queue -->
-        <div id="song-queue"></div>
+        <!-- Suggestions Dropdown -->
+        <div id="suggestions"></div>
+
+        <!-- Album Poster -->
+        <div id="album-poster" style="background-image: url('');"></div>
+
+        <!-- Song Info -->
+        <div id="song-info">
+            <span id="song-name">Song Name</span>
+            <span id="song-artist">Artist Name</span>
+            <span id="album-name">Album Name</span>
+        </div>
 
         <!-- Audio Controls -->
         <div id="controls">
@@ -220,7 +250,7 @@
     <script>
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
-        let songQueue = document.getElementById("song-queue");
+        let songList = document.getElementById("song-list");
         let progressBar = document.getElementById("progress-bar");
         let timeDisplay = document.getElementById("time-display");
         let qualitySelect = document.getElementById("quality-select");
@@ -239,79 +269,35 @@
         async function searchSongs() {
             let query = document.getElementById("search-bar").value;
             if (query.length < 3) {
+                document.getElementById("suggestions").classList.remove("open");
                 return;
             }
 
-            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`; // Fetch 50 songs
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=5`;
             const response = await fetch(url);
             const data = await response.json();
             songs = data.data.results;
-            showSongQueue();
+            showSuggestions();
         }
 
-        // Show song queue with 50 songs
-        function showSongQueue() {
-            songQueue.innerHTML = ''; // Clear previous song list
+        // Show song suggestions
+        function showSuggestions() {
+            const suggestionsContainer = document.getElementById("suggestions");
+            suggestionsContainer.innerHTML = '';
             songs.forEach(song => {
-                const songItem = document.createElement("div");
-                songItem.classList.add("song-item");
-
-                // Song Thumbnail (Album Poster)
-                const albumPoster = document.createElement("img");
-                albumPoster.src = song.image[2].url;
-                albumPoster.alt = "Album Poster";
-
-                // Song Info (Name, Artist, Album)
-                const songInfo = document.createElement("div");
-                songInfo.classList.add("song-info");
-
-                const songName = document.createElement("span");
-                songName.textContent = song.name;
-
-                const artistName = document.createElement("span");
-                artistName.textContent = song.artists.primary[0].name;
-
-                const albumName = document.createElement("span");
-                albumName.textContent = song.album.name;
-
-                songInfo.appendChild(songName);
-                songInfo.appendChild(artistName);
-                songInfo.appendChild(albumName);
-
-                // Quality Icons
-                const qualityIcons = document.createElement("div");
-                qualityIcons.classList.add("quality-icons");
-
-                song.downloadUrl.forEach(url => {
-                    const qualityIcon = document.createElement("i");
-                    qualityIcon.classList.add("material-icons");
-                    qualityIcon.textContent = url.quality === "96kbps" ? "star" : "star_border";
-                    qualityIcon.title = `${url.quality} Quality`;
-                    qualityIcons.appendChild(qualityIcon);
-                });
-
-                // Queue Icon
-                const queueIcon = document.createElement("i");
-                queueIcon.classList.add("material-icons");
-                queueIcon.textContent = "queue";
-                queueIcon.style.cursor = "pointer";
-                queueIcon.onclick = () => addToQueue(song);
-
-                // Append elements to song item
-                songItem.appendChild(albumPoster);
-                songItem.appendChild(songInfo);
-                songItem.appendChild(qualityIcons);
-                songItem.appendChild(queueIcon);
-                songQueue.appendChild(songItem);
+                const suggestionItem = document.createElement("div");
+                suggestionItem.innerText = song.name;
+                suggestionItem.onclick = () => {
+                    document.getElementById("search-bar").value = song.name;
+                    document.getElementById("suggestions").classList.remove("open");
+                    playSong(song);
+                };
+                suggestionsContainer.appendChild(suggestionItem);
             });
+            document.getElementById("suggestions").classList.add("open");
         }
 
-        // Add song to play queue
-        function addToQueue(song) {
-            playSong(song);  // Automatically start playing the added song
-        }
-
-        // Play song after selection
+        // Play song after selection from suggestions
         function playSong(song) {
             const selectedQuality = qualitySelect.value;
             const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
@@ -319,7 +305,7 @@
             audio.src = qualityUrl; // Set the audio source with the selected quality
             document.getElementById("song-name").innerText = song.name;
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            document.getElementById("album-name").innerText = song.album.name;
+            document.getElementById("album-name").innerText = song.album.name; // Add album name
             document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
             playIcon.innerText = "pause";
             audio.play();
