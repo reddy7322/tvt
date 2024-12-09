@@ -11,7 +11,6 @@
 
     <!-- Custom CSS -->
     <style>
-        /* Basic Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -86,7 +85,6 @@
             color: #333;
         }
 
-        /* Responsive Design */
         @media (max-width: 400px) {
             #player-container {
                 width: 90%;
@@ -146,24 +144,12 @@
         let currentSongIndex = 0;
         let songs = []; // Store song data from API response
 
-        // Predefined queries to preload music
-        const queries = [
-            'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens', 'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani', 'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu', 'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja', 'Ramajogayya Sastry', 'new remix'
-        ];
-
-        // Preload songs based on queries
-        async function preloadSongs() {
-            for (let query of queries) {
-                await searchSongs(query); // Load songs for each query
-            }
-        }
-
-        // Function to search and populate song list based on query
+        // Fetch songs from API based on search query
         async function searchSongs(query = "") {
             let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
-            songs = [...songs, ...data.data.results]; // Append songs from query to main array
+            songs = data.data.results;
             updateSongList();
         }
 
@@ -190,7 +176,7 @@
         // Function to load song and update UI
         function loadSong() {
             const song = songs[currentSongIndex];
-            audio.src = song.url;
+            audio.src = song.downloadUrl[3].url; // Using 160kbps quality
             document.getElementById("song-name").innerText = song.name;
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
             document.getElementById("song-artwork").src = song.artists.primary[0].image[2].url;
@@ -237,8 +223,10 @@
             audio.currentTime = (progressBar.value / 100) * audio.duration;
         }
 
-        // Initialize by preloading songs
-        preloadSongs();
+        // Initialize by loading songs for popular queries
+        window.onload = () => {
+            searchSongs('telugu');
+        };
     </script>
 </body>
 
