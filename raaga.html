@@ -5,17 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Music Style Player</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
     <style>
         /* General Reset and Layout */
         body, html {
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Parkinsans', sans-serif;
             background-color: #121212;
             color: white;
             height: 100%;
+            overflow: hidden;
         }
 
+        /* Loader Styles */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide loader when page is loaded */
+        .hide-loader {
+            display: none;
+        }
+
+        /* Main Layout */
         .container {
             display: flex;
             flex-direction: column;
@@ -33,9 +69,12 @@
 
         /* Menu Icon */
         #menu-toggle {
-            font-size: 30px;
+            width: 30px;
+            height: 30px;
+            background-image: url('https://tvtelugu.github.io/images/tvtelugu.ico');
+            background-size: contain;
+            background-repeat: no-repeat;
             cursor: pointer;
-            color: white;
         }
 
         /* Search Bar */
@@ -226,11 +265,16 @@
 </head>
 <body>
 
-    <div class="container">
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container" id="content">
 
         <!-- Header: Menu & Search Bar -->
         <div id="header">
-            <button id="menu-toggle" onclick="toggleMenu()">☰</button>
+            <button id="menu-toggle" onclick="toggleMenu()"></button>
             <div id="search-container">
                 <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
                 <button id="search-btn" onclick="toggleSearchBar()">
@@ -380,76 +424,70 @@
             }
         }
 
-        // Skip to next song
-        function nextSong() {
-            currentSongIndex = (currentSongIndex + 1) % songs.length;
-            loadSong();
-            audio.play();
+        // Seek song through progress bar
+        function seekSong() {
+            let value = progressBar.value;
+            let seekTime = (audio.duration * value) / 100;
+            audio.currentTime = seekTime;
         }
 
-        // Skip to previous song
-        function prevSong() {
-            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-            loadSong();
-            audio.play();
+        // Update progress bar as song plays
+        audio.ontimeupdate = function() {
+            let value = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = value;
+            let currentTime = formatTime(audio.currentTime);
+            timeDisplay.innerText = currentTime;
         }
 
-        // Shuffle playlist
+        // Format time for display
+        function formatTime(seconds) {
+            let min = Math.floor(seconds / 60);
+            let sec = Math.floor(seconds % 60);
+            if (sec < 10) sec = "0" + sec;
+            return `${min}:${sec}`;
+        }
+
+        // Shuffle songs in the list
         function shufflePlaylist() {
-            songs = shuffleArray(songs);
+            songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
-            playSong();
         }
 
-        // Shuffle the array
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        // Change song quality and auto-play
+        // Change quality and auto-play the song
         function changeQuality() {
             loadSong();
             audio.play();
         }
 
-        // Seek through the song
-        function seekSong() {
-            audio.currentTime = (progressBar.value / 100) * audio.duration;
-        }
-
-        // Update progress bar and time display
-        audio.addEventListener("timeupdate", function () {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = progress;
-
-            const minutes = Math.floor(audio.currentTime / 60);
-            const seconds = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-        });
-
-        // Download song
+        // Download current song
         function downloadSong() {
             const song = songs[currentSongIndex];
-            fetch(song.audioUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const base64Data = reader.result.split(',')[1];
-                        const a = document.createElement("a");
-                        a.href = `data:audio/mp3;base64,${base64Data}`;
-                        a.download = `${song.name}.mp3`;
-                        a.click();
-                    };
-                    reader.readAsDataURL(blob);
-                })
-                .catch(error => console.error("Error downloading song", error));
-        }
-    </script>
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
+            fetch(qualityUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `${song.name}.mp3`;
+                    a.click();
+                });
+        }
+
+        // Toggle search bar
+        function toggleSearchBar() {
+            let searchQuery = document.getElementById("search-bar").value;
+            if (searchQuery) {
+                searchSongs(searchQuery);
+            }
+        }
+
+        // Show and hide loader
+        window.addEventListener('load', function() {
+            document.getElementById("loader").classList.add("hide-loader");
+            document.getElementById("content").classList.remove("hide-loader");
+        });
+    </script>
 </body>
 </html>
