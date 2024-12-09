@@ -2,7 +2,6 @@ let currentSongIndex = 0;
 let songs = [];
 let audio = document.getElementById('audio');
 let playButton = document.getElementById('play');
-let volumeControl = document.getElementById('volume');
 let songListDropdown = document.getElementById('song-list');
 let progressBar = document.getElementById('progress-bar');
 let songArtwork = document.getElementById('song-artwork');
@@ -43,8 +42,8 @@ function playSong() {
     currentSongIndex = selectedIndex;
     let selectedSong = songs[currentSongIndex];
 
-    // Use a high-quality download URL (pick the best one available)
-    const downloadUrl = selectedSong.album ? selectedSong.album.url : selectedSong.url;
+    // Get the audio source URL for the song (API provides this directly or fallback)
+    const downloadUrl = selectedSong.url || selectedSong.album.url || selectedSong.album.image[2].url; // Use album or fallback to artist image if no album is found.
 
     audio.src = downloadUrl;
     audio.play();
@@ -53,16 +52,17 @@ function playSong() {
     // Update song info
     songName.textContent = selectedSong.name;
     songArtist.textContent = selectedSong.artists.primary.map(artist => artist.name).join(", ");
-    songArtwork.src = selectedSong.album ? selectedSong.album.url : selectedSong.album.image[2].url;  // Get album artwork or artist image
+    songArtwork.src = selectedSong.album ? selectedSong.album.image[2].url : selectedSong.artists.primary[0].image[2].url; // Get album artwork or artist image
+    songArtwork.style.display = "block";  // Make sure the artwork is visible
 }
 
 function togglePlay() {
     if (audio.paused) {
         audio.play();
-        playButton.textContent = "pause"; // Play icon to pause
+        playButton.textContent = "pause"; // Change to pause icon
     } else {
         audio.pause();
-        playButton.textContent = "play_arrow"; // Change back to play
+        playButton.textContent = "play_arrow"; // Change to play icon
     }
 }
 
