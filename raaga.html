@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</title>
   <link rel="icon" type="image/x-icon" href="https://tvtelugu.github.io/images/tvtelugu.ico">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -72,7 +72,6 @@
       <ul id="songList"></ul>
     </div>
 
-    <!-- Dynamic Menu for Categories -->
     <div id="list" class="music-list">
       <div class="header">
         <i class="list material-icons">queue_music</i>
@@ -95,44 +94,7 @@
   </div>
 
   <audio id="preloadAudio" preload="auto" style="display: none;"></audio>
-
-  <script src="2.js"></script>
-
-  <script>
-    // Function to populate the dynamic menu
-    function populateMenu() {
-      const menu = document.getElementById("menu");
-      const categories = ["Telugu", "Trending Telugu", "Devotional Telugu"]; // Define your categories here
-
-      // Clear existing items in the menu
-      menu.innerHTML = "";
-
-      // Loop through the categories and create menu items
-      categories.forEach(category => {
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-
-        // Assign a click handler to fetch songs based on the category
-        link.href = "#";
-        link.textContent = category;
-        link.onclick = () => {
-          songs = []; // Clear the existing songs
-          fetchSongs(category); // Fetch songs for the selected category
-        };
-
-        li.appendChild(link);
-        menu.appendChild(li);
-      });
-    }
-
-    // Populate the menu on page load
-    window.onload = () => {
-      populateMenu();
-
-      // Hide loader after content is fully loaded
-      document.body.classList.add("loaded");
-    };
-  </script>
+  <script src="script.js"></script>
 </body>
 
 </html>
