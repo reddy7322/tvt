@@ -11,7 +11,7 @@
         body, html {
             margin: 0;
             padding: 0;
-            font-family: 'Parkinson', sans-serif;
+            font-family: 'Parkinsans', sans-serif;
             background-color: #121212;
             color: white;
             height: 100%;
@@ -67,17 +67,20 @@
             justify-content: space-between;
         }
 
+        /* Logo Container */
         #logo-container {
             width: 30px;
             height: 30px;
         }
 
+        /* Page Logo */
         #page-logo {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
 
+        /* Search Bar */
         #search-container {
             display: flex;
             align-items: center;
@@ -116,15 +119,7 @@
             overflow-y: auto;
         }
 
-        #album-poster {
-            width: 250px;
-            height: 250px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
+        /* Song Info */
         #song-info {
             text-align: center;
             margin-bottom: 20px;
@@ -147,6 +142,7 @@
             margin-top: 5px;
         }
 
+        /* Song List */
         #song-list {
             width: 100%;
             padding: 10px;
@@ -157,6 +153,17 @@
             color: white;
         }
 
+        /* Album Image */
+        #album-poster {
+            width: 250px;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Controls */
         #controls {
             display: flex;
             justify-content: space-between;
@@ -172,6 +179,7 @@
             cursor: pointer;
         }
 
+        /* Progress Bar */
         #progress-bar {
             width: 100%;
             height: 10px;
@@ -191,6 +199,7 @@
             cursor: pointer;
         }
 
+        /* Quality Dropdown */
         #quality-select {
             background: #333;
             color: white;
@@ -201,6 +210,7 @@
             margin-top: 15px;
         }
 
+        /* Shuffle and Download Icon */
         #shuffle-btn {
             font-size: 30px;
             color: white;
@@ -214,6 +224,7 @@
             cursor: pointer;
         }
 
+        /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
                 width: 150px;
@@ -225,6 +236,10 @@
 
             #song-name {
                 font-size: 18px;
+            }
+
+            #song-artist {
+                font-size: 14px;
             }
 
             #controls button {
@@ -239,47 +254,84 @@
                 width: 200px;
                 height: 200px;
             }
+
+            #download-btn {
+                font-size: 20px;
+            }
         }
 
+        /* Hide audio element */
         #audio {
             display: none;
         }
     </style>
 </head>
 <body>
+
+    <!-- Loader -->
     <div class="loader" id="loader">
         <div class="spinner"></div>
     </div>
 
-    <div class="container hide-loader" id="content">
+    <div class="container" id="content" class="hide-loader">
+
+        <!-- Header: Page Logo & Search Bar -->
         <div id="header">
             <div id="logo-container">
-                <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo">
+                <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
             </div>
             <div id="search-container">
-                <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()">
-                <button id="search-btn" onclick="searchSongs()">
+                <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
+                <button id="search-btn" onclick="toggleSearchBar()">
                     <i class="material-icons">search</i>
                 </button>
             </div>
         </div>
+
+        <!-- Main Player -->
         <div id="player-container">
-            <div id="album-poster"></div>
+
+            <!-- Album Poster -->
+            <div id="album-poster" style="background-image: url('');"></div>
+
+            <!-- Song Info -->
             <div id="song-info">
                 <span id="song-name">Song Name</span>
                 <span id="song-artist">Artist Name</span>
                 <span id="album-name">Album Name</span>
             </div>
+
+            <!-- Song List Dropdown -->
             <select id="song-list" onchange="playSong()">
                 <option value="">Select a song</option>
             </select>
+
+            <!-- Controls -->
             <div id="controls">
-                <button onclick="prevSong()"><i class="material-icons">skip_previous</i></button>
-                <button onclick="togglePlay()"><i class="material-icons" id="play-icon">play_arrow</i></button>
-                <button onclick="nextSong()"><i class="material-icons">skip_next</i></button>
+                <button id="prev" onclick="prevSong()">
+                    <i class="material-icons">skip_previous</i>
+                </button>
+                <button id="play" onclick="togglePlay()">
+                    <i class="material-icons" id="play-icon">play_arrow</i>
+                </button>
+                <button id="next" onclick="nextSong()">
+                    <i class="material-icons">skip_next</i>
+                </button>
+                <!-- Shuffle Button -->
+                <button id="shuffle-btn" onclick="shufflePlaylist()">
+                    <i class="material-icons">shuffle</i>
+                </button>
+                <!-- Download Button -->
+                <button id="download-btn" onclick="downloadSong()">
+                    <i class="material-icons">file_download</i>
+                </button>
             </div>
-            <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()">
+
+            <!-- Progress Bar -->
+            <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
             <span id="time-display">0:00</span>
+
+            <!-- Quality Dropdown -->
             <select id="quality-select" onchange="changeQuality()">
                 <option value="12">Low Quality (12 kbps)</option>
                 <option value="48">Medium Quality (48 kbps)</option>
@@ -287,10 +339,23 @@
                 <option value="160">Very High Quality (160 kbps)</option>
                 <option value="320">Ultra High Quality (320 kbps)</option>
             </select>
+
         </div>
+
     </div>
-    <audio id="audio"></audio>
+
+    <!-- Audio Player (Hidden) -->
+    <audio id="audio" controls></audio>
+
     <script>
+        const queries = [
+            'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens', 
+            'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani', 
+            'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu', 
+            'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja', 
+            'Ramajogayya Sastry', 'new remix'
+        ];
+
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
         let songList = document.getElementById("song-list");
@@ -298,20 +363,30 @@
         let timeDisplay = document.getElementById("time-display");
         let qualitySelect = document.getElementById("quality-select");
         let currentSongIndex = 0;
-        let songs = [];
-        let currentQuality = "96";
+        let songs = []; // Store song data from API response
+        let currentQuality = "96"; // Default to 96 kbps
 
-        async function searchSongs(query = null) {
-            query = query || document.getElementById("search-bar").value.trim();
-            if (!query) return alert("Please enter a search query!");
+        // Auto-fetch random query and play the first song on page load
+        window.onload = async function() {
+            const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+            await searchSongs(randomQuery);
+            // Hide loader once content is ready
+            document.getElementById("loader").classList.add('hide-loader');
+            document.getElementById("content").classList.remove('hide-loader');
+        }
 
-            const url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
+        // Fetch songs based on search query
+        async function searchSongs(query) {
+            if (!query) return;
+            
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
         }
 
+        // Update song list dropdown
         function updateSongList() {
             songList.innerHTML = "<option value=''>Select a song</option>";
             songs.forEach((song, index) => {
@@ -321,32 +396,38 @@
                 songList.appendChild(option);
             });
 
+            // Auto-play the first song if available
             if (songs.length > 0) {
                 currentSongIndex = 0;
-                loadSong();
+                loadSong(); // Load the first song
+                audio.play(); // Play the first song
             }
         }
 
+        // Play selected song
+        function playSong() {
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Load song info
         function loadSong() {
             const song = songs[currentSongIndex];
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
             audio.src = qualityUrl;
             document.getElementById("song-name").innerText = song.name;
             document.getElementById("song-artist").innerText = song.artists.primary[0].name;
             document.getElementById("album-name").innerText = song.album.name;
             document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+            playIcon.innerText = "pause";  // Change the play icon to "pause"
         }
 
-        function playSong() {
-            if (songList.value !== "") {
-                currentSongIndex = parseInt(songList.value);
-                loadSong();
-                audio.play();
-                playIcon.innerText = "pause";
-            }
-        }
-
+        // Toggle play/pause
         function togglePlay() {
             if (audio.paused) {
                 audio.play();
@@ -357,41 +438,63 @@
             }
         }
 
-        function nextSong() {
-            currentSongIndex = (currentSongIndex + 1) % songs.length;
-            loadSong();
-            audio.play();
-        }
-
-        function prevSong() {
-            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-            loadSong();
-            audio.play();
-        }
-
+        // Seek song based on progress bar
         function seekSong() {
-            audio.currentTime = audio.duration * (progressBar.value / 100);
+            const seekTo = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTo;
         }
 
-        function changeQuality() {
-            currentQuality = qualitySelect.value;
+        // Update progress bar as song plays
+        audio.ontimeupdate = function() {
+            let progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            let minutes = Math.floor(audio.currentTime / 60);
+            let seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        }
+
+        // Skip to next song
+        function nextSong() {
+            currentSongIndex++;
+            if (currentSongIndex >= songs.length) {
+                currentSongIndex = 0;
+            }
             loadSong();
             audio.play();
         }
 
-        audio.ontimeupdate = function () {
-            progressBar.value = (audio.currentTime / audio.duration) * 100;
-            const minutes = Math.floor(audio.currentTime / 60);
-            const seconds = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-        };
+        // Skip to previous song
+        function prevSong() {
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = songs.length - 1;
+            }
+            loadSong();
+            audio.play();
+        }
 
-        audio.onended = nextSong;
+        // Shuffle playlist
+        function shufflePlaylist() {
+            songs = songs.sort(() => Math.random() - 0.5); // Shuffle the songs
+            updateSongList();
+            currentSongIndex = 0; // Reset to the first song after shuffle
+        }
 
-        window.onload = function () {
-            document.getElementById("loader").classList.add('hide-loader');
-            document.getElementById("content").classList.remove('hide-loader');
-        };
+        // Download the current song
+        function downloadSong() {
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+            const a = document.createElement('a');
+            a.href = qualityUrl;
+            a.download = song.name + ".mp3";
+            a.click();
+        }
+
+        // Change song quality
+        function changeQuality() {
+            loadSong();
+        }
     </script>
 </body>
 </html>
