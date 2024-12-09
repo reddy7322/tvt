@@ -408,117 +408,109 @@
             updateSongList();
         }
 
-        // Update song list dropdown
+        // Update the song dropdown list
         function updateSongList() {
             songList.innerHTML = "<option value=''>Select a song</option>";
             songs.forEach((song, index) => {
-                const option = document.createElement("option");
-                option.value = index;
-                option.innerHTML = song.name;
+                let option = document.createElement("option");
+                option.value = song.id;
+                option.text = `${song.name} - ${song.artist}`;
                 songList.appendChild(option);
             });
-
-            if (songs.length > 0) {
-                currentSongIndex = 0;
-                loadSong();
-                audio.play();
-            }
         }
 
-        // Fetch lyrics for the current song
+        // Play the selected song
+        function playSong() {
+            const selectedSongId = songList.value;
+            if (!selectedSongId) return;
+
+            currentSongIndex = songs.findIndex(song => song.id === selectedSongId);
+            loadSong(songs[currentSongIndex]);
+        }
+
+        // Load the song and start playback
+        async function loadSong(song) {
+            const songUrl = `https://saavn.dev/api/song/${song.id}`;
+            const songResponse = await fetch(songUrl);
+            const songData = await songResponse.json();
+            const songUrlToPlay = songData.data.url;
+            const albumImage = songData.data.album.images[0].url;
+            const lyrics = await fetchLyrics(song.id);
+
+            audio.src = songUrlToPlay;
+            audio.play();
+            document.getElementById("album-poster").style.backgroundImage = `url(${albumImage})`;
+            document.getElementById("song-name").innerText = songData.data.name;
+            document.getElementById("song-artist").innerText = songData.data.artist;
+            document.getElementById("album-name").innerText = songData.data.album.name;
+
+            // Display lyrics if available
+            if (lyrics) {
+                lyricsLine.innerText = lyrics.replace(/<br>/g, ' '); // Clean up line breaks
+                lyricsLine.style.animationDuration = `${lyrics.length / 10}s`;
+            }
+
+            playIcon.innerText = 'pause';
+        }
+
+        // Fetch lyrics for a given song ID
         async function fetchLyrics(songId) {
             const response = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
             const data = await response.json();
             return data.success ? data.data.lyrics : "";
         }
 
-        // Load song info
-        function loadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            audio.src = qualityUrl;
-            document.getElementById("song-name").innerText = song.name;
-            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-            document.getElementById("album-name").innerText = song.album.name;
-            document.getElementById("album-poster").style.backgroundImage = `url('${song.image}')`;
-
-            // Fetch and display lyrics
-            fetchLyrics(song.id).then(lyrics => {
-                lyricsLine.textContent = lyrics;
-                // Adjust animation duration based on lyrics length
-                lyricsLine.style.animationDuration = `${lyrics.length * 0.05}s`;
-            });
-        }
-
-        // Play or pause the song
+        // Toggle play/pause functionality
         function togglePlay() {
             if (audio.paused) {
                 audio.play();
-                playIcon.innerText = "pause";
+                playIcon.innerText = 'pause';
             } else {
                 audio.pause();
-                playIcon.innerText = "play_arrow";
+                playIcon.innerText = 'play_arrow';
             }
         }
 
-        // Play next song
-        function nextSong() {
-            currentSongIndex = (currentSongIndex + 1) % songs.length;
-            loadSong();
-            audio.play();
-        }
-
-        // Play previous song
-        function prevSong() {
-            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-            loadSong();
-            audio.play();
-        }
-
-        // Seek the song to a specific time
-        function seekSong() {
-            const seekTime = (audio.duration * progressBar.value) / 100;
-            audio.currentTime = seekTime;
-        }
-
-        // Update progress bar as song plays
-        audio.ontimeupdate = function () {
-            const progress = (audio.currentTime / audio.duration) * 100;
+        // Update progress bar and time display as the song plays
+        audio.addEventListener("timeupdate", function () {
+            const currentTime = audio.currentTime;
+            const duration = audio.duration;
+            const progress = (currentTime / duration) * 100;
             progressBar.value = progress;
-            const minutes = Math.floor(audio.currentTime / 60);
-            const seconds = Math.floor(audio.currentTime % 60);
-            timeDisplay.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            timeDisplay.innerText = formatTime(currentTime);
+        });
+
+        // Format the time for display
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
         }
 
-        // Change song quality
-        function changeQuality() {
-            loadSong();
-            audio.play();
+        // Seek through the song when the progress bar is clicked
+        function seekSong() {
+            const seekTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = seekTime;
         }
 
         // Shuffle playlist
         function shufflePlaylist() {
-            songs = shuffleArray(songs);
+            songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
         }
 
-        // Helper function to shuffle songs
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-            }
-            return array;
+        // Download the song
+        function downloadSong() {
+            const selectedSongId = songList.value;
+            if (!selectedSongId) return;
+
+            const song = songs.find(song => song.id === selectedSongId);
+            window.open(song.url, "_blank");
         }
 
-        // Download the current song
-        function downloadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-            window.open(qualityUrl, '_blank');
+        // Change the quality of the song
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
         }
     </script>
 </body>
