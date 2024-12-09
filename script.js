@@ -45,7 +45,7 @@ function playSong() {
 
     audio.src = selectedSong.downloadUrl[3].url;  // 160kbps quality
     audio.play();
-    playButton.textContent = "Pause";
+    playButton.textContent = "pause"; // Change icon to pause when playing
 
     // Update song info
     songName.textContent = selectedSong.name;
@@ -56,10 +56,10 @@ function playSong() {
 function togglePlay() {
     if (audio.paused) {
         audio.play();
-        playButton.textContent = "Pause";
+        playButton.textContent = "pause"; // Play icon to pause
     } else {
         audio.pause();
-        playButton.textContent = "Play";
+        playButton.textContent = "play_arrow"; // Change back to play
     }
 }
 
