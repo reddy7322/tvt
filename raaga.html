@@ -6,8 +6,257 @@
     <title>YouTube Music Style Player</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
-    <style>
-        /* Add your existing styles here */
+        <style>
+        /* General Reset and Layout */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Parkinsans', sans-serif;
+            background-color: #121212;
+            color: white;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Loader Styles */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide loader when page is loaded */
+        .hide-loader {
+            display: none;
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Header */
+        #header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #1F1F1F;
+            justify-content: space-between;
+        }
+
+        /* Small Page Logo */
+        #page-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        /* Search Bar */
+        #search-container {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        #search-bar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            padding: 5px;
+            width: 150px;
+        }
+
+        #search-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Main Player */
+        #player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Song Info */
+        #song-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #song-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        #song-artist {
+            font-size: 16px;
+            color: #999;
+        }
+
+        #album-name {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Song List */
+        #song-list {
+            width: 100%;
+            padding: 10px;
+            background-color: #1F1F1F;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            color: white;
+        }
+
+        /* Album Image */
+        #album-poster {
+            width: 250px;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Controls */
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin: 10px 0;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #progress-bar::-webkit-slider-thumb {
+            background: #FF4081;
+            border: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Quality Dropdown */
+        #quality-select {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        /* Shuffle and Download Icon */
+        #shuffle-btn {
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        #download-btn {
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            #search-container {
+                width: 150px;
+            }
+
+            #song-list {
+                width: 90%;
+            }
+
+            #song-name {
+                font-size: 18px;
+            }
+
+            #song-artist {
+                font-size: 14px;
+            }
+
+            #controls button {
+                font-size: 30px;
+            }
+
+            #quality-select {
+                font-size: 14px;
+            }
+
+            #album-poster {
+                width: 200px;
+                height: 200px;
+            }
+
+            #download-btn {
+                font-size: 20px;
+            }
+        }
+
+        /* Hide audio element */
+        #audio {
+            display: none;
+        }
     </style>
 </head>
 <body>
