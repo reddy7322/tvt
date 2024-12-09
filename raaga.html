@@ -168,16 +168,18 @@
             margin-top: 15px;
         }
 
-        /* Download Button */
-        #download-btn {
-            background: #FF4081;
-            border: none;
+        /* Shuffle and Download Icon */
+        #shuffle-btn {
+            font-size: 30px;
             color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-right: 20px;
+        }
+
+        #download-btn {
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
         }
 
         /* Mobile Responsiveness */
@@ -212,7 +214,7 @@
             }
 
             #download-btn {
-                font-size: 14px;
+                font-size: 20px;
             }
         }
 
@@ -266,6 +268,14 @@
                 <button id="next" onclick="nextSong()">
                     <i class="material-icons">skip_next</i>
                 </button>
+                <!-- Shuffle Button -->
+                <button id="shuffle-btn" onclick="shufflePlaylist()">
+                    <i class="material-icons">shuffle</i>
+                </button>
+                <!-- Download Button -->
+                <button id="download-btn" onclick="downloadSong()">
+                    <i class="material-icons">file_download</i>
+                </button>
             </div>
 
             <!-- Progress Bar -->
@@ -280,9 +290,6 @@
                 <option value="160">Very High Quality (160 kbps)</option>
                 <option value="320">Ultra High Quality (320 kbps)</option>
             </select>
-
-            <!-- Download Button -->
-            <button id="download-btn" onclick="downloadSong()">Download Song</button>
 
         </div>
 
@@ -310,21 +317,22 @@
         let songs = []; // Store song data from API response
         let currentQuality = "96"; // Default to 96 kbps
 
-        // Toggle menu visibility
-        function toggleMenu() {
-            console.log("Menu toggled");
+        // Auto-fetch random query and play the first song on page load
+        window.onload = async function() {
+            const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+            searchSongs(randomQuery);
         }
 
-        // Search songs
-        async function searchSongs() {
-            let query = document.getElementById("search-bar").value;
+        // Fetch songs based on search query
+        async function searchSongs(query) {
             if (!query) return;
-
+            
             let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=10`;
             const response = await fetch(url);
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
+            playSong(); // Auto-play the first song
         }
 
         // Update song list dropdown
@@ -338,7 +346,7 @@
             });
         }
 
-        // Play song
+        // Play selected song
         function playSong() {
             if (songList.value !== "") {
                 currentSongIndex = songList.value;
@@ -384,6 +392,22 @@
             currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
             loadSong();
             audio.play();
+        }
+
+        // Shuffle playlist
+        function shufflePlaylist() {
+            songs = shuffleArray(songs);
+            updateSongList();
+            playSong();
+        }
+
+        // Shuffle the array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         // Change song quality and auto-play
