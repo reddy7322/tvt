@@ -42,19 +42,32 @@
             background-position: center;
         }
 
-        /* Menu Toggle Icon (Updated) */
+        /* Menu Toggle Button */
         #menu-toggle {
             position: absolute;
             top: 10px;
             left: 10px;
             background: none;
             border: none;
+            font-size: 30px;
+            color: white;
             cursor: pointer;
         }
 
         #menu-toggle img {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
+        }
+
+        /* Centered Title Text */
+        #title-text {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: white;
+            font-weight: bold;
         }
 
         /* Search Bar */
@@ -62,12 +75,12 @@
             width: 100%;
             padding: 10px;
             border-radius: 5px;
-            margin-bottom: 20px;
+            margin-top: 20px;
             border: none;
             font-size: 16px;
             background-color: #444;
             color: white;
-            display: none; /* Initially hidden */
+            display: none;
             transition: all 0.3s ease;
         }
 
@@ -193,10 +206,13 @@
 </head>
 <body>
     <div id="player-container">
-        <!-- Menu Toggle Button (Updated with Image) -->
+        <!-- Menu Toggle Button with Icon -->
         <button id="menu-toggle" onclick="toggleMenu()">
-            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu">
+            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
         </button>
+
+        <!-- Centered Title Text -->
+        <div id="title-text">🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</div>
 
         <!-- Search Bar -->
         <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
@@ -269,16 +285,11 @@
             searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
         }
 
-        // Toggle the search bar with animation
+        // Toggle search bar visibility with animation
         function toggleSearchBar() {
             const searchBar = document.getElementById("search-bar");
-            if (searchBar.style.display === "none" || searchBar.style.display === "") {
-                searchBar.style.display = "block";
-                setTimeout(() => searchBar.style.opacity = "1", 10); // Animation effect
-            } else {
-                searchBar.style.opacity = "0";
-                setTimeout(() => searchBar.style.display = "none", 300); // Hide after fade-out
-            }
+            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+            searchBar.style.transition = "all 0.3s ease";
         }
 
         // Fetch songs from API based on search query
