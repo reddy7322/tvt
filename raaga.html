@@ -381,7 +381,9 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            playSong(); // Auto-play the first song
+            if (songs.length > 0) {
+                playSong(); // Auto-play the first song
+            }
         }
 
         // Update song list dropdown
@@ -390,7 +392,7 @@
             songs.forEach((song, index) => {
                 const option = document.createElement("option");
                 option.value = index;
-                option.innerHTML = song.name;
+                option.innerHTML = `<span class="material-icons">search</span> ${song.name}`;
                 songList.appendChild(option);
             });
         }
@@ -452,47 +454,27 @@
             return `${min}:${sec}`;
         }
 
-        // Shuffle songs in the list
+        // Shuffle playlist
         function shufflePlaylist() {
             songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
         }
 
-        // Change quality and auto-play the song
-        function changeQuality() {
-            loadSong();
-            audio.play();
-        }
-
-        // Download current song
+        // Download the current song
         function downloadSong() {
-            const song = songs[currentSongIndex];
-            const selectedQuality = qualitySelect.value;
-            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-            fetch(qualityUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `${song.name}.mp3`;
-                    a.click();
-                });
+            let song = songs[currentSongIndex];
+            let downloadUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
+            let link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = `${song.name}.mp3`;
+            link.click();
         }
 
-        // Toggle search bar
-        function toggleSearchBar() {
-            let searchQuery = document.getElementById("search-bar").value;
-            if (searchQuery) {
-                searchSongs(searchQuery);
-            }
+        // Change quality of the song
+        function changeQuality() {
+            currentQuality = qualitySelect.value;
+            loadSong();
         }
-
-        // Show and hide loader
-        window.addEventListener('load', function() {
-            document.getElementById("loader").classList.add("hide-loader");
-            document.getElementById("content").classList.remove("hide-loader");
-        });
     </script>
 </body>
 </html>
