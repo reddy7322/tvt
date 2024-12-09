@@ -381,9 +381,7 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            if (songs.length > 0) {
-                playSong(); // Auto-play the first song
-            }
+            playSong(); // Auto-play the first song
         }
 
         // Update song list dropdown
@@ -392,7 +390,7 @@
             songs.forEach((song, index) => {
                 const option = document.createElement("option");
                 option.value = index;
-                option.innerHTML = `<span class="material-icons">search</span> ${song.name}`;
+                option.innerHTML = song.name;
                 songList.appendChild(option);
             });
         }
@@ -454,27 +452,47 @@
             return `${min}:${sec}`;
         }
 
-        // Shuffle playlist
+        // Shuffle songs in the list
         function shufflePlaylist() {
             songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
         }
 
-        // Download the current song
-        function downloadSong() {
-            let song = songs[currentSongIndex];
-            let downloadUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
-            let link = document.createElement("a");
-            link.href = downloadUrl;
-            link.download = `${song.name}.mp3`;
-            link.click();
+        // Change quality and auto-play the song
+        function changeQuality() {
+            loadSong();
+            audio.play();
         }
 
-        // Change quality of the song
-        function changeQuality() {
-            currentQuality = qualitySelect.value;
-            loadSong();
+        // Download current song
+        function downloadSong() {
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+            fetch(qualityUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `${song.name}.mp3`;
+                    a.click();
+                });
         }
+
+        // Toggle search bar
+        function toggleSearchBar() {
+            let searchQuery = document.getElementById("search-bar").value;
+            if (searchQuery) {
+                searchSongs(searchQuery);
+            }
+        }
+
+        // Show and hide loader
+        window.addEventListener('load', function() {
+            document.getElementById("loader").classList.add("hide-loader");
+            document.getElementById("content").classList.remove("hide-loader");
+        });
     </script>
 </body>
 </html>
