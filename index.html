@@ -401,7 +401,7 @@
 
         // Fetch songs based on search query
         async function searchSongs(query) {
-            if (!query) return;
+            if (!query) return; 
 
             let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
             const response = await fetch(url);
