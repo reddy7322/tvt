@@ -1,78 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</title>
-  <link rel="icon" type="image/x-icon" href="https://tvtelugu.github.io/images/tvtelugu.ico">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Music Player</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <!-- Loader -->
-  <div id="loader" class="loader">
-    <div class="spinner"></div>
-  </div>
+    <div class="player-container">
+        <h1>Web Music Player</h1>
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" placeholder="Search for songs" oninput="searchSongs()" />
 
-  <!-- Main Content -->
-  <div class="wrapper">
-    <div class="top-bar">
-      <i onclick="document.querySelector('#menu').classList.toggle('show');">
-        <img class="menu-icon" src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon">
-      </i>
-      <span>🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</span>
-      <i onclick="document.querySelector('.music-list').classList.toggle('show');" id="more-music" class="material-icons">queue_music</i>
+        <!-- Song List Dropdown -->
+        <select id="song-list" onchange="playSong()">
+            <option value="">Select a song</option>
+        </select>
+
+        <!-- Music Player Controls -->
+        <div class="controls">
+            <button id="prev" onclick="prevSong()">Prev</button>
+            <button id="play" onclick="togglePlay()">Play</button>
+            <button id="next" onclick="nextSong()">Next</button>
+            <input type="range" id="volume" min="0" max="1" step="0.1" onchange="adjustVolume()" />
+        </div>
+
+        <!-- Audio Element -->
+        <audio id="audio" controls>
+            Your browser does not support the audio element.
+        </audio>
     </div>
 
-    <div class="img-area">
-      <img id="songImage" src="https://tvtelugu.github.io/images/tvtelugu.png" alt="Song Image">
-    </div>
-
-    <div class="song-details">
-      <p id="name">Song Name</p>
-      <p id="artist">Artist</p>
-    </div>
-
-    <div class="progress-area" id="progress-area">
-      <div id="progress-bar" class="progress-bar"></div>
-      <audio id="audioPlayer" src=""></audio>
-      <div class="song-timer">
-        <span id="current-time">0:00</span>
-        <span id="max-duration">0:00</span>
-      </div>
-    </div>
-
-    <div class="controls">
-      <i id="looper" class="material-icons">repeat</i>
-      <i id="prevButton" class="material-icons">skip_previous</i>
-      <div class="play-pause">
-        <i id="playButton" class="material-icons">play_arrow</i>
-      </div>
-      <i id="nextButton" class="material-icons">skip_next</i>
-      <a id="downloadButton" href="#" download>
-        <i class="material-icons">download</i>
-      </a>
-    </div>
-
-    <!-- Music List -->
-    <div class="music-list">
-      <div class="header">
-        <input type="text" id="searchInput" placeholder="Search for songs">
-        <button id="searchButton"><i class="material-icons">search</i></button>
-        <i onclick="document.querySelector('.music-list').classList.toggle('show');" class="material-icons">close</i>
-      </div>
-      <ul id="songList"></ul>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-      <p>Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
-    </footer>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
-
 </html>
