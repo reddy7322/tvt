@@ -64,16 +64,17 @@
             align-items: center;
             padding: 15px;
             background-color: #1F1F1F;
-            justify-content: center;
+            justify-content: space-between;
         }
 
-        /* Small Logo */
-        #logo {
-            width: 50px;
-            height: 50px;
+        /* Menu Icon */
+        #menu-toggle {
+            width: 30px;
+            height: 30px;
             background-image: url('https://tvtelugu.github.io/images/tvtelugu.ico');
             background-size: contain;
             background-repeat: no-repeat;
+            cursor: pointer;
         }
 
         /* Search Bar */
@@ -85,7 +86,6 @@
             padding: 5px 15px;
             width: 200px;
             transition: all 0.3s ease;
-            margin-left: 20px;
         }
 
         #search-bar {
@@ -272,9 +272,9 @@
 
     <div class="container" id="content">
 
-        <!-- Header: Small Logo & Search Bar -->
+        <!-- Header: Menu & Search Bar -->
         <div id="header">
-            <div id="logo"></div> <!-- Small Logo -->
+            <button id="menu-toggle" onclick="toggleMenu()"></button>
             <div id="search-container">
                 <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs()" />
                 <button id="search-btn" onclick="toggleSearchBar()">
@@ -357,11 +357,11 @@
         let progressBar = document.getElementById("progress-bar");
         let timeDisplay = document.getElementById("time-display");
         let qualitySelect = document.getElementById("quality-select");
-        let currentSongIndex = localStorage.getItem('currentSongIndex') || 0; // Fetch from localStorage if available
+        let currentSongIndex = 0;
         let songs = []; // Store song data from API response
         let currentQuality = "96"; // Default to 96 kbps
 
-        // Auto-fetch random query and play the first song or the last played song
+        // Auto-fetch random query and play the first song on page load
         window.onload = async function() {
             const randomQuery = queries[Math.floor(Math.random() * queries.length)];
             searchSongs(randomQuery);
@@ -376,26 +376,40 @@
             const data = await response.json();
             songs = data.data.results;
             updateSongList();
-            playSong(); // Auto-play the first song or the last played song
+            playSong(); // Auto-play the first song
         }
 
-        // Update the song list dropdown
+        // Update song list dropdown
         function updateSongList() {
-            songList.innerHTML = '<option value="">Select a song</option>';
+            songList.innerHTML = "<option value=''>Select a song</option>";
             songs.forEach((song, index) => {
-                let option = document.createElement("option");
+                const option = document.createElement("option");
                 option.value = index;
-                option.innerText = song.name;
+                option.innerHTML = song.name;
                 songList.appendChild(option);
             });
         }
 
         // Play selected song
         function playSong() {
-            let song = songs[currentSongIndex];
-            let audioUrl = song.url.find(url => url.quality === `${currentQuality}kbps`).url;
-            audio.src = audioUrl;
-            audio.play();
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Load song info
+        function loadSong() {
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+            audio.src = qualityUrl;
+            document.getElementById("song-name").innerText = song.name;
+            document.getElementById("song-artist").innerText = song.artists.primary[0].name;
+            document.getElementById("album-name").innerText = song.album.name;
+            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
             playIcon.innerText = "pause";
         }
 
@@ -404,27 +418,28 @@
             if (audio.paused) {
                 audio.play();
                 playIcon.innerText = "pause";
-                localStorage.setItem('currentSongIndex', currentSongIndex); // Store the song index
             } else {
                 audio.pause();
                 playIcon.innerText = "play_arrow";
             }
         }
 
-        // Update song progress
-        audio.ontimeupdate = function() {
-            let value = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = value;
-            timeDisplay.innerText = formatTime(audio.currentTime);
-        }
-
         // Seek song through progress bar
         function seekSong() {
             let value = progressBar.value;
-            audio.currentTime = (audio.duration * value) / 100;
+            let seekTime = (audio.duration * value) / 100;
+            audio.currentTime = seekTime;
         }
 
-        // Format time display
+        // Update progress bar as song plays
+        audio.ontimeupdate = function() {
+            let value = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = value;
+            let currentTime = formatTime(audio.currentTime);
+            timeDisplay.innerText = currentTime;
+        }
+
+        // Format time for display
         function formatTime(seconds) {
             let min = Math.floor(seconds / 60);
             let sec = Math.floor(seconds % 60);
@@ -432,31 +447,40 @@
             return `${min}:${sec}`;
         }
 
-        // Shuffle song list
+        // Shuffle songs in the list
         function shufflePlaylist() {
             songs = songs.sort(() => Math.random() - 0.5);
             updateSongList();
         }
 
-        // Download song
+        // Change quality and auto-play the song
+        function changeQuality() {
+            loadSong();
+            audio.play();
+        }
+
+        // Download current song
         function downloadSong() {
-            let song = songs[currentSongIndex];
-            let audioUrl = song.url.find(url => url.quality === `${currentQuality}kbps`).url;
-            
-            fetch(audioUrl)
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+            fetch(qualityUrl)
                 .then(res => res.blob())
                 .then(blob => {
-                    let a = document.createElement('a');
+                    const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
                     a.download = `${song.name}.mp3`;
                     a.click();
                 });
         }
 
-        // Change audio quality
-        function changeQuality() {
-            currentQuality = qualitySelect.value;
-            playSong();
+        // Toggle search bar
+        function toggleSearchBar() {
+            let searchQuery = document.getElementById("search-bar").value;
+            if (searchQuery) {
+                searchSongs(searchQuery);
+            }
         }
 
         // Show and hide loader
