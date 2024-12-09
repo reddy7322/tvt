@@ -54,25 +54,9 @@
             cursor: pointer;
         }
 
-        #menu-toggle img {
-            width: 30px;
-            height: 30px;
-        }
-
-        /* Centered Title Text */
-        #title-text {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            color: white;
-            font-weight: bold;
-        }
-
         /* Search Bar */
         #search-bar {
-            width: 100%;
+            width: 250px; /* Medium size */
             padding: 10px;
             border-radius: 5px;
             margin-top: 20px;
@@ -80,14 +64,15 @@
             font-size: 16px;
             background-color: #444;
             color: white;
-            display: none;
-            transition: all 0.3s ease;
+            position: fixed;
+            top: 10%;
+            right: 10%;
         }
 
         #search-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            position: fixed;
+            top: 10%;
+            right: 5%;
             background: none;
             border: none;
             color: white;
@@ -211,15 +196,6 @@
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Menu Icon"/>
         </button>
 
-        <!-- Centered Title Text -->
-        <div id="title-text">🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</div>
-
-        <!-- Search Bar -->
-        <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
-        <button id="search-btn" onclick="toggleSearchBar()">
-            <i class="material-icons">search</i>
-        </button>
-
         <!-- Album Poster -->
         <div id="album-poster" style="background-image: url('');"></div>
 
@@ -268,6 +244,12 @@
     <!-- Audio Player (Hidden) -->
     <audio id="audio" controls></audio>
 
+    <!-- Always Show Search Bar -->
+    <input type="text" id="search-bar" placeholder="Search for songs..." onkeyup="searchSongs()" />
+    <button id="search-btn" onclick="toggleSearchBar()">
+        <i class="material-icons">search</i>
+    </button>
+
     <script>
         let audio = document.getElementById("audio");
         let playIcon = document.getElementById("play-icon");
@@ -285,11 +267,10 @@
             searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
         }
 
-        // Toggle search bar visibility with animation
+        // Always show search bar without animation
         function toggleSearchBar() {
             const searchBar = document.getElementById("search-bar");
-            searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
-            searchBar.style.transition = "all 0.3s ease";
+            searchBar.style.display = "block";
         }
 
         // Fetch songs from API based on search query
