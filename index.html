@@ -120,59 +120,59 @@
             overflow-y: auto;
         }
 
-        /* Album Image */
-        #album-poster {
-            width: 350px;
-            height: 350px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+/* Album Image */
+#album-poster {
+    width: 350px;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        /* Lyrics Section */
-        #lyrics-container {
-            font-family: 'Anek Telugu', sans-serif;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 98%;
-            text-align: center;
-            color: #bbb;
-            font-size: 14px;
-            z-index: 10;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            backdrop-filter: blur(8px);
-            overflow-y: auto;
-            max-height: 98%;
-            scroll-behavior: smooth;
-        }
+/* Lyrics Section */
+#lyrics-container {
+    font-family: 'Anek Telugu', sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers the text */
+    width: 98%; /* Adjust the width to fit inside the album art */
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
+    z-index: 10;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    border-radius: 15px;
+    backdrop-filter: blur(8px); /* Apply the blur effect to the background */
+    overflow-y: auto; /* Allow scrolling */
+    max-height: 98%; /* Prevent overflowing beyond album art */
+    scroll-behavior: smooth; /* Smooth scrolling when jumping to a line */
+}
 
-        /* Lyrics Text */
-        #lyrics-text {
-            white-space: pre-line;
-            font-size: 14px;
-            color: white;
-            line-height: 1.5;
-        }
+/* Lyrics Text */
+#lyrics-text {
+    white-space: pre-line; /* Maintains the line breaks in the lyrics */
+    font-size: 14px;
+    color: white;
+    line-height: 1.5; /* Adjust line height for better readability */
+}
 
-        /* Highlighted Lyrics */
-        .highlight {
-            color: #ffffff;
-            font-weight: none;
-        }
+/* Highlighted Lyrics */
+.highlight {
+    color: #ffffff;
+    font-weight: none;
+}
 
-        /* Hide the scroll bar */
-        #lyrics-container::-webkit-scrollbar {
-            display: none;
-        }
+/* Hide the scroll bar */
+#lyrics-container::-webkit-scrollbar {
+    display: none;
+}
 
         /* Song Info */
         #song-info {
@@ -269,20 +269,25 @@
             color: white;
             cursor: pointer;
         }
-
-        #quality-dropdown {
+#quality-dropdown {
             display: none;
         }
-
         #quality-select {
             width: 200px;
         }
-
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
                 width: 150px;
             }
+            #search-btn {
+            left: 60;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
 
             #song-list {
                 width: 90%;
@@ -354,104 +359,97 @@
 
             <!-- Song Info -->
             <div id="song-info">
-                <p> <span id="song-name">Song Name</span> </p>
-                <span id="song-artist">Artist Name</span> <span> - </span>
-                <span id="album-name">Album Name</span>
+               <p> <span id="song-name">Song Name</span> </p>
+                  <span id="song-artist">Artist Name</span> <span> - </span>
+                  <span id="album-name">Album Name</span>
             </div>
 
-            <!-- Controls -->
-            <div id="controls">
-                <button id="shuffle-btn" onclick="shufflePlaylist()">
-                    <i class="material-icons">shuffle</i>
-                </button>
-                <button id="prev" onclick="prevSong()">
-                    <i class="material-icons">skip_previous</i>
-                </button>
-                <button id="play" onclick="togglePlay()">
-                    <i class="material-icons" id="play-icon">play_arrow</i>
-                </button>
-                <button id="next" onclick="nextSong()">
-                    <i class="material-icons">skip_next</i>
-                </button>
-                <button id="downloadButton" onclick="downloadAudio()">
-                    <i class="material-icons">download</i>
-                </button>
-                <!-- Settings Icon to toggle the quality dropdown -->
-                <button id="settings-btn" onclick="toggleQualityDropdown()">
-                    <i class="material-icons">settings</i>
-                </button>
-            </div>
-
-            <!-- Progress Bar -->
-            <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
-            <span id="time-display">0:00</span>
-
-            <!-- Quality Dropdown (Initially hidden) -->
-            <div id="quality-dropdown">
-                <select id="quality-select" onchange="changeQuality()">
-                    <option value="12">Low Quality</option>
-                    <option value="48">Medium Quality</option>
-                    <option value="96">High Quality</option>
-                    <option value="160" selected>Very High Quality</option>
-                    <option value="320">Ultra High Quality</option>
-                </select>
-            </div>
-
-            <!-- Song List -->
-            <div id="song-list">
-                <ul id="song-list-ul"></ul>
-            </div>
-
+<!-- Controls -->
+                <div id="controls">
+            <button id="shuffle-btn" onclick="shufflePlaylist()">
+                <i class="material-icons">shuffle</i>
+            </button>
+            <button id="prev" onclick="prevSong()">
+                <i class="material-icons">skip_previous</i>
+            </button>
+            <button id="play" onclick="togglePlay()">
+                <i class="material-icons" id="play-icon">play_arrow</i>
+            </button>
+            <button id="next" onclick="nextSong()">
+                <i class="material-icons">skip_next</i>
+            </button>
+            <button id="downloadButton" onclick="downloadAudio()">
+                <i class="material-icons">download</i>
+            </button>
+            <!-- Settings Icon to toggle the quality dropdown -->
+            <button id="settings-btn" onclick="toggleQualityDropdown()">
+                <i class="material-icons">settings</i>
+            </button>
         </div>
-    </div>
 
-    <!-- Hidden Audio Element -->
-    <audio id="audio" controls>
-        <source id="audio-source" src="" type="audio/mp3" />
-    </audio>
+        <!-- Progress Bar -->
+        <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
+        <span id="time-display">0:00</span>
 
-<script>
-    // Function to toggle lyrics visibility
-    function toggleLyrics() {
+        <!-- Quality Dropdown (Initially hidden) -->
+        <div id="quality-dropdown">
+            <select id="quality-select" onchange="changeQuality()">
+                <option value="12">Low Quality</option>
+                <option value="48">Medium Quality</option>
+                <option value="96">High Quality</option>
+                <option value="160" selected>Very High Quality</option>
+                <option value="320">Ultra High Quality</option>
+            </select>
+        </div>
+            <!-- Song List -->
+            <select id="song-list" onchange="playSong()">
+                <option value="">Select a song</option>
+            </select>
+    <!-- Audio Player -->
+    <audio id="audio" controls></audio>
+
+
+     <script>
+             function toggleLyrics() {
         const lyricsContainer = document.getElementById("lyrics-container");
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
     }
-    
-    // Global Variables
-    let audio = document.getElementById("audio");
-    let playIcon = document.getElementById("play-icon");
-    let songList = document.getElementById("song-list");
-    let progressBar = document.getElementById("progress-bar");
-    let timeDisplay = document.getElementById("time-display");
-    let qualitySelect = document.getElementById("quality-select");
-    let currentSongIndex = 0;
-    let songs = []; // Store song data from API response
-    let currentQuality = "160"; // Default to 160 kbps
-    const queries = [
-        'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-        'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
-        'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
-        'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
-        'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
-    ];
+         
+// Global Variables
+let audio = document.getElementById("audio");
+let playIcon = document.getElementById("play-icon");
+let songList = document.getElementById("song-list");
+let progressBar = document.getElementById("progress-bar");
+let timeDisplay = document.getElementById("time-display");
+let qualitySelect = document.getElementById("quality-select");
+let currentSongIndex = 0;
+let songs = []; // Store song data from API response
+let currentQuality = "160"; // Default to 160 kbps
+const queries = [
+    'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
+    'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
+    'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
+    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+];
 
-    // Initial load function
-    window.onload = async function () {
-        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-        await searchSongs(randomQuery);
-        document.getElementById("loader").classList.add('hide-loader');
-        document.getElementById("content").classList.remove('hide-loader');
-    };
+window.onload = async function () {
+    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    await searchSongs(randomQuery);
+    document.getElementById("loader").classList.add('hide-loader');
+    document.getElementById("content").classList.remove('hide-loader');
+};
 
-    // Fetch Songs
-    async function searchSongs(query) {
-        if (!query) return;
-        let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-        const response = await fetch(url);
-        const data = await response.json();
-        songs = data.data.results;
-        updateSongList();
-    }
+// Fetch Songs
+async function searchSongs(query) {
+    if (!query) return;
+
+    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+    const response = await fetch(url);
+    const data = await response.json();
+    songs = data.data.results;
+    updateSongList();
+}
 
     // Fetch lyrics for the song and handle smart scrolling
     async function fetchLyrics(songId) {
@@ -465,7 +463,7 @@
         if (data.data) {
             const lyrics = data.data.lyrics.split('\n');
             let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}" data-time="${index * 10}">${line}</p>`
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'block';
@@ -527,137 +525,135 @@
 
         highlightCurrentLine(lineIndex);
     };
-
-    // Update Song List
-    function updateSongList() {
-        songList.innerHTML = "<option value=''>Select a song</option>";
-        songs.forEach((song, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.innerHTML = song.name;
-            songList.appendChild(option);
-        });
-
-        if (songs.length > 0) {
-            currentSongIndex = 0;
-            loadSong();
-            audio.play();
-        }
-    }
-
-    // Load Selected Song
-    function loadSong() {
-        const song = songs[currentSongIndex];
-        const selectedQuality = qualitySelect.value;
-        const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-        audio.src = qualityUrl;
-        document.getElementById("song-name").innerText = removeQuotes(song.name);
-        document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
-        document.getElementById("album-name").innerText = removeQuotes(song.album.name);
-        document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-        playIcon.innerText = "pause";
-
-        fetchLyrics(song.id);
-    }
-
-    // Decode HTML Entities
-    function decodeHtmlEntities(str) {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = str;
-        return txt.value;
-    }
-
-    // Remove Quotes from Song Data
-    function removeQuotes(str) {
-        const decodedStr = decodeHtmlEntities(str);
-        return decodedStr.replace(/"/g, '');
-    }
-
-    // Toggle Play/Pause
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play();
-            playIcon.innerText = "pause";
-        } else {
-            audio.pause();
-            playIcon.innerText = "play_arrow";
-        }
-    }
-
-    // Seek Song Based on Progress Bar
-    function seekSong() {
-        const seekTo = audio.duration * (progressBar.value / 100);
-        audio.currentTime = seekTo;
-    }
-
-    // Change Quality (Trigger on Dropdown Change)
-    function changeQuality() {
-        if (audio.src) {
-            loadSong();
-            audio.play();
-        }
-    }
-
-    // Go to Previous Song
-    function prevSong() {
-        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-        loadSong();
-        audio.play();
-    }
-
-    // Go to Next Song
-    function nextSong() {
-        currentSongIndex = (currentSongIndex + 1) % songs.length;
-        loadSong();
-        audio.play();
-    }
-
-    // Shuffle Playlist
-    function shufflePlaylist() {
-        songs.sort(() => Math.random() - 0.5);
-        updateSongList();
-    }
-
-    // Download Audio with Correct Extension
-    function downloadAudio() {
-        const song = songs[currentSongIndex];
-        const audioUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
-
-        fetch(audioUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                const sanitizedSongName = song.name.replace(/[\\/:*?"<>|]/g, '');
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = `${sanitizedSongName}.mp3`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-            })
-            .catch(error => {
-                console.error('Error downloading audio:', error);
-            });
-    }
-
-    // Show Quality Dropdown When Clicking Settings Icon
-    document.getElementById('settings-icon').onclick = function () {
-        document.getElementById('quality-select').style.display = 'block';
-    };
-
-    // Event for Song End (Play Next)
-    audio.addEventListener('ended', function () {
-        nextSong();
+// Update Song List
+function updateSongList() {
+    songList.innerHTML = "<option value=''>Select a song</option>";
+    songs.forEach((song, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.innerHTML = song.name;
+        songList.appendChild(option);
     });
-</script>
 
+    if (songs.length > 0) {
+        currentSongIndex = 0;
+        loadSong();
+        audio.play();
+    }
+}
 
+// Load Selected Song
+function loadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+    audio.src = qualityUrl;
+    document.getElementById("song-name").innerText = removeQuotes(song.name);
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+    document.getElementById("album-name").innerText = removeQuotes(song.album.name);
+    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+    playIcon.innerText = "pause";
+
+    fetchLyrics(song.id);
+}
+
+// Decode HTML Entities
+function decodeHtmlEntities(str) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = str;
+    return txt.value;
+}
+
+// Remove Quotes from Song Data
+function removeQuotes(str) {
+    const decodedStr = decodeHtmlEntities(str);
+    return decodedStr.replace(/"/g, '');
+}
+
+// Toggle Play/Pause
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
+    }
+}
+
+// Seek Song Based on Progress Bar
+function seekSong() {
+    const seekTo = audio.duration * (progressBar.value / 100);
+    audio.currentTime = seekTo;
+}
+
+// Change Quality (Trigger on Dropdown Change)
+function changeQuality() {
+    if (audio.src) {
+        loadSong();
+        audio.play();
+    }
+}
+
+// Go to Previous Song
+function prevSong() {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    loadSong();
+    audio.play();
+}
+
+// Go to Next Song
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    loadSong();
+    audio.play();
+}
+
+// Shuffle Playlist
+function shufflePlaylist() {
+    songs.sort(() => Math.random() - 0.5);
+    updateSongList();
+}
+
+// Download Audio with Correct Extension
+function downloadAudio() {
+    const song = songs[currentSongIndex];
+    const audioUrl = song.downloadUrl.find(url => url.quality === `${currentQuality}kbps`).url;
+
+    fetch(audioUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const sanitizedSongName = song.name.replace(/[\\/:*?"<>|]/g, '');
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${sanitizedSongName}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.error('Error downloading audio:', error);
+        });
+}
+
+// Show Quality Dropdown When Clicking Settings Icon
+document.getElementById('settings-icon').onclick = function () {
+    document.getElementById('quality-select').style.display = 'block';
+};
+
+// Event for Song End (Play Next)
+audio.addEventListener('ended', function () {
+    nextSong();
+});
+
+    </script>
 </body>
 </html>
