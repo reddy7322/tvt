@@ -272,7 +272,7 @@
 
          .quality-popup {
         display: none; 
-        position: fixed;
+        position: center;
         z-index: 1;
         left: 0;
         top: 0;
@@ -401,9 +401,7 @@
 <!-- Popup Modal for Quality Select -->
 <div id="quality-popup" class="quality-popup">
     <div class="popup-content">
-        <span class="close-btn" onclick="closeQualityPopup()">&times;</span>
-        <h3>Select Quality</h3>
-        <select id="quality-select" onchange="changeQuality()">
+          <select id="quality-select" onchange="changeQuality()">
             <option value="12">Low Quality</option>
             <option value="48">Medium Quality</option>
             <option value="96">High Quality</option>
