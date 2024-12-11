@@ -280,6 +280,10 @@
         height: auto;
         overflow: auto;
     }
+        
+    select {
+        width: 100%; /* Make the select element fill the width of the modal */
+    }
 
       /* Mobile Responsiveness */
         @media (max-width: 600px) {
@@ -445,7 +449,7 @@
 
         // Close the popup automatically after selecting an option
         const popup = document.getElementById('quality-popup');
-        popup.style.display = 'none';
+        popup.style.display = 'none';  // Close the popup
     }
       
     function toggleLyrics() {
