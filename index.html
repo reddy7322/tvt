@@ -378,9 +378,21 @@
                 <button id="next" onclick="nextSong()">
                     <i class="material-icons">skip_next</i>
                 </button>
-                <button id="downloadButton" onclick="downloadAudio()">
-                    <i class="material-icons">download</i>
-                </button>
+<button id="downloadButton" onclick="downloadAudio()">
+    <i class="material-icons">download</i>
+</button>
+
+<button class="quality-button" onclick="toggleQualityDropdown()">
+    <i class="material-icons">tune</i> <!-- Material icon for settings -->
+    Quality: <span id="quality-text">Very High Quality</span>
+</button>
+<select id="quality-select" onchange="changeQuality()" style="display: none;">
+    <option value="12">Low Quality</option>
+    <option value="48">Medium Quality</option>
+    <option value="96">High Quality</option>
+    <option value="160" selected>Very High Quality</option>
+    <option value="320">Ultra High Quality</option>
+</select>
 
             </div>
 
@@ -405,6 +417,17 @@
     <audio id="audio" controls></audio>
 
   <script>
+      function toggleQualityDropdown() {
+        const selectElement = document.getElementById('quality-select');
+        selectElement.style.display = selectElement.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function changeQuality() {
+        const selectElement = document.getElementById('quality-select');
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        document.getElementById('quality-text').textContent = selectedOption.text;
+    }
+      
     function toggleLyrics() {
         const lyricsContainer = document.getElementById("lyrics-container");
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
