@@ -270,6 +270,42 @@
             cursor: pointer;
         }
 
+        .quality-popup {
+        display: none; 
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4); /* Black background with transparency */
+    }
+
+    .popup-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%;
+        max-width: 500px;
+        border-radius: 5px;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
@@ -382,17 +418,25 @@
     <i class="material-icons">download</i>
 </button>
 
-<button class="quality-button" onclick="toggleQualityDropdown()">
+<button class="quality-button" onclick="toggleQualityPopup()">
     <i class="material-icons">tune</i> <!-- Material icon for settings -->
     Quality: <span id="quality-text">Very High Quality</span>
 </button>
-<select id="quality-select" onchange="changeQuality()" style="display: none;">
-    <option value="12">Low Quality</option>
-    <option value="48">Medium Quality</option>
-    <option value="96">High Quality</option>
-    <option value="160" selected>Very High Quality</option>
-    <option value="320">Ultra High Quality</option>
-</select>
+
+<!-- Popup Modal for Quality Select -->
+<div id="quality-popup" class="quality-popup">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closeQualityPopup()">&times;</span>
+        <h3>Select Quality</h3>
+        <select id="quality-select" onchange="changeQuality()">
+            <option value="12">Low Quality</option>
+            <option value="48">Medium Quality</option>
+            <option value="96">High Quality</option>
+            <option value="160" selected>Very High Quality</option>
+            <option value="320">Ultra High Quality</option>
+        </select>
+    </div>
+</div>
 
             </div>
 
@@ -417,9 +461,14 @@
     <audio id="audio" controls></audio>
 
   <script>
-      function toggleQualityDropdown() {
-        const selectElement = document.getElementById('quality-select');
-        selectElement.style.display = selectElement.style.display === 'none' ? 'block' : 'none';
+         function toggleQualityPopup() {
+        const popup = document.getElementById('quality-popup');
+        popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function closeQualityPopup() {
+        const popup = document.getElementById('quality-popup');
+        popup.style.display = 'none';
     }
 
     function changeQuality() {
