@@ -270,6 +270,18 @@
             cursor: pointer;
         }
 
+         .quality-popup {
+        display: none; 
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4); /* Black background with transparency */
+    }
+
       /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
@@ -384,8 +396,7 @@
 
 <button class="quality-button" onclick="toggleQualityPopup()">
     <i class="material-icons">tune</i> <!-- Material icon for settings -->
-    Quality: <span id="quality-text">Very High Quality</span>
-</button>
+   </button>
 
 <!-- Popup Modal for Quality Select -->
 <div id="quality-popup" class="quality-popup">
