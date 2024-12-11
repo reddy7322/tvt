@@ -6,12 +6,13 @@
     <title>YouTube Music Style Player</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* General Reset and Layout */
         body, html {
             margin: 0;
             padding: 0;
-            font-family: 'Parkinsans', sans-serif;
+            font-family: 'Parkinson', sans-serif;
             background-color: #121212;
             color: white;
             height: 100%;
@@ -119,6 +120,60 @@
             overflow-y: auto;
         }
 
+/* Album Image */
+#album-poster {
+    width: 350px;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Lyrics Section */
+#lyrics-container {
+    font-family: 'Anek Telugu', sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers the text */
+    width: 98%; /* Adjust the width to fit inside the album art */
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
+    z-index: 10;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    border-radius: 15px;
+    backdrop-filter: blur(8px); /* Apply the blur effect to the background */
+    overflow-y: auto; /* Allow scrolling */
+    max-height: 98%; /* Prevent overflowing beyond album art */
+    scroll-behavior: smooth; /* Smooth scrolling when jumping to a line */
+}
+
+/* Lyrics Text */
+#lyrics-text {
+    white-space: pre-line; /* Maintains the line breaks in the lyrics */
+    font-size: 14px;
+    color: white;
+    line-height: 1.5; /* Adjust line height for better readability */
+}
+
+/* Highlighted Lyrics */
+.highlight {
+    color: #ffffff;
+    font-weight: none;
+}
+
+/* Hide the scroll bar */
+#lyrics-container::-webkit-scrollbar {
+    display: none;
+}
+
         /* Song Info */
         #song-info {
             text-align: center;
@@ -138,6 +193,7 @@
 
         #album-name {
             font-size: 14px;
+            font-weight: bold;
             color: #888;
             margin-top: 5px;
         }
@@ -151,16 +207,6 @@
             margin-bottom: 20px;
             border: none;
             color: white;
-        }
-
-        /* Album Image */
-        #album-poster {
-            width: 250px;
-            height: 250px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 15px;
         }
 
         /* Controls */
@@ -218,7 +264,7 @@
             margin-right: 20px;
         }
 
-        #download-btn {
+        #downloadButton {
             font-size: 30px;
             color: white;
             cursor: pointer;
@@ -229,6 +275,14 @@
             #search-container {
                 width: 150px;
             }
+            #search-btn {
+            left: 60;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
 
             #song-list {
                 width: 90%;
@@ -251,11 +305,11 @@
             }
 
             #album-poster {
-                width: 200px;
-                height: 200px;
+                width: 350px;
+                height: 350px;
             }
 
-            #download-btn {
+            #downloadButton {
                 font-size: 20px;
             }
         }
@@ -275,7 +329,7 @@
 
     <div class="container" id="content" class="hide-loader">
 
-        <!-- Header: Page Logo & Search Bar -->
+        <!-- Header -->
         <div id="header">
             <div id="logo-container">
                 <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
@@ -292,22 +346,29 @@
         <div id="player-container">
 
             <!-- Album Poster -->
-            <div id="album-poster" style="background-image: url('');"></div>
+            <div id="album-poster" onclick="toggleLyrics()">
+                <div id="lyrics-container">
+                    <div id="lyrics-text">Loading lyrics...</div>
+                </div>
+            </div>
 
             <!-- Song Info -->
             <div id="song-info">
-                <span id="song-name">Song Name</span>
-                <span id="song-artist">Artist Name</span>
-                <span id="album-name">Album Name</span>
+               <p> <span id="song-name">Song Name</span> </p>
+                  <span id="song-artist">Artist Name</span> <span> - </span>
+                  <span id="album-name">Album Name</span>
             </div>
 
-            <!-- Song List Dropdown -->
+            <!-- Song List -->
             <select id="song-list" onchange="playSong()">
                 <option value="">Select a song</option>
             </select>
 
             <!-- Controls -->
             <div id="controls">
+                <button id="shuffle-btn" onclick="shufflePlaylist()">
+                    <i class="material-icons">shuffle</i>
+                </button>
                 <button id="prev" onclick="prevSong()">
                     <i class="material-icons">skip_previous</i>
                 </button>
@@ -317,14 +378,10 @@
                 <button id="next" onclick="nextSong()">
                     <i class="material-icons">skip_next</i>
                 </button>
-                <!-- Shuffle Button -->
-                <button id="shuffle-btn" onclick="shufflePlaylist()">
-                    <i class="material-icons">shuffle</i>
+                <button id="downloadButton" onclick="downloadAudio()">
+                    <i class="material-icons">download</i>
                 </button>
-                <!-- Download Button -->
-                <button id="download-btn" onclick="downloadSong()">
-                    <i class="material-icons">file_download</i>
-                </button>
+
             </div>
 
             <!-- Progress Bar -->
@@ -333,188 +390,287 @@
 
             <!-- Quality Dropdown -->
             <select id="quality-select" onchange="changeQuality()">
-                <option value="12">Low Quality (12 kbps)</option>
-                <option value="48">Medium Quality (48 kbps)</option>
-                <option value="96" selected>High Quality (96 kbps)</option>
-                <option value="160">Very High Quality (160 kbps)</option>
-                <option value="320">Ultra High Quality (320 kbps)</option>
+                <option value="12">Low Quality</option>
+                <option value="48">Medium Quality</option>
+                <option value="96">High Quality</option>
+                <option value="160" selected>Very High Quality</option>
+                <option value="320">Ultra High Quality</option>
             </select>
 
         </div>
 
     </div>
 
-    <!-- Audio Player (Hidden) -->
+    <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-    <script>
-        const queries = [
-    'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'love', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
-    'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
-    'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'new remix'
-];
-
-let audio = document.getElementById("audio");
-let playIcon = document.getElementById("play-icon");
-let songList = document.getElementById("song-list");
-let progressBar = document.getElementById("progress-bar");
-let timeDisplay = document.getElementById("time-display");
-let qualitySelect = document.getElementById("quality-select");
-let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "96"; // Default to 96 kbps
-
-// Auto-fetch random query and play the first song on page load
-window.onload = async function () {
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    await searchSongs(randomQuery);
-    document.getElementById("loader").classList.add('hide-loader');
-    document.getElementById("content").classList.remove('hide-loader');
-};
-
-// Fetch songs based on search query
-async function searchSongs(query) {
-    if (!query) return;
-
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    const response = await fetch(url);
-    const data = await response.json();
-    songs = data.data.results;
-    updateSongList();
-}
-
-// Update song list dropdown
-function updateSongList() {
-    songList.innerHTML = "<option value=''>Select a song</option>";
-    songs.forEach((song, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.innerHTML = song.name;
-        songList.appendChild(option);
-    });
-
-    if (songs.length > 0) {
-        currentSongIndex = 0;
-        loadSong();
-        audio.play();
+  <script>
+    function toggleLyrics() {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
     }
-}
 
-// Play selected song
-function playSong() {
-    if (songList.value !== "") {
-        currentSongIndex = songList.value;
-        loadSong();
-        audio.play();
+    const queries = [
+        'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+        'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
+        'Annamayya Keerthana', 'G.V. Prakash Kumar', 'Anurag Kulkarni', 'Mahesh Babu',
+        'Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Yuvan Shankar Raja',
+        'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+    ];
+
+    let audio = document.getElementById("audio");
+    let playIcon = document.getElementById("play-icon");
+    let songList = document.getElementById("song-list");
+    let progressBar = document.getElementById("progress-bar");
+    let timeDisplay = document.getElementById("time-display");
+    let qualitySelect = document.getElementById("quality-select");
+    let currentSongIndex = 0;
+    let songs = []; // Store song data from API response
+    let currentQuality = "160"; // Default to 160 kbps
+
+    // Auto-fetch random query and play the first song on page load
+    window.onload = async function () {
+        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+        await searchSongs(randomQuery);
+        document.getElementById("loader").classList.add('hide-loader');
+        document.getElementById("content").classList.remove('hide-loader');
+    };
+
+    // Fetch songs based on search query
+    async function searchSongs(query) {
+        if (!query) return;
+
+        let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+        const response = await fetch(url);
+        const data = await response.json();
+        songs = data.data.results;
+        updateSongList();
     }
-}
 
-// Load song info
-function loadSong() {
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+    // Fetch lyrics for the song and handle smart scrolling
+    async function fetchLyrics(songId) {
+        const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-    audio.src = qualityUrl;
-    document.getElementById("song-name").innerText = song.name;
-    document.getElementById("song-artist").innerText = song.artists.primary[0].name;
-    document.getElementById("album-name").innerText = song.album.name;
-    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-    playIcon.innerText = "pause";
-}
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
 
-// Toggle play/pause
-function togglePlay() {
-    if (audio.paused) {
-        audio.play();
+        if (data.data) {
+            const lyrics = data.data.lyrics.split('\n');
+            let formattedLyrics = lyrics.map((line, index) => 
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            ).join('');
+            lyricsText.innerHTML = formattedLyrics;
+            lyricsContainer.style.display = 'block';
+
+            // Initialize the first line as highlighted
+            highlightCurrentLine(0);
+        } else {
+            lyricsText.innerText = 'Lyrics not available.';
+            lyricsContainer.style.display = 'none';
+        }
+    }
+
+    // Highlight the current line based on the song's current time
+    function highlightCurrentLine(lineIndex) {
+        const lines = document.querySelectorAll('.lyrics-line');
+
+        // Remove highlight from all lines
+        lines.forEach(line => line.classList.remove('highlight'));
+
+        // Add highlight to the current line
+        const currentLine = lines[lineIndex];
+        if (currentLine) {
+            currentLine.classList.add('highlight');
+            scrollToLine(currentLine);
+        }
+    }
+
+    // Scroll to the current line
+    function scrollToLine(line) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const offsetTop = line.offsetTop;
+        const lineHeight = line.offsetHeight;
+
+        // Adjust scroll position to center the current line in the container
+        lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
+    }
+
+    // Update the highlighted line and scroll as the song progresses
+    audio.ontimeupdate = function () {
+        let progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        let minutes = Math.floor(audio.currentTime / 60);
+        let seconds = Math.floor(audio.currentTime % 60);
+        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        // Determine which line to highlight based on the current time of the song
+        const currentTimeInSeconds = Math.floor(audio.currentTime);
+        const lyricsLines = document.querySelectorAll('.lyrics-line');
+        let lineIndex = 0;
+
+        // Find the line corresponding to the current time
+        for (let i = 0; i < lyricsLines.length; i++) {
+            const line = lyricsLines[i];
+            const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
+            if (lineTime <= currentTimeInSeconds) {
+                lineIndex = i;
+            }
+        }
+
+        highlightCurrentLine(lineIndex);
+    };
+
+    // Update song list dropdown
+    function updateSongList() {
+        songList.innerHTML = "<option value=''>Select a song</option>";
+        songs.forEach((song, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.innerHTML = song.name;
+            songList.appendChild(option);
+        });
+
+        if (songs.length > 0) {
+            currentSongIndex = 0;
+            loadSong();
+            audio.play();
+        }
+    }
+
+    // Play selected song
+    function playSong() {
+        if (songList.value !== "") {
+            currentSongIndex = songList.value;
+            loadSong();
+            audio.play();
+        }
+    }
+
+    // Load song info
+    function loadSong() {
+        const song = songs[currentSongIndex];
+        const selectedQuality = qualitySelect.value;
+        const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+        audio.src = qualityUrl;
+       // Remove quotes and HTML entities from song name, artist name, and album name
+        document.getElementById("song-name").innerText = removeQuotes(song.name);
+        document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+        document.getElementById("album-name").innerText = removeQuotes(song.album.name);
+        document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
         playIcon.innerText = "pause";
-    } else {
-        audio.pause();
-        playIcon.innerText = "play_arrow";
+
+        // Fetch lyrics
+        fetchLyrics(song.id);
     }
-}
-
-// Seek song based on progress bar
-function seekSong() {
-    const seekTo = audio.duration * (progressBar.value / 100);
-    audio.currentTime = seekTo;
-}
-
-// Update progress bar as song plays
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-};
-
-// Auto-continue to next song when the current song ends
-audio.onended = function () {
-    nextSong();
-};
-
-// Skip to next song
-function nextSong() {
-    currentSongIndex++;
-    if (currentSongIndex >= songs.length) {
-        currentSongIndex = 0;
-    }
-    loadSong();
-    audio.play();
-}
-
-// Skip to previous song
-function prevSong() {
-    currentSongIndex--;
-    if (currentSongIndex < 0) {
-        currentSongIndex = songs.length - 1;
-    }
-    loadSong();
-    audio.play();
-}
-
-// Shuffle the playlist
-function shufflePlaylist() {
-    currentSongIndex = Math.floor(Math.random() * songs.length);
-    loadSong();
-    audio.play();
-}
-
-// Download current song
-function downloadSong() {
-    if (songs.length === 0 || currentSongIndex < 0 || currentSongIndex >= songs.length) {
-        alert("No song available to download!");
-        return;
+       
+    // Function to decode HTML entities and remove quotes
+    function decodeHtmlEntities(str) {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = str;
+        return txt.value; // This decodes HTML entities
     }
 
+    // Function to remove quotes after decoding HTML entities
+    function removeQuotes(str) {
+        const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
+        return decodedStr.replace(/"/g, ''); // Remove the actual quotes
+    }
+
+    // Toggle play/pause
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play();
+            playIcon.innerText = "pause";
+        } else {
+            audio.pause();
+            playIcon.innerText = "play_arrow";
+        }
+    }
+
+    // Seek song based on progress bar
+    function seekSong() {
+        const seekTo = audio.duration * (progressBar.value / 100);
+        audio.currentTime = seekTo;
+    }
+
+    // Update progress bar as song plays
+    audio.ontimeupdate = function () {
+        let progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        let minutes = Math.floor(audio.currentTime / 60);
+        let seconds = Math.floor(audio.currentTime % 60);
+        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
+
+    // Switch audio quality
+    function changeQuality() {
+        if (audio.src) {
+            loadSong();
+            audio.play();
+        }
+    }
+
+    // Previous song
+    function prevSong() {
+        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+        loadSong();
+        audio.play();
+    }
+
+    // Next song
+    function nextSong() {
+        currentSongIndex = (currentSongIndex + 1) % songs.length;
+        loadSong();
+        audio.play();
+    }
+
+    // Shuffle playlist
+    function shufflePlaylist() {
+        songs.sort(() => Math.random() - 0.5);
+        updateSongList();
+    }
+
+// Download song
+function downloadAudio() {
     const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+    const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
 
-    if (!qualityUrl) {
-        alert("Download URL not available for the selected quality!");
-        return;
-    }
+    fetch(audioUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
 
-    // Create an invisible anchor element
-    const a = document.createElement("a");
-    a.href = qualityUrl;
-    a.download = `${song.name}.mp3`; // Set the filename for the download
+            // Sanitize the song name to remove existing extensions
+            const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
 
-    // Prevent the default behavior (opening in a new tab)
-    a.style.display = 'none'; // Make it invisible
-    document.body.appendChild(a);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-    // Trigger the download by clicking the anchor element
-    a.click();
-
-    // Clean up by removing the anchor element
-    document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.error('Error downloading audio:', error);
+        });
 }
 
-    </script>
+
+    // Automatically play the next song when the current song ends
+    audio.addEventListener('ended', function () {
+        nextSong();
+    });
+</script>
+
 </body>
 </html>
