@@ -410,6 +410,11 @@
 
 
      <script>
+             function toggleLyrics() {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
+    }
+         
 // Global Variables
 let audio = document.getElementById("audio");
 let playIcon = document.getElementById("play-icon");
@@ -446,92 +451,80 @@ async function searchSongs(query) {
     updateSongList();
 }
 
-// Fetch Lyrics for a Song
-async function fetchLyrics(songId) {
-    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
-    const response = await fetch(url);
-    const data = await response.json();
+    // Fetch lyrics for the song and handle smart scrolling
+    async function fetchLyrics(songId) {
+        const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-    console.log(data);  // Debugging the response
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
 
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const lyricsText = document.getElementById("lyrics-text");
+        if (data.data) {
+            const lyrics = data.data.lyrics.split('\n');
+            let formattedLyrics = lyrics.map((line, index) => 
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            ).join('');
+            lyricsText.innerHTML = formattedLyrics;
+            lyricsContainer.style.display = 'block';
 
-    if (data.data && data.data.lyrics) {
-        const lyrics = data.data.lyrics.split('\n');
-        const times = data.data.times || [];
-
-        // Format the lyrics and add a data-time attribute for each line
-        let formattedLyrics = lyrics.map((line, index) => {
-            const time = times[index] || 0; // Use 0 if no time data is available
-            return `<p class="lyrics-line" id="line-${index}" data-time="${time}">${line}</p>`;
-        }).join('');
-
-        lyricsText.innerHTML = formattedLyrics;
-        lyricsContainer.style.display = 'block';
-        
-        // Start by highlighting the first line
-        highlightCurrentLine(0);
-    } else {
-        lyricsText.innerText = 'Lyrics not available.';
-        lyricsContainer.style.display = 'none';
-    }
-}
-
-// Highlight the Current Lyrics Line
-function highlightCurrentLine(lineIndex) {
-    const lines = document.querySelectorAll('.lyrics-line');
-    lines.forEach(line => line.classList.remove('highlight'));
-
-    const currentLine = lines[lineIndex];
-    if (currentLine) {
-        currentLine.classList.add('highlight');
-        scrollToLine(currentLine);
-    }
-}
-
-// Smart Scrolling for Lyrics
-function scrollToLine(line) {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const lineTop = line.offsetTop;
-    const lineHeight = line.offsetHeight;
-    const containerTop = lyricsContainer.scrollTop;
-    const containerHeight = lyricsContainer.offsetHeight;
-
-    // Check if the current line is above the viewable area
-    if (lineTop < containerTop) {
-        lyricsContainer.scrollTop = lineTop;
-    } 
-    // Check if the current line is below the viewable area
-    else if (lineTop + lineHeight > containerTop + containerHeight) {
-        lyricsContainer.scrollTop = lineTop + lineHeight - containerHeight;
-    }
-}
-
-// Update Progress Bar and Lyrics Based on Audio Time
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-    const currentTimeInSeconds = Math.floor(audio.currentTime);
-    const lyricsLines = document.querySelectorAll('.lyrics-line');
-    let lineIndex = 0;
-
-    // Iterate over all the lyrics lines and find which line should be highlighted based on time
-    for (let i = 0; i < lyricsLines.length; i++) {
-        const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10);
-        if (lineTime <= currentTimeInSeconds) {
-            lineIndex = i;
+            // Initialize the first line as highlighted
+            highlightCurrentLine(0);
+        } else {
+            lyricsText.innerText = 'Lyrics not available.';
+            lyricsContainer.style.display = 'none';
         }
     }
 
-    highlightCurrentLine(lineIndex);
-};
+    // Highlight the current line based on the song's current time
+    function highlightCurrentLine(lineIndex) {
+        const lines = document.querySelectorAll('.lyrics-line');
 
+        // Remove highlight from all lines
+        lines.forEach(line => line.classList.remove('highlight'));
+
+        // Add highlight to the current line
+        const currentLine = lines[lineIndex];
+        if (currentLine) {
+            currentLine.classList.add('highlight');
+            scrollToLine(currentLine);
+        }
+    }
+
+    // Scroll to the current line
+    function scrollToLine(line) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const offsetTop = line.offsetTop;
+        const lineHeight = line.offsetHeight;
+
+        // Adjust scroll position to center the current line in the container
+        lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
+    }
+
+    // Update the highlighted line and scroll as the song progresses
+    audio.ontimeupdate = function () {
+        let progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        let minutes = Math.floor(audio.currentTime / 60);
+        let seconds = Math.floor(audio.currentTime % 60);
+        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        // Determine which line to highlight based on the current time of the song
+        const currentTimeInSeconds = Math.floor(audio.currentTime);
+        const lyricsLines = document.querySelectorAll('.lyrics-line');
+        let lineIndex = 0;
+
+        // Find the line corresponding to the current time
+        for (let i = 0; i < lyricsLines.length; i++) {
+            const line = lyricsLines[i];
+            const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
+            if (lineTime <= currentTimeInSeconds) {
+                lineIndex = i;
+            }
+        }
+
+        highlightCurrentLine(lineIndex);
+    };
 // Update Song List
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
