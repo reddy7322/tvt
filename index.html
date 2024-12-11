@@ -433,7 +433,7 @@
     <audio id="audio" controls></audio>
 
   <script>
-         function toggleQualityPopup() {
+     function toggleQualityPopup() {
         const popup = document.getElementById('quality-popup');
         popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
     }
@@ -447,6 +447,9 @@
         const selectElement = document.getElementById('quality-select');
         const selectedOption = selectElement.options[selectElement.selectedIndex];
         document.getElementById('quality-text').textContent = selectedOption.text;
+
+        // Close the popup automatically after selecting an option
+        closeQualityPopup();
     }
       
     function toggleLyrics() {
