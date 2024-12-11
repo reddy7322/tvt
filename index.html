@@ -275,6 +275,39 @@
         #quality-select {
             width: 200px;
         }
+
+        /* Quality dropdown style */
+#quality-select {
+    position: absolute;
+    display: none;
+    top: 50px; /* Adjust this based on the desired placement */
+    right: 0;
+    z-index: 10;
+    animation: fadeIn 0.3s ease-out;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#quality-select.show {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
@@ -365,7 +398,7 @@
             </div>
 
 <!-- Controls -->
-   <div id="controls">
+<div id="controls">
     <button id="shuffle-btn" onclick="shufflePlaylist()">
         <i class="material-icons">shuffle</i>
     </button>
@@ -667,6 +700,13 @@ document.getElementById('settings-icon').onclick = function () {
 audio.addEventListener('ended', function () {
     nextSong();
 });
+
+// Go to Next Song (Updated to load and play next song automatically)
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;  // Loop to the first song if we reach the end
+    loadSong();  // Load the next song
+    audio.play();  // Play the next song
+}
 
 // Event for changing the quality when the user selects a new value from the dropdown
 qualitySelect.addEventListener('change', changeQuality);
