@@ -365,27 +365,34 @@
             </div>
 
 <!-- Controls -->
-                <div id="controls">
-            <button id="shuffle-btn" onclick="shufflePlaylist()">
-                <i class="material-icons">shuffle</i>
-            </button>
-            <button id="prev" onclick="prevSong()">
-                <i class="material-icons">skip_previous</i>
-            </button>
-            <button id="play" onclick="togglePlay()">
-                <i class="material-icons" id="play-icon">play_arrow</i>
-            </button>
-            <button id="next" onclick="nextSong()">
-                <i class="material-icons">skip_next</i>
-            </button>
-            <button id="downloadButton" onclick="downloadAudio()">
-                <i class="material-icons">download</i>
-            </button>
-            <!-- Settings Icon to toggle the quality dropdown -->
-            <button id="settings-btn" onclick="toggleQualityDropdown()">
-                <i class="material-icons">settings</i>
-            </button>
-        </div>
+   <div id="controls">
+    <button id="shuffle-btn" onclick="shufflePlaylist()">
+        <i class="material-icons">shuffle</i>
+    </button>
+    <button id="prev" onclick="prevSong()">
+        <i class="material-icons">skip_previous</i>
+    </button>
+    <button id="play" onclick="togglePlay()">
+        <i class="material-icons" id="play-icon">play_arrow</i>
+    </button>
+    <button id="next" onclick="nextSong()">
+        <i class="material-icons">skip_next</i>
+    </button>
+    <button id="downloadButton" onclick="downloadAudio()">
+        <i class="material-icons">download</i>
+    </button>
+    <!-- Settings Icon to toggle the quality dropdown -->
+    <button id="settings-btn" onclick="toggleQualityDropdown()">
+        <i class="material-icons">settings</i>
+    </button>
+</div>
+
+<!-- Quality Dropdown (hidden initially) -->
+<select id="quality-select" style="display: none;">
+    <option value="160">160 kbps</option>
+    <option value="320">320 kbps</option>
+    <option value="64">64 kbps</option>
+</select>
 
         <!-- Progress Bar -->
         <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
@@ -446,7 +453,7 @@ async function searchSongs(query) {
     updateSongList();
 }
 
-    // Fetch lyrics for the song and handle smart scrolling
+// Fetch lyrics for the song and handle smart scrolling
 // Function to toggle the display of the lyrics
 function toggleLyrics() {
     const lyricsContainer = document.getElementById("lyrics-container");
@@ -527,6 +534,7 @@ audio.ontimeupdate = function () {
 
     highlightCurrentLine(lineIndex);
 };
+
 // Update Song List
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
@@ -592,6 +600,10 @@ function seekSong() {
 
 // Change Quality (Trigger on Dropdown Change)
 function changeQuality() {
+    // Get selected quality from dropdown
+    currentQuality = qualitySelect.value;
+
+    // If song is playing, reload the current song with the new quality
     if (audio.src) {
         loadSong();
         audio.play();
@@ -655,6 +667,9 @@ document.getElementById('settings-icon').onclick = function () {
 audio.addEventListener('ended', function () {
     nextSong();
 });
+
+// Event for changing the quality when the user selects a new value from the dropdown
+qualitySelect.addEventListener('change', changeQuality);
 
     </script>
 </body>
