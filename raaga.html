@@ -7,311 +7,330 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;700&display=swap" rel="stylesheet">
-      <style>
-        /* General Reset and Layout */
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Parkinson', sans-serif;
-            background-color: #121212;
-            color: white;
-            height: 100%;
-            overflow: hidden;
-        }
 
-        /* Loader Styles */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+<style>
+      /* General Reset and Layout */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Parkinson', sans-serif;
+    background-color: #121212;
+    color: white;
+    height: 100%;
+    overflow: hidden;
+}
 
-        .loader .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
+/* Loader Styles */
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+.loader .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
 
-        /* Hide loader when page is loaded */
-        .hide-loader {
-            display: none;
-        }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
-        /* Main Layout */
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+/* Hide loader when page is loaded */
+.hide-loader {
+    display: none;
+}
 
-        /* Header */
-        #header {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #1F1F1F;
-            justify-content: space-between;
-        }
+/* Main Layout */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
 
-        /* Logo Container */
-        #logo-container {
-            width: 30px;
-            height: 30px;
-        }
+/* Header */
+#header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #1F1F1F;
+    justify-content: space-between;
+}
 
-        /* Page Logo */
-        #page-logo {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+/* Logo Container */
+#logo-container {
+    width: 30px;
+    height: 30px;
+}
 
-        /* Search Bar */
-        #search-container {
-            display: flex;
-            align-items: center;
-            background-color: #333;
-            border-radius: 20px;
-            padding: 5px 15px;
-            width: 200px;
-            transition: all 0.3s ease;
-        }
+/* Page Logo */
+#page-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
 
-        #search-bar {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            padding: 5px;
-            width: 150px;
-        }
+/* Search Bar */
+#search-container {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    border-radius: 20px;
+    padding: 5px 15px;
+    width: 200px;
+    transition: all 0.3s ease;
+}
 
-        #search-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
+#search-bar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    padding: 5px;
+    width: 150px;
+}
 
-        /* Main Player */
-        #player-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
+#search-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
 
-        /* Album Image */
-        #album-poster {
-            width: 350px;
-            height: 350px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+/* Main Player */
+#player-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
 
-        /* Lyrics Section */
-        #lyrics-container {
-            font-family: 'Anek Telugu', sans-serif;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 98%;
-            text-align: center;
-            color: #bbb;
-            font-size: 14px;
-            z-index: 10;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            backdrop-filter: blur(8px);
-            overflow-y: auto;
-            max-height: 98%;
-            scroll-behavior: smooth;
-        }
+/* Album Image */
+#album-poster {
+    width: 350px;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        /* Lyrics Text */
-        #lyrics-text {
-            white-space: pre-line;
-            font-size: 14px;
-            color: white;
-            line-height: 1.5;
-        }
+/* Lyrics Section */
+#lyrics-container {
+    font-family: 'Anek Telugu', sans-serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers the text */
+    width: 98%; /* Adjust the width to fit inside the album art */
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
+    z-index: 10;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    border-radius: 15px;
+    backdrop-filter: blur(8px); /* Apply the blur effect to the background */
+    overflow-y: auto; /* Allow scrolling */
+    max-height: 98%; /* Prevent overflowing beyond album art */
+    scroll-behavior: smooth; /* Smooth scrolling when jumping to a line */
+}
 
-        /* Song Info */
-        #song-info {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+/* Lyrics Text */
+#lyrics-text {
+    white-space: pre-line; /* Maintains the line breaks in the lyrics */
+    font-size: 14px;
+    color: white;
+    line-height: 1.5; /* Adjust line height for better readability */
+}
 
-        #song-name {
-            font-size: 22px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
+/* Highlighted Lyrics */
+.highlight {
+    color: #ffffff;
+    font-weight: none;
+}
 
-        #song-artist {
-            font-size: 16px;
-            color: #999;
-        }
+/* Hide the scroll bar */
+#lyrics-container::-webkit-scrollbar {
+    display: none;
+}
 
-        #album-name {
-            font-size: 14px;
-            font-weight: bold;
-            color: #888;
-            margin-top: 5px;
-        }
+/* Song Info */
+#song-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        /* Song List */
-        #song-list {
-            width: 100%;
-            padding: 10px;
-            background-color: #1F1F1F;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: none;
-            color: white;
-        }
+#song-name {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 10px 0;
+}
 
-        /* Controls */
-        #controls {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-top: 20px;
-        }
+#song-artist {
+    font-size: 16px;
+    color: #999;
+}
 
-        #controls button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-        }
+#album-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #888;
+    margin-top: 5px;
+}
 
-        /* Progress Bar */
-        #progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            margin: 10px 0;
-            outline: none;
-            cursor: pointer;
-        }
+/* Song List */
+#song-list {
+    width: 100%;
+    padding: 10px;
+    background-color: #1F1F1F;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: none;
+    color: white;
+}
 
-        #progress-bar::-webkit-slider-thumb {
-            background: #FF4081;
-            border: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
+/* Controls */
+#controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
 
-        /* Quality Dropdown */
-        #quality-select {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-top: 15px;
-        }
+#controls button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+}
 
-        /* Shuffle and Download Icon */
-        #shuffle-btn {
-            font-size: 30px;
-            color: white;
-            cursor: pointer;
-            margin-right: 20px;
-        }
+/* Progress Bar */
+#progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    margin: 10px 0;
+    outline: none;
+    cursor: pointer;
+}
 
-        #downloadButton {
-            font-size: 30px;
-            color: white;
-            cursor: pointer;
-        }
+#progress-bar::-webkit-slider-thumb {
+    background: #FF4081;
+    border: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+}
 
-        /* Controls Row */
-        #controls-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
+/* Quality Dropdown */
+#quality-select {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 15px;
+}
 
-        #song-list, #quality-select {
-            margin: 0 10px;
-        }
+/* Shuffle and Download Icon */
+#shuffle-btn {
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    margin-right: 20px;
+}
 
-        /* Mobile Responsiveness */
-        @media (max-width: 600px) {
-            #search-container {
-                width: 150px;
-            }
+#downloadButton {
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+}
 
-            #song-list {
-                width: 90%;
-            }
+#controls-row {
+    display: flex;
+    justify-content: space-between; /* Space out elements */
+    align-items: center; /* Align vertically */
+}
 
-            #song-name {
-                font-size: 18px;
-            }
+#song-list, #quality-select {
+    margin: 0 10px; /* Optional: add space between the dropdowns */
+}
 
-            #song-artist {
-                font-size: 14px;
-            }
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    #search-container {
+        width: 150px;
+    }
 
-            #controls button {
-                font-size: 30px;
-            }
+    #search-btn {
+        left: 60;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 15px;
+        cursor: pointer;
+    }
 
-            #quality-select {
-                font-size: 14px;
-            }
+    #song-list {
+        width: 90%;
+    }
 
-            #album-poster {
-                width: 300px;
-                height: 300px;
-            }
+    #song-name {
+        font-size: 18px;
+    }
 
-            #downloadButton {
-                font-size: 20px;
-            }
-        }
+    #song-artist {
+        font-size: 14px;
+    }
 
-        /* Hide audio element */
-        #audio {
-            display: none;
-        }
-    </style>
+    #controls button {
+        font-size: 30px;
+    }
+
+    #quality-select {
+        font-size: 14px;
+    }
+
+    #album-poster {
+        width: 350px;
+        height: 350px;
+    }
+
+    #downloadButton {
+        font-size: 20px;
+    }
+}
+
+/* Hide audio element */
+#audio {
+    display: none;
+}
+</style>
 </head>
 <body>
 
