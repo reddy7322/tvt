@@ -622,36 +622,51 @@
     }
 
      // Load song info
-    function loadSong() {
-        const song = songs[currentSongIndex];
-        const selectedQuality = qualitySelect.value;
+   function loadSong() {
+    const song = songs[currentSongIndex];
 
-        const qualityUrlObj = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`);
-
-        if (qualityUrlObj) {
-            audio.src = qualityUrlObj.url;
-        } else {
-            console.warn('Selected quality not available. Defaulting to first available quality.');
-            audio.src = song.downloadUrl[0]?.url || '';
-        }
-
-        document.getElementById("song-name").innerText = removeQuotes(song.name);
-        document.getElementById("song-artist").innerText = removeQuotes(song.artists?.primary[0]?.name || 'Unknown Artist');
-        document.getElementById("album-name").innerText = removeQuotes(song.album?.name || 'Unknown Album');
-
-        const albumPoster = document.getElementById("album-poster");
-        albumPoster.style.backgroundImage = song.image?.[2]?.url
-            ? `url(${song.image[2].url})`
-            : 'url(default_image_url_here)';
-
-        playIcon.innerText = "pause";
-
-        if (song.id) {
-            fetchLyrics(song.id, song.name, song.album?.name || 'Unknown Album');
-        } else {
-            console.warn('Song ID is missing, unable to fetch lyrics.');
-        }
+    if (!song) {
+        console.warn('No song found at the current index. Aborting load.');
+        return;
     }
+
+    // Get the selected quality URL
+    const selectedQuality = qualitySelect.value;
+    const qualityUrlObj = song.downloadUrl?.find(url => url.quality === `${selectedQuality}kbps`);
+
+    if (qualityUrlObj && qualityUrlObj.url) {
+        audio.src = qualityUrlObj.url;
+    } else if (song.downloadUrl?.[0]?.url) {
+        console.warn('Selected quality not available. Defaulting to the first available quality.');
+        audio.src = song.downloadUrl[0].url;
+    } else {
+        console.error('No valid audio URL found for the song.');
+        audio.src = ''; // Reset the source to prevent playback issues
+        return;
+    }
+
+    // Update UI elements
+    document.getElementById("song-name").innerText = removeQuotes(song.name || 'Unknown Song');
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists?.primary?.[0]?.name || 'Unknown Artist');
+    document.getElementById("album-name").innerText = removeQuotes(song.album?.name || 'Unknown Album');
+
+    // Update album poster
+    const albumPoster = document.getElementById("album-poster");
+    if (song.image?.[2]?.url) {
+        albumPoster.style.backgroundImage = `url(${song.image[2].url})`;
+    } else {
+        console.warn('Album image not available. Using default image.');
+        albumPoster.style.backgroundImage = 'url(default_image_url_here)';
+    }
+
+    // Update play icon and fetch lyrics
+    playIcon.innerText = "pause";
+    if (song.id) {
+        fetchLyrics(song.id, song.name, song.album?.name || 'Unknown Album');
+    } else {
+        console.warn('Song ID is missing, unable to fetch lyrics.');
+    }
+}
 
     function decodeHtmlEntities(str) {
         const txt = document.createElement("textarea");
