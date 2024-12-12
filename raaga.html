@@ -405,11 +405,6 @@
     <audio id="audio" controls></audio>
 
 <script>
-    function toggleLyrics() {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-    }
-
     const queries = [
         'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
         'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
@@ -446,156 +441,12 @@
                 songs = data.data.results;
                 updateSongList();
             } else {
-                console.error("No songs found. Trying backup API...");
-                await searchBackup(query);
+                console.error("No songs found.");
             }
         } catch (error) {
-            console.error("Error fetching data from main API:", error);
-            await searchBackup(query);
+            console.error("Error fetching data from API:", error);
         }
     }
-
-    async function searchBackup(query) {
-        let backupUrl = `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${query}&page=1&limit=50`;
-        try {
-            const response = await fetch(backupUrl);
-            const data = await response.json();
-            if (data.status === "SUCCESS" && data.data.results.length > 0) {
-                songs = data.data.results;
-                updateSongList();
-            } else {
-                console.error("No songs found in backup API either.");
-            }
-        } catch (error) {
-            console.error("Error fetching data from backup API:", error);
-        }
-    }
-
-    // Fetch lyrics from prioritized sources
-    async function fetchLyrics(songId, songName, albumName) {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
-
-        try {
-            // Fetch lyrics from lrclib.net
-            const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
-            const lrclibData = await lrclibResponse.json();
-
-            const normalizedSongName = songName.trim().toLowerCase();
-            const normalizedAlbumName = albumName.trim().toLowerCase();
-
-            // Check for matching lyrics
-            const matchedLyrics = lrclibData.find(song =>
-                song.trackName.toLowerCase().includes(normalizedSongName) &&
-                song.albumName.toLowerCase().includes(normalizedAlbumName)
-            );
-
-            if (matchedLyrics) {
-                if (matchedLyrics.syncedLyrics) {
-                    displayLyrics(matchedLyrics.syncedLyrics, true);
-                    return;
-                } else if (matchedLyrics.plainLyrics) {
-                    displayLyrics(matchedLyrics.plainLyrics, false);
-                    return;
-                } else {
-                    lyricsText.innerText = 'Lyrics available, but no synced version found.';
-                    lyricsContainer.style.display = 'none';
-                }
-            } else {
-                lyricsText.innerText = 'No matching lyrics found in the library.';
-                lyricsContainer.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Error fetching lyrics from lrclib.net:', error);
-            lyricsText.innerText = 'Error fetching lyrics from external source.';
-            lyricsContainer.style.display = 'none';
-        }
-
-        // Fallback to Saavn lyrics API
-        try {
-            const saavnResponse = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
-            const saavnData = await saavnResponse.json();
-
-            if (saavnData.data) {
-                displayLyrics(saavnData.data.lyrics, false);
-            } else {
-                lyricsText.innerText = 'Lyrics not available in Saavn database.';
-                lyricsContainer.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Error fetching lyrics from Saavn:', error);
-            lyricsText.innerText = 'Error fetching lyrics from Saavn.';
-            lyricsContainer.style.display = 'none';
-        }
-    }
-
-    // Function to display lyrics
-    function displayLyrics(lyrics, isSynced) {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
-
-        if (isSynced) {
-            const lines = lyrics.split('\n').map((line, index) => {
-                const [time, text] = line.split('|');
-                const timeInSeconds = parseFloat(time.trim());
-                return `<p class="lyrics-line" id="line-${index}" data-time="${timeInSeconds}">${text.trim()}</p>`;
-            }).join('');
-            lyricsText.innerHTML = lines;
-        } else {
-            const lines = lyrics.split('\n').map((line, index) =>
-                `<p class="lyrics-line" id="line-${index}">${line.trim()}</p>`
-            ).join('');
-            lyricsText.innerHTML = lines;
-        }
-
-        lyricsContainer.style.display = 'block';
-        highlightCurrentLine(0); // Initialize the first line as highlighted
-    }
-
-    // Highlight the current line based on the song's current time
-    function highlightCurrentLine(lineIndex) {
-        const lines = document.querySelectorAll('.lyrics-line');
-        lines.forEach(line => line.classList.remove('highlight'));
-
-        const currentLine = lines[lineIndex];
-        if (currentLine) {
-            currentLine.classList.add('highlight');
-            scrollToLine(currentLine);
-        }
-    }
-
-    // Scroll to the current line
-    function scrollToLine(line) {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const offsetTop = line.offsetTop;
-        const lineHeight = line.offsetHeight;
-
-        lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
-    }
-
-    // Update the highlighted line and scroll as the song progresses
-    audio.ontimeupdate = function () {
-        let progress = (audio.currentTime / audio.duration) * 100;
-        progressBar.value = progress;
-        let minutes = Math.floor(audio.currentTime / 60);
-        let seconds = Math.floor(audio.currentTime % 60);
-        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-        const currentTimeInSeconds = Math.floor(audio.currentTime);
-        const lyricsLines = document.querySelectorAll('.lyrics-line');
-        let lineIndex = 0;
-
-        for (let i = 0; i < lyricsLines.length; i++) {
-            const line = lyricsLines[i];
-            const lineTime = parseFloat(line.getAttribute('data-time'));
-            if (lineTime <= currentTimeInSeconds) {
-                lineIndex = i;
-            }
-        }
-
-        highlightCurrentLine(lineIndex);
-    };
-
 
     function updateSongList() {
         songList.innerHTML = "<option value=''>Select a song</option>";
@@ -609,8 +460,52 @@
         if (songs.length > 0) {
             currentSongIndex = 0;
             loadSong();
-            audio.play();
         }
+    }
+
+    function loadSong() {
+        const song = songs[currentSongIndex];
+
+        if (!song) {
+            console.warn('No song found at the current index. Aborting load.');
+            return;
+        }
+
+        // Get the selected quality URL
+        const selectedQuality = qualitySelect.value;
+        const qualityUrlObj = song.downloadUrl?.find(url => url.quality === `${selectedQuality}kbps`);
+
+        if (qualityUrlObj && qualityUrlObj.link) {
+            audio.src = qualityUrlObj.link;
+        } else if (song.downloadUrl?.[0]?.link) {
+            console.warn('Selected quality not available. Defaulting to the first available quality.');
+            audio.src = song.downloadUrl[0].link;
+        } else {
+            console.error('No valid audio URL found for the song.');
+            audio.src = ''; // Reset the source to prevent playback issues
+            return;
+        }
+
+        // Update UI elements
+        document.getElementById("song-name").innerText = removeQuotes(song.name || 'Unknown Song');
+        document.getElementById("song-artist").innerText = removeQuotes(song.primaryArtists || 'Unknown Artist');
+        document.getElementById("album-name").innerText = removeQuotes(song.album?.name || 'Unknown Album');
+
+        // Update album poster
+        const albumPoster = document.getElementById("album-poster");
+        if (song.image?.[2]?.link) {
+            albumPoster.style.backgroundImage = `url(${song.image[2].link})`;
+        } else {
+            console.warn('Album image not available. Using default image.');
+            albumPoster.style.backgroundImage = 'url(default_image_url_here)';
+        }
+
+        // Update play icon
+        playIcon.innerText = "pause";
+    }
+
+    function removeQuotes(str) {
+        return str.replace(/"/g, '');
     }
 
     function playSong() {
@@ -619,64 +514,6 @@
             loadSong();
             audio.play();
         }
-    }
-
-     // Load song info
-   function loadSong() {
-    const song = songs[currentSongIndex];
-
-    if (!song) {
-        console.warn('No song found at the current index. Aborting load.');
-        return;
-    }
-
-    // Get the selected quality URL
-    const selectedQuality = qualitySelect.value;
-    const qualityUrlObj = song.downloadUrl?.find(url => url.quality === `${selectedQuality}kbps`);
-
-    if (qualityUrlObj && qualityUrlObj.url) {
-        audio.src = qualityUrlObj.url;
-    } else if (song.downloadUrl?.[0]?.url) {
-        console.warn('Selected quality not available. Defaulting to the first available quality.');
-        audio.src = song.downloadUrl[0].url;
-    } else {
-        console.error('No valid audio URL found for the song.');
-        audio.src = ''; // Reset the source to prevent playback issues
-        return;
-    }
-
-    // Update UI elements
-    document.getElementById("song-name").innerText = removeQuotes(song.name || 'Unknown Song');
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists?.primary?.[0]?.name || 'Unknown Artist');
-    document.getElementById("album-name").innerText = removeQuotes(song.album?.name || 'Unknown Album');
-
-    // Update album poster
-    const albumPoster = document.getElementById("album-poster");
-    if (song.image?.[2]?.url) {
-        albumPoster.style.backgroundImage = `url(${song.image[2].url})`;
-    } else {
-        console.warn('Album image not available. Using default image.');
-        albumPoster.style.backgroundImage = 'url(default_image_url_here)';
-    }
-
-    // Update play icon and fetch lyrics
-    playIcon.innerText = "pause";
-    if (song.id) {
-        fetchLyrics(song.id, song.name, song.album?.name || 'Unknown Album');
-    } else {
-        console.warn('Song ID is missing, unable to fetch lyrics.');
-    }
-}
-
-    function decodeHtmlEntities(str) {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = str;
-        return txt.value;
-    }
-
-    function removeQuotes(str) {
-        const decodedStr = decodeHtmlEntities(str);
-        return decodedStr.replace(/"/g, '');
     }
 
     function togglePlay() {
@@ -718,39 +555,133 @@
         updateSongList();
     }
 
-    function downloadAudio() {
-        const song = songs[currentSongIndex];
-        const audioUrl = song.downloadUrl[4].link;
-
-        fetch(audioUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = `${sanitizedSongName}.mp3`;
-
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                URL.revokeObjectURL(blobUrl);
-            })
-            .catch(error => {
-                console.error('Error downloading audio:', error);
-            });
-    }
-
     audio.addEventListener('ended', function () {
         nextSong();
     });
+
+    function toggleLyrics() {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
+    }
+
+    async function fetchLyrics(songId, songName, albumName) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
+
+        try {
+            const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
+            const lrclibData = await lrclibResponse.json();
+
+            const normalizedSongName = songName.trim().toLowerCase();
+            const normalizedAlbumName = albumName.trim().toLowerCase();
+
+            const matchedLyrics = lrclibData.find(song =>
+                song.trackName.toLowerCase().includes(normalizedSongName) &&
+                song.albumName.toLowerCase().includes(normalizedAlbumName)
+            );
+
+            if (matchedLyrics) {
+                if (matchedLyrics.syncedLyrics) {
+                    displayLyrics(matchedLyrics.syncedLyrics, true);
+                    return;
+                } else if (matchedLyrics.plainLyrics) {
+                    displayLyrics(matchedLyrics.plainLyrics, false);
+                    return;
+                } else {
+                    lyricsText.innerText = 'Lyrics available, but no synced version found.';
+                    lyricsContainer.style.display = 'none';
+                }
+            } else {
+                lyricsText.innerText = 'No matching lyrics found in the library.';
+                lyricsContainer.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching lyrics from lrclib.net:', error);
+            lyricsText.innerText = 'Error fetching lyrics from external source.';
+            lyricsContainer.style.display = 'none';
+        }
+
+        try {
+            const saavnResponse = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
+            const saavnData = await saavnResponse.json();
+
+            if (saavnData.data) {
+                displayLyrics(saavnData.data.lyrics, false);
+            } else {
+                lyricsText.innerText = 'Lyrics not available in Saavn database.';
+                lyricsContainer.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching lyrics from Saavn:', error);
+            lyricsText.innerText = 'Error fetching lyrics from Saavn.';
+            lyricsContainer.style.display = 'none';
+        }
+    }
+
+    function displayLyrics(lyrics, isSynced) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
+
+        if (isSynced) {
+            const lines = lyrics.split('\n').map((line, index) => {
+                const [time, text] = line.split('|');
+                const timeInSeconds = parseFloat(time.trim());
+                return `<p class="lyrics-line" id="line-${index}" data-time="${timeInSeconds}">${text.trim()}</p>`;
+            }).join('');
+            lyricsText.innerHTML = lines;
+        } else {
+            const lines = lyrics.split('\n').map((line, index) =>
+                `<p class="lyrics-line" id="line-${index}">${line.trim()}</p>`
+            ).join('');
+            lyricsText.innerHTML = lines;
+        }
+
+        lyricsContainer.style.display = 'block';
+        highlightCurrentLine(0);
+    }
+
+    function highlightCurrentLine(lineIndex) {
+        const lines = document.querySelectorAll('.lyrics-line');
+        lines.forEach(line => line.classList.remove('highlight'));
+
+        const currentLine = lines[lineIndex];
+        if (currentLine) {
+            currentLine.classList.add('highlight');
+            scrollToLine(currentLine);
+        }
+    }
+
+    function scrollToLine(line) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const offsetTop = line.offsetTop;
+        const lineHeight = line.offsetHeight;
+
+        lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
+    }
+
+    audio.ontimeupdate = function () {
+        let progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        let minutes = Math.floor(audio.currentTime / 60);
+        let seconds = Math.floor(audio.currentTime % 60);
+        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+        const currentTimeInSeconds = Math.floor(audio.currentTime);
+        const lyricsLines = document.querySelectorAll('.lyrics-line');
+        let lineIndex = 0;
+
+        for (let i = 0; i < lyricsLines.length; i++) {
+            const line = lyricsLines[i];
+            const lineTime = parseFloat(line.getAttribute('data-time'));
+            if (lineTime <= currentTimeInSeconds) {
+                lineIndex = i;
+            }
+        }
+
+        highlightCurrentLine(lineIndex);
+    };
 </script>
+
 
 
 </body>
