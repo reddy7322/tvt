@@ -427,22 +427,8 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-  <script>
-     function changeQuality() {
-        const selectElement = document.getElementById('quality-select');
-        const selectedOption = selectElement.options[selectElement.selectedIndex];
-        document.getElementById('quality-text').textContent = selectedOption.text;
-
-        // Close the popup automatically after selecting an option
-        const popup = document.getElementById('quality-popup');
-        popup.style.display = 'none';  // Close the popup
-    }
-      
-    function toggleLyrics() {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-    }
-
+<script>
+    // Queries for auto-fetching songs based on search terms
     const queries = [
         'Telugu', 'SBP', 'Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
         'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'K.J. Yesudas', 'M. M. Keeravani',
@@ -480,35 +466,39 @@
         updateSongList();
     }
 
-// Function to toggle the lyrics display
-function toggleLyrics() {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-}
+    // Function to toggle the lyrics display
+    function toggleLyrics() {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
+    }
 
-// Fetch lyrics from prioritized sources
-async function fetchLyrics(songId, songName, albumName) {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const lyricsText = document.getElementById("lyrics-text");
+    // Fetch lyrics from prioritized sources
+    async function fetchLyrics(songId, songName, albumName) {
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
 
-    try {
-        // Fetch lyrics from new API
-        const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
-        const lrclibData = await lrclibResponse.json();
+        try {
+            // Fetch lyrics from new API
+            const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
+            const lrclibData = await lrclibResponse.json();
 
-        // Check for matching lyrics in the new API
-        const matchedLyrics = lrclibData.find(song =>
-            song.trackName.toLowerCase() === songName.toLowerCase() &&
-            song.albumName.toLowerCase().includes(albumName.toLowerCase())
-        );
+            // Normalize and trim inputs for partial matching
+            const normalizedSongName = songName.trim().toLowerCase();
+            const normalizedAlbumName = albumName.trim().toLowerCase();
 
-        if (matchedLyrics) {
-            if (matchedLyrics.syncedLyrics) {
-                displayLyrics(matchedLyrics.syncedLyrics, true);
-                return;
-            } else if (matchedLyrics.plainLyrics) {
-                displayLyrics(matchedLyrics.plainLyrics, false);
-                return;
+            // Check for matching lyrics in the new API using partial matching
+            const matchedLyrics = lrclibData.find(song => 
+                song.trackName.toLowerCase().includes(normalizedSongName) &&
+                song.albumName.toLowerCase().includes(normalizedAlbumName)
+            );
+
+            if (matchedLyrics) {
+                if (matchedLyrics.syncedLyrics) {
+                    displayLyrics(matchedLyrics.syncedLyrics, true);
+                    return;
+                } else if (matchedLyrics.plainLyrics) {
+                    displayLyrics(matchedLyrics.plainLyrics, false);
+                    return;
             }
         }
 
@@ -604,32 +594,31 @@ audio.ontimeupdate = function () {
     highlightCurrentLine(lineIndex);
 };
 
+// Update song list dropdown
+function updateSongList() {
+    songList.innerHTML = "<option value=''>Select a song</option>";
+    songs.forEach((song, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.innerHTML = song.name;
+        songList.appendChild(option);
+    });
 
-    // Update song list dropdown
-    function updateSongList() {
-        songList.innerHTML = "<option value=''>Select a song</option>";
-        songs.forEach((song, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.innerHTML = song.name;
-            songList.appendChild(option);
-        });
-
-        if (songs.length > 0) {
-            currentSongIndex = 0;
-            loadSong();
-            audio.play();
-        }
+    if (songs.length > 0) {
+        currentSongIndex = 0;
+        loadSong();
+        audio.play();
     }
+}
 
-    // Play selected song
-    function playSong() {
-        if (songList.value !== "") {
-            currentSongIndex = songList.value;
-            loadSong();
-            audio.play();
-        }
+// Play selected song
+function playSong() {
+    if (songList.value !== "") {
+        currentSongIndex = songList.value;
+        loadSong();
+        audio.play();
     }
+}
 
 // Load song info
 function loadSong() {
@@ -670,73 +659,72 @@ function loadSong() {
     }
 }
 
-       
-    // Function to decode HTML entities and remove quotes
-    function decodeHtmlEntities(str) {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = str;
-        return txt.value; // This decodes HTML entities
+// Function to decode HTML entities and remove quotes
+function decodeHtmlEntities(str) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = str;
+    return txt.value; // This decodes HTML entities
+}
+
+// Function to remove quotes after decoding HTML entities
+function removeQuotes(str) {
+    const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
+    return decodedStr.replace(/"/g, ''); // Remove the actual quotes
+}
+
+// Toggle play/pause
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
     }
+}
 
-    // Function to remove quotes after decoding HTML entities
-    function removeQuotes(str) {
-        const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
-        return decodedStr.replace(/"/g, ''); // Remove the actual quotes
-    }
+// Seek song based on progress bar
+function seekSong() {
+    const seekTo = audio.duration * (progressBar.value / 100);
+    audio.currentTime = seekTo;
+}
 
-    // Toggle play/pause
-    function togglePlay() {
-        if (audio.paused) {
-            audio.play();
-            playIcon.innerText = "pause";
-        } else {
-            audio.pause();
-            playIcon.innerText = "play_arrow";
-        }
-    }
+// Update progress bar as song plays
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
 
-    // Seek song based on progress bar
-    function seekSong() {
-        const seekTo = audio.duration * (progressBar.value / 100);
-        audio.currentTime = seekTo;
-    }
-
-    // Update progress bar as song plays
-    audio.ontimeupdate = function () {
-        let progress = (audio.currentTime / audio.duration) * 100;
-        progressBar.value = progress;
-        let minutes = Math.floor(audio.currentTime / 60);
-        let seconds = Math.floor(audio.currentTime % 60);
-        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
-    // Switch audio quality
-    function changeQuality() {
-        if (audio.src) {
-            loadSong();
-            audio.play();
-        }
-    }
-
-    // Previous song
-    function prevSong() {
-        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+// Switch audio quality
+function changeQuality() {
+    if (audio.src) {
         loadSong();
         audio.play();
     }
+}
 
-    // Next song
-    function nextSong() {
-        currentSongIndex = (currentSongIndex + 1) % songs.length;
-        loadSong();
-        audio.play();
-    }
+// Previous song
+function prevSong() {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    loadSong();
+    audio.play();
+}
 
-    // Shuffle playlist
-    function shufflePlaylist() {
-        songs.sort(() => Math.random() - 0.5);
-        updateSongList();
-    }
+// Next song
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    loadSong();
+    audio.play();
+}
+
+// Shuffle playlist
+function shufflePlaylist() {
+    songs.sort(() => Math.random() - 0.5);
+    updateSongList();
+}
 
 // Download song
 function downloadAudio() {
@@ -770,12 +758,12 @@ function downloadAudio() {
         });
 }
 
-
-    // Automatically play the next song when the current song ends
-    audio.addEventListener('ended', function () {
-        nextSong();
-    });
+// Automatically play the next song when the current song ends
+audio.addEventListener('ended', function () {
+    nextSong();
+});
 </script>
+
 
 </body>
 </html>
