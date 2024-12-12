@@ -472,49 +472,65 @@
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
     }
 
-    // Fetch lyrics from prioritized sources
-    async function fetchLyrics(songId, songName, albumName) {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
+   // Fetch lyrics from prioritized sources
+async function fetchLyrics(songId, songName, albumName) {
+    const lyricsContainer = document.getElementById("lyrics-container");
+    const lyricsText = document.getElementById("lyrics-text");
 
-        try {
-            // Fetch lyrics from new API
-            const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
-            const lrclibData = await lrclibResponse.json();
+    try {
+        // Fetch lyrics from new API (lrclib.net)
+        const lrclibResponse = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(songName)}`);
+        const lrclibData = await lrclibResponse.json();
 
-            // Normalize and trim inputs for partial matching
-            const normalizedSongName = songName.trim().toLowerCase();
-            const normalizedAlbumName = albumName.trim().toLowerCase();
+        // Normalize and trim inputs for partial matching
+        const normalizedSongName = songName.trim().toLowerCase();
+        const normalizedAlbumName = albumName.trim().toLowerCase();
 
-            // Check for matching lyrics in the new API using partial matching
-            const matchedLyrics = lrclibData.find(song => 
-                song.trackName.toLowerCase().includes(normalizedSongName) &&
-                song.albumName.toLowerCase().includes(normalizedAlbumName)
-            );
+        // Check for matching lyrics in the new API using partial matching
+        const matchedLyrics = lrclibData.find(song =>
+            song.trackName.toLowerCase().includes(normalizedSongName) &&
+            song.albumName.toLowerCase().includes(normalizedAlbumName)
+        );
 
-            if (matchedLyrics) {
-                if (matchedLyrics.syncedLyrics) {
-                    displayLyrics(matchedLyrics.syncedLyrics, true);
-                    return;
-                } else if (matchedLyrics.plainLyrics) {
-                    displayLyrics(matchedLyrics.plainLyrics, false);
-                    return;
+        if (matchedLyrics) {
+            // Check for synced lyrics first
+            if (matchedLyrics.syncedLyrics) {
+                displayLyrics(matchedLyrics.syncedLyrics, true);
+                return;
+            } 
+            // Fallback if synced lyrics are not available
+            else if (matchedLyrics.plainLyrics) {
+                displayLyrics(matchedLyrics.plainLyrics, false);
+                return;
+            } else {
+                lyricsText.innerText = 'Lyrics available, but no synced version found.';
+                lyricsContainer.style.display = 'none';
             }
+        } else {
+            // Handle no match found scenario
+            lyricsText.innerText = 'No matching lyrics found in the library.';
+            lyricsContainer.style.display = 'none';
         }
+    } catch (error) {
+        console.error('Error fetching lyrics from lrclib.net:', error);
+        lyricsText.innerText = 'Error fetching lyrics from external source.';
+        lyricsContainer.style.display = 'none';
+    }
 
-        // Fallback to existing lyrics API
+    // Fallback to Saavn lyrics API if lrclib.net fails
+    try {
         const saavnResponse = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
         const saavnData = await saavnResponse.json();
 
         if (saavnData.data) {
-            displayLyrics(saavnData.data.lyrics, false);
+            displayLyrics(saavnData.data.lyrics, false); // Display fallback lyrics
         } else {
-            lyricsText.innerText = 'Lyrics not available.';
+            lyricsText.innerText = 'Lyrics not available in Saavn database.';
             lyricsContainer.style.display = 'none';
         }
     } catch (error) {
-        console.error('Error fetching lyrics:', error);
-        lyricsText.innerText = 'Error fetching lyrics.';
+        console.error('Error fetching lyrics from Saavn:', error);
+        lyricsText.innerText = 'Error fetching lyrics from Saavn.';
         lyricsContainer.style.display = 'none';
     }
 }
@@ -533,7 +549,7 @@ function displayLyrics(lyrics, isSynced) {
 
         lyricsText.innerHTML = lines;
     } else {
-        const lines = lyrics.split('\n').map((line, index) => 
+        const lines = lyrics.split('\n').map((line, index) =>
             `<p class="lyrics-line" id="line-${index}">${line.trim()}</p>`
         ).join('');
 
