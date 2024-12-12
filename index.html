@@ -466,13 +466,7 @@
         updateSongList();
     }
 
-    // Function to toggle the lyrics display
-    function toggleLyrics() {
-        const lyricsContainer = document.getElementById("lyrics-container");
-        lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-    }
-
-   // Fetch lyrics from prioritized sources
+// Fetch lyrics from prioritized sources
 async function fetchLyrics(songId, songName, albumName) {
     const lyricsContainer = document.getElementById("lyrics-container");
     const lyricsText = document.getElementById("lyrics-text");
@@ -493,12 +487,12 @@ async function fetchLyrics(songId, songName, albumName) {
         );
 
         if (matchedLyrics) {
-            // Check for synced lyrics first
+            // First, try to load synced lyrics if available
             if (matchedLyrics.syncedLyrics) {
                 displayLyrics(matchedLyrics.syncedLyrics, true);
                 return;
             } 
-            // Fallback if synced lyrics are not available
+            // If no synced lyrics, fallback to plain lyrics
             else if (matchedLyrics.plainLyrics) {
                 displayLyrics(matchedLyrics.plainLyrics, false);
                 return;
@@ -517,7 +511,7 @@ async function fetchLyrics(songId, songName, albumName) {
         lyricsContainer.style.display = 'none';
     }
 
-    // Fallback to Saavn lyrics API if lrclib.net fails
+    // Fallback to Saavn lyrics API if lrclib.net fails or no synced lyrics
     try {
         const saavnResponse = await fetch(`https://saavn.dev/api/songs/${songId}/lyrics`);
         const saavnData = await saavnResponse.json();
@@ -534,6 +528,7 @@ async function fetchLyrics(songId, songName, albumName) {
         lyricsContainer.style.display = 'none';
     }
 }
+
 
 // Function to display lyrics
 function displayLyrics(lyrics, isSynced) {
