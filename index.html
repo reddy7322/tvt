@@ -631,23 +631,45 @@ audio.ontimeupdate = function () {
         }
     }
 
-    // Load song info
-    function loadSong() {
-        const song = songs[currentSongIndex];
-        const selectedQuality = qualitySelect.value;
-        const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+// Load song info
+function loadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
 
-        audio.src = qualityUrl;
-       // Remove quotes and HTML entities from song name, artist name, and album name
-        document.getElementById("song-name").innerText = removeQuotes(song.name);
-        document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
-        document.getElementById("album-name").innerText = removeQuotes(song.album.name);
-        document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-        playIcon.innerText = "pause";
+    // Find the download URL matching the selected quality
+    const qualityUrlObj = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`);
 
-        // Fetch lyrics
-        fetchLyrics(song.id);
+    if (qualityUrlObj) {
+        audio.src = qualityUrlObj.url;
+    } else {
+        console.warn('Selected quality not available. Defaulting to first available quality.');
+        audio.src = song.downloadUrl[0]?.url || ''; // Fallback to the first URL if available
     }
+
+    // Remove quotes and HTML entities from song name, artist name, and album name
+    document.getElementById("song-name").innerText = removeQuotes(song.name);
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists?.primary[0]?.name || 'Unknown Artist');
+    document.getElementById("album-name").innerText = removeQuotes(song.album?.name || 'Unknown Album');
+
+    // Handle album poster image
+    const albumPoster = document.getElementById("album-poster");
+    if (song.image?.[2]?.url) {
+        albumPoster.style.backgroundImage = `url(${song.image[2].url})`;
+    } else {
+        albumPoster.style.backgroundImage = 'url(default_image_url_here)'; // Fallback to a default image
+    }
+
+    // Update play/pause icon
+    playIcon.innerText = "pause";
+
+    // Fetch lyrics
+    if (song.id) {
+        fetchLyrics(song.id, song.name, song.album?.name || 'Unknown Album');
+    } else {
+        console.warn('Song ID is missing, unable to fetch lyrics.');
+    }
+}
+
        
     // Function to decode HTML entities and remove quotes
     function decodeHtmlEntities(str) {
