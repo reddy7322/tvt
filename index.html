@@ -497,7 +497,7 @@ async function fetchLyrics(songId, songName, albumName) {
         const lrclibData = await lrclibResponse.json();
 
         // Check for matching lyrics in the new API
-        const matchedLyrics = lrclibData.find(song => 
+        const matchedLyrics = lrclibData.find(song =>
             song.trackName.toLowerCase() === songName.toLowerCase() &&
             song.albumName.toLowerCase().includes(albumName.toLowerCase())
         );
