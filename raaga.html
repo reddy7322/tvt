@@ -9,117 +9,117 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-      /* General Reset and Layout */
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Parkinson', sans-serif;
-    background-color: #121212;
-    color: white;
-    height: 100%;
-    overflow: hidden;
-}
+        /* General Reset and Layout */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Parkinson', sans-serif;
+            background-color: #121212;
+            color: white;
+            height: 100%;
+            overflow: hidden;
+        }
 
-/* Loader Styles */
-.loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #121212;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
+        /* Loader Styles */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
-.loader .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-/* Hide loader when page is loaded */
-.hide-loader {
-    display: none;
-}
+        /* Hide loader when page is loaded */
+        .hide-loader {
+            display: none;
+        }
 
-/* Main Layout */
-.container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
+        /* Main Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
-/* Header */
-#header {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background-color: #1F1F1F;
-    justify-content: space-between;
-}
+        /* Header */
+        #header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #1F1F1F;
+            justify-content: space-between;
+        }
 
-/* Logo Container */
-#logo-container {
-    width: 30px;
-    height: 30px;
-}
+        /* Logo Container */
+        #logo-container {
+            width: 30px;
+            height: 30px;
+        }
 
-/* Page Logo */
-#page-logo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
+        /* Page Logo */
+        #page-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-/* Search Bar */
-#search-container {
-    display: flex;
-    align-items: center;
-    background-color: #333;
-    border-radius: 20px;
-    padding: 5px 15px;
-    width: 200px;
-    transition: all 0.3s ease;
-}
+        /* Search Bar */
+        #search-container {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            border-radius: 20px;
+            padding: 5px 15px;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
 
-#search-bar {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 14px;
-    outline: none;
-    padding: 5px;
-    width: 150px;
-}
+        #search-bar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            padding: 5px;
+            width: 150px;
+        }
 
-#search-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-}
+        #search-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
 
-/* Main Player */
-#player-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    flex: 1;
-    overflow-y: auto;
-}
+        /* Main Player */
+        #player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
 
 /* Album Image */
 #album-poster {
@@ -175,101 +175,101 @@ body, html {
     display: none;
 }
 
-/* Song Info */
-#song-info {
-    text-align: center;
-    margin-bottom: 20px;
-}
+        /* Song Info */
+        #song-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-#song-name {
-    font-size: 22px;
-    font-weight: bold;
-    margin: 10px 0;
-}
+        #song-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
 
-#song-artist {
-    font-size: 16px;
-    color: #999;
-}
+        #song-artist {
+            font-size: 16px;
+            color: #999;
+        }
 
-#album-name {
-    font-size: 14px;
-    font-weight: bold;
-    color: #888;
-    margin-top: 5px;
-}
+        #album-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #888;
+            margin-top: 5px;
+        }
 
-/* Song List */
-#song-list {
-    width: 100%;
-    padding: 10px;
-    background-color: #1F1F1F;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    border: none;
-    color: white;
-}
+        /* Song List */
+        #song-list {
+            width: 100%;
+            padding: 10px;
+            background-color: #1F1F1F;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: none;
+            color: white;
+        }
 
-/* Controls */
-#controls {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 20px;
-}
+        /* Controls */
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
 
-#controls button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 40px;
-    cursor: pointer;
-}
+        #controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
 
-/* Progress Bar */
-#progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: #333;
-    border-radius: 5px;
-    margin: 10px 0;
-    outline: none;
-    cursor: pointer;
-}
+        /* Progress Bar */
+        #progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin: 10px 0;
+            outline: none;
+            cursor: pointer;
+        }
 
-#progress-bar::-webkit-slider-thumb {
-    background: #FF4081;
-    border: none;
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
-    cursor: pointer;
-}
+        #progress-bar::-webkit-slider-thumb {
+            background: #FF4081;
+            border: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
 
-/* Quality Dropdown */
-#quality-select {
-    background: #333;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 5px;
-    font-size: 16px;
-    margin-top: 15px;
-}
+        /* Quality Dropdown */
+        #quality-select {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 15px;
+        }
 
-/* Shuffle and Download Icon */
-#shuffle-btn {
-    font-size: 30px;
-    color: white;
-    cursor: pointer;
-    margin-right: 20px;
-}
+        /* Shuffle and Download Icon */
+        #shuffle-btn {
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            margin-right: 20px;
+        }
 
-#downloadButton {
-    font-size: 30px;
-    color: white;
-    cursor: pointer;
-}
+        #downloadButton {
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
 
 #controls-row {
     display: flex;
@@ -281,56 +281,55 @@ body, html {
     margin: 0 10px; /* Optional: add space between the dropdowns */
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 600px) {
-    #search-container {
-        width: 150px;
-    }
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            #search-container {
+                width: 150px;
+            }
+            #search-btn {
+            left: 60;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
 
-    #search-btn {
-        left: 60;
-        background: none;
-        border: none;
-        color: white;
-        font-size: 15px;
-        cursor: pointer;
-    }
+            #song-list {
+                width: 90%;
+            }
 
-    #song-list {
-        width: 90%;
-    }
+            #song-name {
+                font-size: 18px;
+            }
 
-    #song-name {
-        font-size: 18px;
-    }
+            #song-artist {
+                font-size: 14px;
+            }
 
-    #song-artist {
-        font-size: 14px;
-    }
+            #controls button {
+                font-size: 30px;
+            }
 
-    #controls button {
-        font-size: 30px;
-    }
+            #quality-select {
+                font-size: 14px;
+            }
 
-    #quality-select {
-        font-size: 14px;
-    }
+            #album-poster {
+                width: 350px;
+                height: 350px;
+            }
 
-    #album-poster {
-        width: 350px;
-        height: 350px;
-    }
+            #downloadButton {
+                font-size: 20px;
+            }
+        }
 
-    #downloadButton {
-        font-size: 20px;
-    }
-}
-
-/* Hide audio element */
-#audio {
-    display: none;
-}
-</style>
+        /* Hide audio element */
+        #audio {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -371,23 +370,6 @@ body, html {
                   <span id="album-name">Album Name</span>
             </div>
 
-           <!-- Song List and Quality Dropdown -->
-<div id="controls-row">
-    <!-- Song List -->
-    <select id="song-list" onchange="playSong()">
-        <option value="">Select a song</option>
-    </select>
-
-    <!-- Quality Dropdown -->
-    <select id="quality-select" onchange="changeQuality()">
-        <option value="12">Low Quality</option>
-        <option value="48">Medium Quality</option>
-        <option value="96">High Quality</option>
-        <option value="160" selected>Very High Quality</option>
-        <option value="320">Ultra High Quality</option>
-    </select>
-</div>
-
             <!-- Controls -->
             <div id="controls">
                 <button id="shuffle-btn" onclick="shufflePlaylist()">
@@ -412,16 +394,22 @@ body, html {
             <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
             <span id="time-display">0:00</span>
 
-            <!-- Quality Dropdown -->
-            <select id="quality-select" onchange="changeQuality()">
-                <option value="12">Low Quality</option>
-                <option value="48">Medium Quality</option>
-                <option value="96">High Quality</option>
-                <option value="160" selected>Very High Quality</option>
-                <option value="320">Ultra High Quality</option>
-            </select>
+                    <!-- Song List and Quality Dropdown -->
+<div id="controls-row">
+    <!-- Song List -->
+    <select id="song-list" onchange="playSong()">
+        <option value="">Select a song</option>
+    </select>
 
-        </div>
+    <!-- Quality Dropdown -->
+    <select id="quality-select" onchange="changeQuality()">
+        <option value="12">Low Quality</option>
+        <option value="48">Medium Quality</option>
+        <option value="96">High Quality</option>
+        <option value="160" selected>Very High Quality</option>
+        <option value="320">Ultra High Quality</option>
+    </select>
+</div>
 
     </div>
 
