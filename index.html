@@ -459,7 +459,7 @@
     async function searchSongs(query) {
         if (!query) return;
 
-        let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+        let url = `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${query}&page=1&limit=50`;
         const response = await fetch(url);
         const data = await response.json();
         songs = data.data.results;
