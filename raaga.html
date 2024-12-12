@@ -369,10 +369,22 @@
                   <span id="album-name">Album Name</span>
             </div>
 
-            <!-- Song List -->
-            <select id="song-list" onchange="playSong()">
-                <option value="">Select a song</option>
-            </select>
+          <!-- Song List and Quality Dropdown -->
+<div id="controls-row">
+    <!-- Song List -->
+    <select id="song-list" onchange="playSong()">
+        <option value="">Select a song</option>
+    </select>
+
+    <!-- Quality Dropdown -->
+    <select id="quality-select" onchange="changeQuality()">
+        <option value="12">Low Quality</option>
+        <option value="48">Medium Quality</option>
+        <option value="96">High Quality</option>
+        <option value="160" selected>Very High Quality</option>
+        <option value="320">Ultra High Quality</option>
+    </select>
+</div>
 
             <!-- Controls -->
             <div id="controls">
@@ -398,14 +410,7 @@
             <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
             <span id="time-display">0:00</span>
 
-            <!-- Quality Dropdown -->
-            <select id="quality-select" onchange="changeQuality()">
-                <option value="12">Low Quality</option>
-                <option value="48">Medium Quality</option>
-                <option value="96">High Quality</option>
-                <option value="160" selected>Very High Quality</option>
-                <option value="320">Ultra High Quality</option>
-            </select>
+           
 
         </div>
 
