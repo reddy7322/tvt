@@ -61,6 +61,45 @@
             display: none;
         }
 
+        /* Header Section */
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #222;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #page-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        #logo-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #search-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
         /* Main Layout */
         .container {
             display: flex;
@@ -171,6 +210,20 @@
     <!-- Loader -->
     <div class="loader" id="loader">
         <div class="spinner"></div>
+    </div>
+
+    <!-- Header Section -->
+    <div id="header">
+        <div id="logo-container">
+            <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
+            <span id="logo-text">Sɯαɾα™</span>
+        </div>
+        <div id="search-container">
+            <!-- Search Button -->
+            <button id="search-btn">
+                <i class="material-icons">search</i>
+            </button>
+        </div>
     </div>
 
     <div class="container" id="content" class="hide-loader">
