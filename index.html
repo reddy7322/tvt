@@ -500,6 +500,21 @@
     <audio id="audio" controls></audio>
 
     <script>
+
+                // JavaScript to update the title with the current song name
+        const audioPlayer = document.getElementById('audio-player');
+        const defaultTitle = '🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™'; // Default title
+
+        // Function to update the title
+        function updateTitle() {
+            const songName = audioPlayer.src.split('/').pop().split('.')[0]; // Extract the song name from the file name
+            document.title = `🎶 ${songName} - ${defaultTitle}`; // Update title with song name
+        }
+
+        // Listen for 'play' event to update title when a song starts
+        audioPlayer.addEventListener('play', updateTitle);
+
+        
         function toggleLyrics() {
         const lyricsContainer = document.getElementById("lyrics-container");
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
