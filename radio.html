@@ -20,44 +20,7 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: hidden;
-        }
-
-        /* Loader Styles */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loader .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .hide-loader {
-            display: none;
+            overflow-y: auto;
         }
 
         /* Header Section */
@@ -99,136 +62,59 @@
             cursor: pointer;
         }
 
-        /* Radio Player */
-        #radio-player-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        /* Radio Header */
-        #radio-header {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #radio-station-name {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        /* Radio Poster */
-        #radio-poster {
-            width: 350px;
-            height: 350px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* Radio Controls */
-        #radio-controls {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        #radio-controls button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        #radio-progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        #radio-progress-bar::-webkit-slider-thumb {
-            background: #FF4081;
-            border: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        #radio-time-display {
-            font-size: 14px;
-            color: #FFF;
-        }
-
-        /* Radio Station List Styling */
+        /* Radio Station List */
         #radio-station-list {
             list-style: none;
             padding: 0;
-            margin: 0;
-            width: 100%;
+            margin: 20px auto;
+            max-width: 600px;
         }
 
         .station-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #1d1d1d;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
         .station-item:hover {
-            background-color: #1d1d1d;
+            background-color: #333;
+        }
+
+        .station-poster {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            margin-right: 15px;
+            object-fit: cover;
         }
 
         .station-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .station-info img {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-            border-radius: 5px;
-            object-fit: cover;
+            flex: 1;
         }
 
         .station-name {
             font-size: 18px;
             font-weight: bold;
+            margin: 0;
+        }
+
+        .station-desc {
+            font-size: 14px;
+            color: #bbb;
+            margin: 5px 0 0;
         }
 
         .station-play-btn {
-            background: #FF4081;
-            color: white;
-            padding: 8px 15px;
+            background: none;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            color: #FF4081;
+            font-size: 30px;
             cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .station-play-btn:hover {
-            background: #e0336a;
         }
 
         /* Footer Styling */
@@ -238,7 +124,6 @@
             text-align: center;
             padding: 15px;
             font-size: 14px;
-            margin-top: 20px;
         }
 
         .footer a {
@@ -254,11 +139,6 @@
 
 <body>
 
-    <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="spinner"></div>
-    </div>
-
     <!-- Header Section -->
     <div id="header">
         <div id="logo-container">
@@ -273,67 +153,68 @@
         </div>
     </div>
 
-    <div class="container" id="content" class="hide-loader">
-        <!-- Radio Player -->
-        <div id="radio-player-container">
-            <div id="radio-header">
-                <p id="radio-station-name">Radio Station</p>
-            </div>
+    <ul id="radio-station-list"></ul>
 
-            <div id="radio-poster"></div>
+    <footer class="footer">
+        <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
+    </footer>
 
-            <ul id="radio-station-list"></ul>
-        </div>
-
-        <!-- Footer Section -->
-        <footer class="footer">
-            <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
-        </footer>
-    </div>
+    <audio id="radio-audio" controls></audio>
 
     <script>
+        let radioAudio = document.getElementById("radio-audio");
         let radioStationList = document.getElementById("radio-station-list");
-        let radioAudio = document.createElement("audio");
-        let radioPoster = document.getElementById("radio-poster");
 
+        // Fetch radio stations from radio.json
         fetch('radio.json')
             .then(response => response.json())
-            .then(stations => {
-                stations.forEach(station => {
-                    let listItem = document.createElement('li');
-                    listItem.className = 'station-item';
-                    listItem.onclick = () => playStation(station);
+            .then(data => {
+                data.forEach(station => createStationListItem(station));
+            })
+            .catch(error => console.error('Error fetching radio stations:', error));
 
-                    let stationInfo = document.createElement('div');
-                    stationInfo.className = 'station-info';
+        function createStationListItem(station) {
+            let listItem = document.createElement("li");
+            listItem.className = "station-item";
+            listItem.onclick = () => changeRadioStation(station);
 
-                    let img = document.createElement('img');
-                    img.src = station.poster;
+            let poster = document.createElement("img");
+            poster.src = station.poster;
+            poster.alt = station.name;
+            poster.className = "station-poster";
 
-                    let name = document.createElement('div');
-                    name.className = 'station-name';
-                    name.textContent = station.name;
+            let info = document.createElement("div");
+            info.className = "station-info";
 
-                    let playButton = document.createElement('button');
-                    playButton.className = 'station-play-btn';
-                    playButton.textContent = 'Play';
-                    playButton.onclick = (event) => {
-                        event.stopPropagation();
-                        playStation(station);
-                    };
+            let name = document.createElement("p");
+            name.className = "station-name";
+            name.innerText = station.name;
 
-                    stationInfo.appendChild(img);
-                    stationInfo.appendChild(name);
-                    listItem.appendChild(stationInfo);
-                    listItem.appendChild(playButton);
-                    radioStationList.appendChild(listItem);
-                });
-            });
+            let desc = document.createElement("p");
+            desc.className = "station-desc";
+            desc.innerText = "Click to Play";
 
-        function playStation(station) {
+            let playButton = document.createElement("button");
+            playButton.className = "station-play-btn";
+            playButton.innerHTML = `<i class="material-icons">play_arrow</i>`;
+            playButton.onclick = (event) => {
+                event.stopPropagation(); // Prevent triggering list item click
+                changeRadioStation(station);
+            };
+
+            info.appendChild(name);
+            info.appendChild(desc);
+
+            listItem.appendChild(poster);
+            listItem.appendChild(info);
+            listItem.appendChild(playButton);
+
+            radioStationList.appendChild(listItem);
+        }
+
+        function changeRadioStation(station) {
             radioAudio.src = station.url;
             radioAudio.play();
-            radioPoster.style.backgroundImage = `url(${station.poster})`;
         }
     </script>
 </body>
