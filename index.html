@@ -73,9 +73,9 @@
 
         /* Logo Container */
         #logo-container {
-            width: 30px;
-            height: 30px;
-        }
+        display: flex;              /* Use flexbox for side-by-side layout */
+        align-items: center;        /* Vertically center the items */
+    }
 
         /* Page Logo */
         #page-logo {
@@ -83,6 +83,12 @@
             height: 100%;
             object-fit: contain;
         }
+
+        #logo-text {
+        font-size: 24px;            /* Set the font size for the text */
+        font-weight: bold;          /* Optional: make the text bold */
+        color: White;             /* Optional: set a color for the text */
+    }
 
         /* Search Bar */
         #search-container {
@@ -412,10 +418,10 @@
 
 <!-- Header -->
 <div id="header">
-    <div id="logo-container">
-        <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
-        <span>Sɯαɾα™</span>
-    </div>
+   <div id="logo-container">
+    <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
+    <span id="logo-text">Sɯαɾα™</span>
+</div>
     <div id="search-container">
         <!-- Page Refresh Button -->
         <button class="refresh-button" onclick="window.location.reload();">
