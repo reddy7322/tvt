@@ -232,70 +232,57 @@
 #progress-bar {
     width: 100%;
     height: 12px;
-    background-color: #222; /* Dark background */
+    background-color: #ddd; /* Light gray background */
     border-radius: 6px;
     margin: 10px 0;
     outline: none;
     cursor: pointer;
-    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6); /* Neon glow effect on the bar */
-    transition: background 0.3s ease-in-out;
+    transition: background-color 0.3s ease;
 }
 
 #progress-bar::-webkit-slider-runnable-track {
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #00ff99, #00b3b3); /* Neon gradient fill */
+    background-color: #ddd; /* Light gray track */
 }
 
 #progress-bar::-webkit-slider-thumb {
-    background-color: #00ff99;
+    background-color: #4CAF50; /* Green thumb */
     border: none;
-    height: 24px;
-    width: 24px;
+    height: 18px;
+    width: 18px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.8); /* Neon glow on thumb */
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: background-color 0.3s ease; /* Smooth color change */
 }
 
 #progress-bar::-webkit-slider-thumb:hover {
-    transform: scale(1.1); /* Slight increase in size on hover */
-    box-shadow: 0 0 20px rgba(0, 255, 255, 1); /* Glowing effect on hover */
-}
-
-#progress-bar::-webkit-slider-thumb:active {
-    transform: scale(0.9); /* Slight decrease in size on active press */
+    background-color: #45a049; /* Slightly darker green on hover */
 }
 
 #progress-bar::-moz-range-track {
     height: 12px;
-    background: linear-gradient(90deg, #00ff99, #00b3b3);
+    background-color: #ddd;
     border-radius: 6px;
 }
 
 #progress-bar::-moz-range-thumb {
-    background-color: #00ff99;
+    background-color: #4CAF50;
     border: none;
-    height: 24px;
-    width: 24px;
+    height: 18px;
+    width: 18px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: background-color 0.3s ease;
 }
 
 #progress-bar::-moz-range-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-}
-
-#progress-bar::-moz-range-thumb:active {
-    transform: scale(0.9);
+    background-color: #45a049;
 }
 
 #progress-bar::-ms-track {
     height: 12px;
-    background: linear-gradient(90deg, #00ff99, #00b3b3);
+    background-color: #ddd;
     border-radius: 6px;
     border-color: transparent;
     color: transparent;
@@ -303,41 +290,17 @@
 }
 
 #progress-bar::-ms-thumb {
-    background-color: #00ff99;
+    background-color: #4CAF50;
     border: none;
-    height: 24px;
-    width: 24px;
+    height: 18px;
+    width: 18px;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: background-color 0.3s ease;
 }
 
 #progress-bar::-ms-thumb:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-}
-
-#progress-bar::-ms-thumb:active {
-    transform: scale(0.9);
-}
-
-/* Optional: Progress bar animation */
-@keyframes progressGlow {
-    0% {
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-    }
-    100% {
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
-    }
-}
-
-/* Glow animation when filling the progress */
-#progress-bar:active {
-    animation: progressGlow 1s infinite;
+    background-color: #45a049;
 }
 
         /* Quality Dropdown */
