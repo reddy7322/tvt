@@ -20,7 +20,44 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        /* Loader Styles */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hide-loader {
+            display: none;
         }
 
         /* Header Section */
@@ -62,59 +99,135 @@
             cursor: pointer;
         }
 
-        /* Radio Station List */
-        #radio-station-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px auto;
-            max-width: 600px;
-        }
-
-        .station-item {
+        /* Radio Player */
+        #radio-player-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             padding: 10px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Radio Header */
+        #radio-header {
+            text-align: center;
             margin-bottom: 10px;
-            background-color: #1d1d1d;
-            border-radius: 10px;
-            transition: background-color 0.3s ease;
+        }
+
+        #radio-station-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Radio Poster */
+        #radio-poster {
+            width: 350px;
+            height: 350px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Radio Controls */
+        #radio-controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #radio-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 40px;
             cursor: pointer;
         }
 
-        .station-item:hover {
-            background-color: #333;
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
         }
 
-        .station-poster {
-            width: 60px;
-            height: 60px;
+        #radio-progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
             border-radius: 5px;
-            margin-right: 15px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #radio-progress-bar::-webkit-slider-thumb {
+            background: #FF4081;
+            border: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #radio-time-display {
+            font-size: 14px;
+            color: #FFF;
+        }
+
+        /* Radio Station List Styling */
+        #radio-station-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .station-card {
+            background-color: #1d1d1d;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .station-card:hover {
+            transform: scale(1.05);
+        }
+
+        .station-card img {
+            width: 100%;
+            height: 180px;
             object-fit: cover;
         }
 
-        .station-info {
-            flex: 1;
+        .station-card .station-info {
+            padding: 15px;
+            color: white;
+            text-align: center;
         }
 
-        .station-name {
+        .station-card .station-name {
             font-size: 18px;
             font-weight: bold;
-            margin: 0;
+            margin-bottom: 10px;
         }
 
-        .station-desc {
-            font-size: 14px;
-            color: #bbb;
-            margin: 5px 0 0;
-        }
-
-        .station-play-btn {
-            background: none;
+        .station-card .station-play-btn {
+            background: #FF4081;
+            color: white;
+            padding: 10px 20px;
             border: none;
-            color: #FF4081;
-            font-size: 30px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .station-card .station-play-btn:hover {
+            background: #e0336a;
         }
 
         /* Footer Styling */
@@ -124,6 +237,7 @@
             text-align: center;
             padding: 15px;
             font-size: 14px;
+            margin-top: 20px;
         }
 
         .footer a {
@@ -139,6 +253,11 @@
 
 <body>
 
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Header Section -->
     <div id="header">
         <div id="logo-container">
@@ -153,69 +272,140 @@
         </div>
     </div>
 
-    <ul id="radio-station-list"></ul>
+    <div class="container" id="content" class="hide-loader">
+        <!-- Radio Player -->
+        <div id="radio-player-container">
+            <div id="radio-header">
+                <p id="radio-station-name">Radio Station</p>
+            </div>
 
-    <footer class="footer">
-        <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
-    </footer>
+            <div id="radio-poster"></div>
+
+            <div id="radio-controls">
+                <button id="radio-play" onclick="toggleRadioPlay()">
+                    <i class="material-icons" id="radio-play-icon">play_arrow</i>
+                </button>
+                <button id="radio-volume">
+                    <i class="material-icons">volume_up</i>
+                </button>
+            </div>
+
+            <div class="progress-container">
+                <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
+                <span id="radio-time-display">0:00</span>
+            </div>
+
+            <div id="radio-station-list"></div>
+        </div>
+
+        <!-- Footer Section -->
+        <footer class="footer">
+            <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
+        </footer>
+    </div>
 
     <audio id="radio-audio" controls></audio>
 
     <script>
         let radioAudio = document.getElementById("radio-audio");
+        let radioPlayButton = document.getElementById("radio-play");
+        let radioPlayIcon = document.getElementById("radio-play-icon");
+        let radioProgressBar = document.getElementById("radio-progress-bar");
+        let radioTimeDisplay = document.getElementById("radio-time-display");
         let radioStationList = document.getElementById("radio-station-list");
+        let loader = document.getElementById("loader");
+        let content = document.getElementById("content");
+        let radioPoster = document.getElementById("radio-poster");
+        let radioStations = [];
 
         // Fetch radio stations from radio.json
         fetch('radio.json')
             .then(response => response.json())
             .then(data => {
-                data.forEach(station => createStationListItem(station));
+                radioStations = data;
+                initRadioStations();
             })
             .catch(error => console.error('Error fetching radio stations:', error));
 
-        function createStationListItem(station) {
-            let listItem = document.createElement("li");
-            listItem.className = "station-item";
-            listItem.onclick = () => changeRadioStation(station);
+        function initRadioStations() {
+            radioStations.forEach(station => {
+                let card = document.createElement("div");
+                card.className = "station-card";
+                card.onclick = () => changeRadioStation(station);
 
-            let poster = document.createElement("img");
-            poster.src = station.poster;
-            poster.alt = station.name;
-            poster.className = "station-poster";
+                let img = document.createElement("img");
+                img.src = station.poster;
 
-            let info = document.createElement("div");
-            info.className = "station-info";
+                let info = document.createElement("div");
+                info.className = "station-info";
 
-            let name = document.createElement("p");
-            name.className = "station-name";
-            name.innerText = station.name;
+                let name = document.createElement("div");
+                name.className = "station-name";
+                name.innerText = station.name;
 
-            let desc = document.createElement("p");
-            desc.className = "station-desc";
-            desc.innerText = "Click to Play";
+                let playButton = document.createElement("button");
+                playButton.className = "station-play-btn";
+                playButton.innerText = "Play";
+                playButton.onclick = (event) => {
+                    event.stopPropagation(); // Prevent triggering card click
+                    changeRadioStation(station);
+                };
 
-            let playButton = document.createElement("button");
-            playButton.className = "station-play-btn";
-            playButton.innerHTML = `<i class="material-icons">play_arrow</i>`;
-            playButton.onclick = (event) => {
-                event.stopPropagation(); // Prevent triggering list item click
-                changeRadioStation(station);
-            };
-
-            info.appendChild(name);
-            info.appendChild(desc);
-
-            listItem.appendChild(poster);
-            listItem.appendChild(info);
-            listItem.appendChild(playButton);
-
-            radioStationList.appendChild(listItem);
+                info.appendChild(name);
+                info.appendChild(playButton);
+                card.appendChild(img);
+                card.appendChild(info);
+                radioStationList.appendChild(card);
+            });
         }
 
         function changeRadioStation(station) {
             radioAudio.src = station.url;
-            radioAudio.play();
+            radioPoster.style.backgroundImage = `url(${station.poster})`;
+            radioPlayButton.onclick = playRadio;
+            playRadio();
         }
+
+        function toggleRadioPlay() {
+            if (radioAudio.paused) {
+                playRadio();
+            } else {
+                pauseRadio();
+            }
+        }
+
+        function playRadio() {
+            radioAudio.play();
+            radioPlayIcon.innerText = "pause";
+        }
+
+        function pauseRadio() {
+            radioAudio.pause();
+            radioPlayIcon.innerText = "play_arrow";
+        }
+
+        radioAudio.ontimeupdate = function () {
+            let currentTime = radioAudio.currentTime;
+            let duration = radioAudio.duration;
+            let progress = (currentTime / duration) * 100;
+            radioProgressBar.value = progress;
+
+            let minutes = Math.floor(currentTime / 60);
+            let seconds = Math.floor(currentTime % 60);
+            radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        };
+
+        function seekRadio() {
+            let value = radioProgressBar.value;
+            let duration = radioAudio.duration;
+            radioAudio.currentTime = (value / 100) * duration;
+        }
+
+        // Initialize after page load
+        window.onload = function () {
+            loader.style.display = "none";
+            content.style.display = "block";
+        };
     </script>
 </body>
 
