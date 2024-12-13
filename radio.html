@@ -22,9 +22,29 @@
             height: 100%;
             overflow: hidden;
         }
-       #radio-station-list, {
-             margin: 0 10px; /* Optional: add space between the dropdowns */
-        }
+      
+        #radio-station-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+    appearance: none; /* Hides default browser arrow */
+    cursor: pointer;
+}
+
+#radio-station-select:hover {
+    background-color: #333; /* Optional: Slight hover effect */
+}
+
+#radio-station-select option {
+    background-color: #121212; /* Background for dropdown options */
+    color: white; /* Text color for dropdown options */
+}
+
         /* Loader Styles */
         .loader {
             position: fixed;
