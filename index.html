@@ -230,19 +230,21 @@
 
 /* Container for progress bar and time display */
 .progress-container {
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Optional: If you want space between the elements */
     width: 100%;
 }
 
 /* Progress Bar */
 #progress-bar {
-    width: 100%;
+    width: 80%;  /* Adjust the width if needed */
     height: 10px;
     background-color: #333;
     border-radius: 5px;
+    margin-right: 10px;  /* Space between the progress bar and time display */
     outline: none;
     cursor: pointer;
-    position: relative;
 }
 
 #progress-bar::-webkit-slider-thumb {
@@ -256,15 +258,9 @@
 
 /* Time Display */
 #time-display {
-    position: absolute;
-    top: -25px; /* Adjust based on desired positioning */
-    left: 50%;  /* Center the time display relative to the thumb */
-    transform: translateX(-50%);  /* Correct centering */
     font-size: 14px;
     color: #FFF;
-    user-select: none; /* Prevent text selection */
 }
-
 
         /* Quality Dropdown */
         #quality-select {
@@ -444,11 +440,10 @@
             </div>
 
             <!-- Progress Bar -->
-<div class="progress-container">
-    <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
-    <span id="time-display">0:00</span>
-</div>
-
+            <div class="progress-container">
+            <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
+            <span id="time-display">0:00</span>
+            </div>
 
             <!-- Song List and Quality Dropdown -->
             <div id="controls-row">
@@ -666,27 +661,20 @@
         }
     }
 
-function seekSong() {
-    var progressBar = document.getElementById('progress-bar');
-    var timeDisplay = document.getElementById('time-display');
-    var value = progressBar.value;
-    var width = progressBar.offsetWidth;
-    
-    // Update the time display text here if needed
-    timeDisplay.innerText = formatTime(value);
+    // Seek song based on progress bar
+    function seekSong() {
+        const seekTo = audio.duration * (progressBar.value / 100);
+        audio.currentTime = seekTo;
+    }
 
-    // Position the time display based on the progress bar's value
-    var thumbPosition = (value / 100) * width;
-    timeDisplay.style.left = `calc(${thumbPosition}px - 50%)`;
-}
-
-// Format time (e.g., 2:30)
-function formatTime(seconds) {
-    var minutes = Math.floor(seconds / 60);
-    var remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-}
-
+    // Update progress bar as song plays
+    audio.ontimeupdate = function () {
+        let progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = progress;
+        let minutes = Math.floor(audio.currentTime / 60);
+        let seconds = Math.floor(audio.currentTime % 60);
+        timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
 
     // Switch audio quality
     function changeQuality() {
