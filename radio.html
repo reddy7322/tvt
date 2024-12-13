@@ -10,6 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* General Reset and Layout */
         body, html {
@@ -245,9 +246,18 @@
             let selectedStation = radioStationSelect.value;
             if (selectedStation) {
                 let station = radioStations.find(station => station.name === selectedStation);
-                radioAudio.src = station.url;
+                if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                    let hls = new Hls();
+                    hls.loadSource(station.url);
+                    hls.attachMedia(radioAudio);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        playRadio();
+                    });
+                } else {
+                    radioAudio.src = station.url;
+                    playRadio();
+                }
                 radioPoster.style.backgroundImage = `url(${station.poster})`;
-                playRadio();
             }
         }
 
