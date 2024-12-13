@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Music Style Player</title>
+    <meta name="theme-color" content="#121212">
+    <title>🕊𝐓𝐕𝐓𝐞𝐥𝐮𝐠𝐮™</title>
+    <link rel="icon" type="image/x-icon" href="https://tvtelugu.github.io/images/tvtelugu.ico">
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* General Reset and Layout */
+       /* General Reset and Layout */
         body, html {
             margin: 0;
             padding: 0;
@@ -279,14 +282,31 @@
         #song-list, #quality-select {
              margin: 0 10px; /* Optional: add space between the dropdowns */
         }
+        
+     /* Footer Styling */
+    .footer {
+      text-align: center;
+      padding: 10px 0;
+      background: transparent;
+      color: white;
+      font-size: 14px;
+    }
 
+    .footer a {
+      color: #000000;
+      text-decoration: underline;
+    }
+
+    .footer a:hover {
+      color: #ffcc00;
+    }
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
             #search-container {
                 width: 150px;
             }
             #search-btn {
-            left: 60;
+            left: 40;
             background: none;
             border: none;
             color: white;
@@ -331,7 +351,6 @@
     </style>
 </head>
 <body>
-
     <!-- Loader -->
     <div class="loader" id="loader">
         <div class="spinner"></div>
@@ -364,7 +383,7 @@
 
             <!-- Song Info -->
             <div id="song-info">
-               <p> <span id="song-name">Song Name</span> </p>
+               <p><span id="song-name">Song Name</span></p>
                   <span id="song-artist">Artist Name</span> <span> - </span>
                   <span id="album-name">Album Name</span>
             </div>
@@ -386,39 +405,41 @@
                 <button id="downloadButton" onclick="downloadAudio()">
                     <i class="material-icons">download</i>
                 </button>
-
             </div>
 
             <!-- Progress Bar -->
             <input type="range" id="progress-bar" value="0" max="100" onchange="seekSong()" />
             <span id="time-display">0:00</span>
 
-                      <!-- Song List and Quality Dropdown -->
-<div id="controls-row">
-    <!-- Song List -->
-    <select id="song-list" onchange="playSong()">
-        <option value="">Select a song</option>
-    </select>
-
-    <!-- Quality Dropdown -->
-    <select id="quality-select" onchange="changeQuality()">
-        <option value="12">Low Quality</option>
-        <option value="48">Medium Quality</option>
-        <option value="96">High Quality</option>
-        <option value="160" selected>Very High Quality</option>
-        <option value="320">Ultra High Quality</option>
-    </select>
-</div>
+            <!-- Song List and Quality Dropdown -->
+            <div id="controls-row">
+                <select id="song-list" onchange="playSong()">
+                    <option value="">Select a song</option>
+                </select>
+                <select id="quality-select" onchange="changeQuality()">
+                    <option value="12">Low Quality</option>
+                    <option value="48">Medium Quality</option>
+                    <option value="96">High Quality</option>
+                    <option value="160" selected>Very High Quality</option>
+                    <option value="320">Ultra High Quality</option>
+                </select>
+            </div>
 
         </div>
-
+ <!-- Footer -->
+    <footer class="footer">
+      <p>
+        Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a>
+      </p>
+    </footer>
+        
     </div>
 
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-  <script>
-    function toggleLyrics() {
+    <script>
+        function toggleLyrics() {
         const lyricsContainer = document.getElementById("lyrics-container");
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
     }
@@ -683,7 +704,57 @@ function downloadAudio() {
     audio.addEventListener('ended', function () {
         nextSong();
     });
-</script>
 
+        // Installable PWA logic
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Add a button to notify the user about installability
+        });
+
+        document.getElementById('installBtn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        // Prevent audio pause on screen lock using the Wake Lock API
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        };
+
+        const releaseWakeLock = () => {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLock();
+            } else {
+                releaseWakeLock();
+            }
+        });
+
+        // Request wake lock when page is loaded
+        window.onload = () => {
+            requestWakeLock();
+        };
+
+        window.onunload = () => {
+            releaseWakeLock();
+        };
+    </script>
 </body>
 </html>
