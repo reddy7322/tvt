@@ -66,7 +66,7 @@
         #header {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 5px;
             background-color: #1F1F1F;
             justify-content: space-between;
         }
@@ -118,7 +118,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
             flex: 1;
             overflow-y: auto;
         }
@@ -228,25 +228,98 @@
             cursor: pointer;
         }
 
-        /* Progress Bar */
-        #progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            margin: 10px 0;
-            outline: none;
-            cursor: pointer;
-        }
+       /* Progress Bar */
+#progress-bar {
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(to right, #4CAF50, #FF4081); /* Gradient background */
+    border-radius: 5px;
+    margin: 10px 0;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out; /* Smooth transition on hover */
+}
 
-        #progress-bar::-webkit-slider-thumb {
-            background: #FF4081;
-            border: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
+#progress-bar::-webkit-slider-runnable-track {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #4CAF50, #FF4081); /* Gradient track */
+}
+
+#progress-bar::-webkit-slider-thumb {
+    background: #FF4081;
+    border: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out; /* Thumb animation */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add a shadow effect */
+}
+
+#progress-bar::-webkit-slider-thumb:hover {
+    transform: scale(1.2); /* Enlarge the thumb on hover */
+}
+
+#progress-bar::-moz-range-track {
+    height: 10px;
+    background: linear-gradient(to right, #4CAF50, #FF4081); /* For Firefox */
+    border-radius: 5px;
+}
+
+#progress-bar::-moz-range-thumb {
+    background: #FF4081;
+    border: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#progress-bar::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+#progress-bar::-ms-track {
+    height: 10px;
+    background: linear-gradient(to right, #4CAF50, #FF4081); /* For IE */
+    border-radius: 5px;
+    border-color: transparent;
+    color: transparent;
+    background-color: transparent;
+}
+
+#progress-bar::-ms-thumb {
+    background: #FF4081;
+    border: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#progress-bar::-ms-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* For added animation: simulate progress */
+@keyframes progressAnimation {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+/* Apply animation on progress */
+#progress-bar {
+    animation: progressAnimation 2s infinite;
+}
 
         /* Quality Dropdown */
         #quality-select {
