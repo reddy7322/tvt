@@ -44,7 +44,13 @@
     background-color: #121212; /* Background for dropdown options */
     color: white; /* Text color for dropdown options */
 }
-
+#music-page-toggle-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
         /* Loader Styles */
         .loader {
             position: fixed;
@@ -241,11 +247,11 @@
             <span id="logo-text">Sɯαɾα™</span>
         </div>
         <div id="search-container">
-            <!-- Search Button -->
-            <button id="search-btn">
-                <i class="material-icons">search</i>
-            </button>
-        </div>
+    <!-- Music Page Switch Toggle -->
+    <button id="music-page-toggle-btn">
+        <i class="material-icons" id="music-page-icon">library_music</i>
+    </button>
+</div>
     </div>
 
     <div class="container" id="content" class="hide-loader">
@@ -299,6 +305,16 @@
         let radioPoster = document.getElementById("radio-poster");
         let radioStations = [];
 
+
+        let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
+
+musicPageToggleBtn.addEventListener("click", function () {
+    // Redirect to the specified URL
+    window.location.href = "https://tvt-beryl.vercel.app/";
+});
+
+
+        
         // Fetch radio stations from radio.json
         fetch('radio.json')
             .then(response => response.json())
