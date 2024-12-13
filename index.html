@@ -228,6 +228,19 @@
             cursor: pointer;
         }
 
+
+            .refresh-button {
+        font-size: 24px;
+        color: #00796b;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px; /* Space between refresh button and search bar */
+    }
+        
 /* Container for progress bar and time display */
 .progress-container {
     display: flex;
@@ -390,19 +403,26 @@
 
     <div class="container" id="content" class="hide-loader">
 
-        <!-- Header -->
-        <div id="header">
-            <div id="logo-container">
-                <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
-            </div>
-            <div id="search-container">
-                <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs(this.value)" />
-                <button id="search-btn">
-                    <i class="material-icons">search</i>
-                </button>
-            </div>
-        </div>
+<!-- Header -->
+<div id="header">
+    <div id="logo-container">
+        <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
+    </div>
+    <div id="search-container">
+        <!-- Page Refresh Button -->
+        <button class="refresh-button" onclick="window.location.reload();">
+            <span class="material-icons">refresh</span>
+        </button>
 
+        <!-- Search Bar -->
+        <input type="text" id="search-bar" placeholder="Search..." onkeyup="searchSongs(this.value)" />
+        
+        <!-- Search Button -->
+        <button id="search-btn">
+            <i class="material-icons">search</i>
+        </button>
+    </div>
+</div>
         <!-- Main Player -->
         <div id="player-container">
 
