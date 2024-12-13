@@ -1,5 +1,7 @@
 {
     "short_name": "Swara",
+    "display": "standalone",
+    "orientation": "any",
     "name": "Swara",
     "icons": [
         {
