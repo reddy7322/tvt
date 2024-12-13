@@ -95,23 +95,30 @@
             transition: all 0.3s ease;
         }
 
-        #search-bar {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            padding: 5px;
-            width: 150px;
-        }
+       #search-bar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    padding: 0 8px 0 10px; /* Adjust padding to allow space for the button */
+    width: 100%;
+    height: 100%;
+}
 
-        #search-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
+#search-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    height: 100%;
+    width: 40px; /* Adjust the size of the button */
+}
 
         /* Main Player */
         #player-container {
