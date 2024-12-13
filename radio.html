@@ -24,33 +24,35 @@
         }
       
         #radio-station-select {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    background-color: #222;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    outline: none;
-    appearance: none; /* Hides default browser arrow */
-    cursor: pointer;
-}
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
 
-#radio-station-select:hover {
-    background-color: #333; /* Optional: Slight hover effect */
-}
+        #radio-station-select:hover {
+            background-color: #333;
+        }
 
-#radio-station-select option {
-    background-color: #121212; /* Background for dropdown options */
-    color: white; /* Text color for dropdown options */
-}
-#music-page-toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-}
+        #radio-station-select option {
+            background-color: #121212;
+            color: white;
+        }
+
+        #music-page-toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
         /* Loader Styles */
         .loader {
             position: fixed;
@@ -214,7 +216,6 @@
 
         /* Footer Styling */
         .footer {
-            background-color: #333;
             color: white;
             text-align: center;
             padding: 15px;
@@ -247,11 +248,11 @@
             <span id="logo-text">Sɯαɾα™</span>
         </div>
         <div id="search-container">
-    <!-- Music Page Switch Toggle -->
-    <button id="music-page-toggle-btn">
-        <i class="material-icons" id="music-page-icon">library_music</i>
-    </button>
-</div>
+            <!-- Music Page Switch Toggle -->
+            <button id="music-page-toggle-btn">
+                <i class="material-icons" id="music-page-icon">library_music</i>
+            </button>
+        </div>
     </div>
 
     <div class="container" id="content" class="hide-loader">
@@ -305,22 +306,19 @@
         let radioPoster = document.getElementById("radio-poster");
         let radioStations = [];
 
-
         let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
-musicPageToggleBtn.addEventListener("click", function () {
-    // Redirect to the specified URL
-    window.location.href = "https://tvt-beryl.vercel.app/";
-});
+        musicPageToggleBtn.addEventListener("click", function () {
+            window.location.href = "https://tvt-beryl.vercel.app/";
+        });
 
-
-        
         // Fetch radio stations from radio.json
         fetch('radio.json')
             .then(response => response.json())
             .then(data => {
                 radioStations = data;
                 initRadioStations();
+                playRandomStation();
             })
             .catch(error => console.error('Error fetching radio stations:', error));
 
@@ -331,6 +329,26 @@ musicPageToggleBtn.addEventListener("click", function () {
                 option.textContent = station.name;
                 radioStationSelect.appendChild(option);
             });
+        }
+
+        function playRandomStation() {
+            if (radioStations.length > 0) {
+                let randomIndex = Math.floor(Math.random() * radioStations.length);
+                let station = radioStations[randomIndex];
+                if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                    let hls = new Hls();
+                    hls.loadSource(station.url);
+                    hls.attachMedia(radioAudio);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        playRadio();
+                    });
+                } else {
+                    radioAudio.src = station.url;
+                    playRadio();
+                }
+                radioPoster.style.backgroundImage = `url(${station.poster})`;
+                document.getElementById("radio-station-name").innerText = station.name;
+            }
         }
 
         function changeRadioStation() {
