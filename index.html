@@ -340,6 +340,21 @@
     .footer a:hover {
       color: #ffcc00;
     }
+
+        #radio-switch {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .radio-button {
+        text-decoration: none;
+        color: inherit;
+        font-size: 24px;
+    }
+    .radio-button:hover {
+        color: #ff5722; /* Optional hover effect */
+    }
+
+        
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
 
@@ -419,10 +434,18 @@
 
 <!-- Header -->
 <div id="header">
-   <div id="logo-container">
-    <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
-    <span id="logo-text">Sɯαɾα™</span>
-</div>
+    <div id="logo-container">
+        <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
+        <span id="logo-text">Sɯαɾα™</span>
+    </div>
+    
+    <!-- Radio Page Switch Button -->
+    <div id="radio-switch">
+        <a href="https://tvt-beryl.vercel.app/radio.html" class="radio-button">
+            <span class="material-icons">radio</span>
+        </a>
+    </div>
+
     <div id="search-container">
         <!-- Page Refresh Button -->
         <button class="refresh-button" onclick="window.location.reload();">
