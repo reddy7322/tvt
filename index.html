@@ -549,9 +549,9 @@
     <audio id="audio" controls></audio>
 
     <script>
-<script>
 
-    function toggleLyrics() {
+       
+        function toggleLyrics() {
         const lyricsContainer = document.getElementById("lyrics-container");
         lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
     }
@@ -686,9 +686,15 @@
             loadSong();
             audio.play();
         }
+    }
 
-        // Dynamically set the dropdown value to the current song index
-        songList.value = currentSongIndex;
+    // Play selected song
+    function playSong() {
+        if (songList.value !== "") {
+            currentSongIndex = songList.value;
+            loadSong();
+            audio.play();
+        }
     }
 
     // Load song info
@@ -698,6 +704,7 @@
         const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
         audio.src = qualityUrl;
+       // Remove quotes and HTML entities from song name, artist name, and album name
         document.getElementById("song-name").innerText = removeQuotes(song.name);
         document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
         document.getElementById("album-name").innerText = removeQuotes(song.album.name);
@@ -707,7 +714,7 @@
         // Fetch lyrics
         fetchLyrics(song.id);
     }
-
+       
     // Function to decode HTML entities and remove quotes
     function decodeHtmlEntities(str) {
         const txt = document.createElement("textarea");
@@ -721,21 +728,16 @@
         return decodedStr.replace(/"/g, ''); // Remove the actual quotes
     }
 
-    // Play selected song
-    function playSong() {
-        if (songList.value !== "") {
-            currentSongIndex = songList.value;
-            loadSong();
+    // Toggle play/pause
+    function togglePlay() {
+        if (audio.paused) {
             audio.play();
+            playIcon.innerText = "pause";
+        } else {
+            audio.pause();
+            playIcon.innerText = "play_arrow";
         }
     }
-
-    // Automatically update the dropdown when the song changes
-    audio.addEventListener('ended', function () {
-        nextSong();
-        // Update the dropdown to reflect the current song
-        songList.value = currentSongIndex;
-    });
 
     // Seek song based on progress bar
     function seekSong() {
@@ -780,92 +782,94 @@
         updateSongList();
     }
 
-    // Download song
-    function downloadAudio() {
-        const song = songs[currentSongIndex];
-        const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
+// Download song
+function downloadAudio() {
+    const song = songs[currentSongIndex];
+    const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
 
-        fetch(audioUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
+    fetch(audioUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
 
-                // Sanitize the song name to remove existing extensions
-                const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
+            // Sanitize the song name to remove existing extensions
+            const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
 
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-                URL.revokeObjectURL(blobUrl);
-            })
-            .catch(error => {
-                console.error('Error downloading audio:', error);
-            });
-    }
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.error('Error downloading audio:', error);
+        });
+}
 
-    // Installable PWA logic
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // Add a button to notify the user about installability
+
+    // Automatically play the next song when the current song ends
+    audio.addEventListener('ended', function () {
+        nextSong();
     });
 
-    document.getElementById('installBtn').addEventListener('click', () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                deferredPrompt = null;
-            });
-        }
-    });
+        // Installable PWA logic
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Add a button to notify the user about installability
+        });
 
-    // Prevent audio pause on screen lock using the Wake Lock API
-    let wakeLock = null;
-    const requestWakeLock = async () => {
-        try {
-            wakeLock = await navigator.wakeLock.request('screen');
-        } catch (err) {
-            console.error(`${err.name}, ${err.message}`);
-        }
-    };
+        document.getElementById('installBtn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                });
+            }
+        });
 
-    const releaseWakeLock = () => {
-        if (wakeLock) {
-            wakeLock.release();
-            wakeLock = null;
-        }
-    };
+        // Prevent audio pause on screen lock using the Wake Lock API
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        };
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
+        const releaseWakeLock = () => {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLock();
+            } else {
+                releaseWakeLock();
+            }
+        });
+
+        // Request wake lock when page is loaded
+        window.onload = () => {
             requestWakeLock();
-        } else {
+        };
+
+        window.onunload = () => {
             releaseWakeLock();
-        }
-    });
-
-    // Request wake lock when page is loaded
-    window.onload = () => {
-        requestWakeLock();
-    };
-
-    window.onunload = () => {
-        releaseWakeLock();
-    };
-
-</script>
-
-
+        };
     </script>
 </body>
 </html>
