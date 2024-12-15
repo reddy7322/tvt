@@ -358,12 +358,83 @@
 
 
 
-<div id="error-popup" class="error-popup">
-    <div class="popup-content">
-        <span id="error-message">API Down, Welcome back After Some time or Switch to Radio</span>
-        <button id="switch-to-radio" class="btn-radio">Switch to Radio</button>
-    </div>
-</div>
+/* Error Popup Styling */
+#error-popup {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f44336;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    z-index: 1000;
+    opacity: 0;
+    animation: popup-animation 0.5s ease-in-out forwards, ribbon-border 3s linear infinite;
+    width: auto;
+    max-width: 90%;
+    text-align: center;
+}
+
+/* Popup animation for smooth appearance */
+@keyframes popup-animation {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Ribbon border animation */
+@keyframes ribbon-border {
+    0%, 100% {
+        border: 5px solid transparent;
+        border-image: linear-gradient(45deg, #ff5722, #2196f3);
+        border-image-slice: 1;
+    }
+    50% {
+        border: 5px solid transparent;
+        border-image: linear-gradient(45deg, #2196f3, #ff5722);
+        border-image-slice: 1;
+    }
+}
+
+/* Button to Switch to Radio */
+.btn-radio {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-radio:hover {
+    background-color: #45a049;
+}
+
+/* Styling the popup content */
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Error Message Text */
+#error-message {
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 
 	    
         /* Mobile Responsiveness */
