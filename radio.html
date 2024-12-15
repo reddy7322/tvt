@@ -299,7 +299,6 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
-<p></p>
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -357,7 +356,6 @@ function initRadioStations() {
 }
 
 function playRandomStation() {
-    // Generate a random index for the station
     let randomIndex = Math.floor(Math.random() * radioStations.length);
     playStation(randomIndex);
 }
@@ -465,21 +463,13 @@ function setupVisualizer() {
         for (let i = 0; i < bufferLength; i++) {
             barHeight = dataArray[i] / 2;
 
-            // Create a gradient
-            const gradient = visualizerCtx.createLinearGradient(
-                0,
-                visualizerCanvas.height - barHeight,
-                0,
-                visualizerCanvas.height
-            );
+            const gradient = visualizerCtx.createLinearGradient(0, visualizerCanvas.height - barHeight, 0, visualizerCanvas.height);
 
-            // Add gradient color stops
-            gradient.addColorStop(0, '#FF0000'); // Red
-            gradient.addColorStop(0.5, '#FECD00'); // Jonquil
-            gradient.addColorStop(1, '#349DA1'); // Dark Cyan
+            gradient.addColorStop(0, '#FF0000');
+            gradient.addColorStop(0.5, '#FECD00');
+            gradient.addColorStop(1, '#349DA1');
 
             visualizerCtx.fillStyle = gradient;
-
             visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
 
             x += barWidth + 1;
@@ -489,13 +479,11 @@ function setupVisualizer() {
     draw();
 }
 
-// Initialize after page load
 window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
 };
 </script>
-
 
 </body>
 
