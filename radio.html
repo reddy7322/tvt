@@ -172,7 +172,7 @@
             background-size: cover;
             background-position: center;
             border-radius: 15px;
-            filter: blur(4px);
+            filter: blur(2px);
             opacity: 80;
         }
 
@@ -299,7 +299,7 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
-
+<p></p>
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -316,7 +316,7 @@
 
     <audio id="radio-audio" controls></audio>
 
-    <script>
+<script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -343,7 +343,9 @@ fetch('radio.json')
     .then(data => {
         radioStations = data;
         initRadioStations();
-        playStation(0);
+        // Randomly pick a station to play on startup
+        let randomIndex = Math.floor(Math.random() * radioStations.length);
+        playStation(randomIndex);
     })
     .catch(error => console.error('Error fetching radio stations:', error));
 
@@ -360,18 +362,25 @@ function playStation(index) {
     currentStationIndex = index;
     let station = radioStations[index];
 
-    if (Hls.isSupported() && station.url.includes(".m3u8")) {
+    // Check if the URL is a .m3u8 (HLS) stream or .mp3 stream
+    if (station.url.includes(".m3u8") && Hls.isSupported()) {
         let hls = new Hls();
         hls.loadSource(station.url);
         hls.attachMedia(radioAudio);
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
             playRadio();
         });
+    } else if (station.url.includes(".mp3")) {
+        // If it's an MP3 stream, directly set the src
+        radioAudio.src = station.url;
+        playRadio();
     } else {
+        // Fallback for other types of streams
         radioAudio.src = station.url;
         playRadio();
     }
 
+    // Update UI (poster, station name)
     radioPoster.style.backgroundImage = `url(${station.poster})`;
     document.getElementById("radio-station-name").innerText = station.name;
     radioStationSelect.value = index;
@@ -489,7 +498,14 @@ window.onload = function () {
     content.style.display = "block";
 };
 
-    </script>
+// Error handling for audio
+radioAudio.onerror = function (e) {
+    console.error("Error loading stream: ", e);
+    alert("Failed to load radio station. Please try another one.");
+};
+
+</script>
+
 
 </body>
 
