@@ -364,20 +364,33 @@ function playStation(index) {
 
     // Check if the URL is a .m3u8 (HLS) stream or .mp3 stream
     if (station.url.includes(".m3u8") && Hls.isSupported()) {
+        console.log("Playing HLS stream for " + station.name);
         let hls = new Hls();
         hls.loadSource(station.url);
         hls.attachMedia(radioAudio);
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            console.log("HLS stream loaded successfully");
             playRadio();
         });
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            console.error("HLS error: ", data);
+            alert("Error loading HLS stream, switching to next station.");
+            nextStation();
+        });
     } else if (station.url.includes(".mp3")) {
-        // If it's an MP3 stream, directly set the src
+        console.log("Playing MP3 stream for " + station.name);
         radioAudio.src = station.url;
+        radioAudio.onerror = function () {
+            console.error("Error loading MP3 stream: ", station.url);
+            alert("Error loading MP3 stream, switching to next station.");
+            nextStation();
+        };
         playRadio();
     } else {
-        // Fallback for other types of streams
-        radioAudio.src = station.url;
-        playRadio();
+        console.error("Unsupported stream type for " + station.name);
+        alert("Unsupported stream type, switching to next station.");
+        nextStation();
     }
 
     // Update UI (poster, station name)
@@ -402,7 +415,10 @@ function toggleRadioPlay() {
 }
 
 function playRadio() {
-    radioAudio.play();
+    radioAudio.play().catch((error) => {
+        console.error("Error trying to play the radio: ", error);
+        alert("Error playing the stream.");
+    });
     radioPlayIcon.innerText = "pause";
     setupVisualizer();
 }
@@ -504,6 +520,7 @@ radioAudio.onerror = function (e) {
     // Automatically switch to the next station if the current stream fails
     nextStation();
 };
+
 
 </script>
 
