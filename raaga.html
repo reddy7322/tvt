@@ -549,23 +549,10 @@
     <audio id="audio" controls></audio>
 
     <script>
-function toggleLyrics() {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-}
-
-const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
-    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
-    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
-    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
-];
-
 let audio = document.getElementById("audio");
+let albumPoster = document.getElementById("album-poster");
+let visualizerCanvas = document.getElementById("audio-visualizer");
+let visualizerContext = visualizerCanvas.getContext("2d");
 let playIcon = document.getElementById("play-icon");
 let songList = document.getElementById("song-list");
 let progressBar = document.getElementById("progress-bar");
@@ -575,26 +562,84 @@ let currentSongIndex = 0;
 let songs = []; // Store song data from API response
 let currentQuality = "160"; // Default to 160 kbps
 
-// Auto-fetch random query and play the first song on page load
-window.onload = async function () {
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    await searchSongs(randomQuery);
-    document.getElementById("loader").classList.add('hide-loader');
-    document.getElementById("content").classList.remove('hide-loader');
-};
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let analyser = audioContext.createAnalyser();
+let sourceNode;
 
-// Fetch songs based on search query
-async function searchSongs(query) {
-    if (!query) return;
+// Set up the audio analyser
+function setupAudioAnalyser() {
+    if (audio.src) {
+        let track = audioContext.createMediaElementSource(audio);
+        track.connect(analyser);
+        analyser.connect(audioContext.destination);
 
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    const response = await fetch(url);
-    const data = await response.json();
-    songs = data.data.results;
-    updateSongList();
+        analyser.fftSize = 256; // Number of frequency bins
+        analyser.smoothingTimeConstant = 0.85;
+    }
 }
 
-// Fetch lyrics for the song and handle smart scrolling
+// Draw the audio visualizer (line spectrum)
+function drawVisualizer() {
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    analyser.getByteFrequencyData(dataArray);
+    
+    visualizerContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+    const barWidth = visualizerCanvas.width / bufferLength;
+    let x = 0;
+
+    visualizerContext.beginPath();
+    visualizerContext.moveTo(0, visualizerCanvas.height / 2); // Start at the middle of the canvas
+    
+    for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i];
+        visualizerContext.lineTo(x, (visualizerCanvas.height / 2) - barHeight); // Adjust line height
+        x += barWidth;
+    }
+
+    visualizerContext.strokeStyle = "rgba(0, 255, 255, 0.8)";
+    visualizerContext.lineWidth = 2;
+    visualizerContext.stroke();
+    visualizerContext.closePath();
+}
+
+// Adjust canvas size on window resize
+window.addEventListener('resize', () => {
+    visualizerCanvas.width = albumPoster.clientWidth;
+    visualizerCanvas.height = albumPoster.clientHeight;
+});
+
+// Start drawing visualizer when audio starts playing
+audio.onplay = () => {
+    setupAudioAnalyser();
+    visualizerCanvas.width = albumPoster.clientWidth;
+    visualizerCanvas.height = albumPoster.clientHeight;
+
+    // Start drawing the visualizer
+    requestAnimationFrame(drawVisualizer);
+};
+
+// Stop drawing visualizer when audio is paused
+audio.onpause = () => {
+    visualizerContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+};
+
+// Load song info and background image
+function loadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+    audio.src = qualityUrl;
+    albumPoster.style.backgroundImage = `url(${song.image[2].url})`;
+    playIcon.innerText = "pause";
+
+    fetchLyrics(song.id);
+}
+
+// Fetch lyrics for the song
 async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
@@ -607,7 +652,7 @@ async function fetchLyrics(songId) {
         if (data.data) {
             const lyrics = data.data.lyrics.split('\n');
             let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+                `<p class="lyrics-line" id="line-${index}" data-time="${index}">${line}</p>`
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'block';
@@ -620,7 +665,6 @@ async function fetchLyrics(songId) {
         }
     } catch (error) {
         console.error('Error fetching lyrics:', error);
-        // Prevent showing error message, instead hide lyrics container
         document.getElementById("lyrics-container").style.display = 'none';
     }
 }
@@ -706,35 +750,14 @@ function playSong() {
     }
 }
 
-// Load song info
-function loadSong() {
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-    audio.src = qualityUrl;
-    // Remove quotes and HTML entities from song name, artist name, and album name
-    document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
-    document.getElementById("album-name").innerText = removeQuotes(song.album.name);
-    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-    playIcon.innerText = "pause";
-
-    // Fetch lyrics
-    fetchLyrics(song.id);
-
-    // Update song list selection
-    updateSongListSelection();
-}
-
-// Function to decode HTML entities and remove quotes
+// Decode HTML entities and remove quotes
 function decodeHtmlEntities(str) {
     const txt = document.createElement("textarea");
     txt.innerHTML = str;
     return txt.value; // This decodes HTML entities
 }
 
-// Function to remove quotes after decoding HTML entities
+// Remove quotes after decoding HTML entities
 function removeQuotes(str) {
     const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
     return decodedStr.replace(/"/g, ''); // Remove the actual quotes
@@ -882,6 +905,24 @@ window.onunload = () => {
     releaseWakeLock();
 };
 
+// Auto-fetch random query and play the first song on page load
+window.onload = async function () {
+    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    await searchSongs(randomQuery);
+    document.getElementById("loader").classList.add('hide-loader');
+    document.getElementById("content").classList.remove('hide-loader');
+};
+
+// Fetch songs based on search query
+async function searchSongs(query) {
+    if (!query) return;
+
+    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+    const response = await fetch(url);
+    const data = await response.json();
+    songs = data.data.results;
+    updateSongList();
+}
     </script>
 </body>
 </html>
