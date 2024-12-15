@@ -138,18 +138,25 @@
             overflow-y: auto;
         }
 
+* Animated Record Cover Art */
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Album Image */
 #album-poster {
     width: 350px;
     height: 350px;
     background-size: cover;
     background-position: center;
-    border-radius: 15px;
+    border-radius: 50%;
     margin-bottom: 15px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    animation: rotate 20s linear infinite;
 }
 
 /* Lyrics Section */
@@ -158,27 +165,27 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Centers the text */
-    width: 98%; /* Adjust the width to fit inside the album art */
+    transform: translate(-50%, -50%);
+    width: 98%;
     text-align: center;
     color: #bbb;
     font-size: 14px;
     z-index: 10;
     padding: 10px;
-    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 15px;
-    backdrop-filter: blur(8px); /* Apply the blur effect to the background */
-    overflow-y: auto; /* Allow scrolling */
-    max-height: 98%; /* Prevent overflowing beyond album art */
-    scroll-behavior: smooth; /* Smooth scrolling when jumping to a line */
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+    max-height: 98%;
+    scroll-behavior: smooth;
 }
 
 /* Lyrics Text */
 #lyrics-text {
-    white-space: pre-line; /* Maintains the line breaks in the lyrics */
+    white-space: pre-line;
     font-size: 14px;
     color: white;
-    line-height: 1.5; /* Adjust line height for better readability */
+    line-height: 1.5;
 }
 
 /* Highlighted Lyrics */
@@ -192,7 +199,7 @@
     display: none;
 }
 
-        /* Song Info */
+       /* Song Info */
         #song-info {
             text-align: center;
             margin-bottom: 20px;
@@ -482,12 +489,12 @@
         <!-- Main Player -->
         <div id="player-container">
 
-            <!-- Album Poster -->
-            <div id="album-poster" onclick="toggleLyrics()">
-                <div id="lyrics-container">
-                    <div id="lyrics-text">Loading lyrics...</div>
-                </div>
-            </div>
+           <!-- Album Poster -->
+        <div id="album-poster" onclick="toggleLyrics()">
+        <div id="lyrics-container">
+        <div id="lyrics-text">Loading lyrics...</div>
+       </div>
+</div>
 
             <!-- Song Info -->
             <div id="song-info">
