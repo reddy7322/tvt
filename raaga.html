@@ -495,19 +495,23 @@
 
 <!-- Album Poster with Visualizer -->
 <div id="album-poster" onclick="toggleLyrics()">
-  <canvas id="visualizer" width="350" height="350"></canvas>
-  <div id="lyrics-container">
-    <div id="lyrics-text">Loading lyrics...</div>
-  </div>
+    <!-- Canvas for Audio Visualization -->
+    <canvas id="visualizer" width="350" height="350"></canvas>
+
+    <!-- Lyrics Container (Initially Hidden) -->
+    <div id="lyrics-container">
+        <div id="lyrics-text">Loading lyrics...</div>
+    </div>
 </div>
 
 
-            <!-- Song Info -->
-            <div id="song-info">
-               <p><span id="song-name">Song Name</span></p>
-                  <span id="song-artist">Artist Name</span> <span> - </span>
-                  <span id="album-name">Album Name</span>
-            </div>
+<!-- Song Information -->
+<div id="song-info">
+    <h2 id="song-name"></h2>
+    <p id="song-artist"></p>
+    <p id="album-name"></p>
+    <div id="album-poster" style="background-image: url('');"></div>
+</div>
 
             <!-- Controls -->
             <div id="controls">
@@ -589,6 +593,13 @@ let currentSongIndex = 0;
 let songs = []; // Store song data from API response
 let currentQuality = "160"; // Default to 160 kbps
 
+// Audio visualization setup
+let canvas = document.getElementById("visualization");
+let canvasContext = canvas.getContext("2d");
+let analyser = null;
+let bufferLength = 0;
+let dataArray = null;
+
 // Auto-fetch random query and play the first song on page load
 window.onload = async function () {
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
@@ -596,6 +607,45 @@ window.onload = async function () {
     document.getElementById("loader").classList.add('hide-loader');
     document.getElementById("content").classList.remove('hide-loader');
 };
+
+// Set up the AudioContext and analyser
+function setupAudioVisualization() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256; // Size of the FFT (Fast Fourier Transform), defines the frequency bins
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+
+    const source = audioContext.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+
+    // Start drawing the visualization
+    draw();
+}
+
+// Draw the visualization
+function draw() {
+    requestAnimationFrame(draw);
+    
+    analyser.getByteFrequencyData(dataArray);
+
+    canvasContext.fillStyle = 'rgb(0, 0, 0)';
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+    let barWidth = (canvas.width / bufferLength) * 2.5;
+    let barHeight;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+        barHeight = dataArray[i];
+
+        canvasContext.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+        canvasContext.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+        x += barWidth + 1;
+    }
+}
 
 // Fetch songs based on search query
 async function searchSongs(query) {
@@ -918,6 +968,7 @@ window.onunload = () => {
     releaseWakeLock();
 };
 </script>
+
 
 </body>
 </html>
