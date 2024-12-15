@@ -591,6 +591,8 @@ const queries = [
 
 // Initialize the Audio Context and Analyser for visualization
 function setupAudioVisualization() {
+    canvas = document.getElementById('visualizer');
+    canvasContext = canvas.getContext('2d');
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 256; // Defines frequency bins for the visualizer
