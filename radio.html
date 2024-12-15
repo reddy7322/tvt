@@ -343,8 +343,9 @@ fetch('radio.json')
     .then(data => {
         radioStations = data;
         initRadioStations();
-        playStation(0);
-    });
+        playRandomStation();  // Play a random station on startup
+    })
+    .catch(error => console.error('Error fetching radio stations:', error));
 
 function initRadioStations() {
     radioStations.forEach((station, index) => {
@@ -355,40 +356,31 @@ function initRadioStations() {
     });
 }
 
+function playRandomStation() {
+    // Generate a random index for the station
+    let randomIndex = Math.floor(Math.random() * radioStations.length);
+    playStation(randomIndex);
+}
+
 function playStation(index) {
     currentStationIndex = index;
     let station = radioStations[index];
 
-    // First try the default audio player
-    radioAudio.src = station.url;
-    radioAudio.load();
-    radioAudio.play()
-        .then(() => {
-            // Successfully started the radio stream
-            radioPoster.style.backgroundImage = `url(${station.poster})`;
-            document.getElementById("radio-station-name").innerText = station.name;
-            radioStationSelect.value = index;
-            setupVisualizer();
-        })
-        .catch(() => {
-            // If default audio player fails (e.g., non-HTTP stream), switch to HLS player
-            if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                let hls = new Hls();
-                hls.loadSource(station.url);
-                hls.attachMedia(radioAudio);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    radioAudio.play();
-                });
-                hls.on(Hls.Events.ERROR, function (event, data) {
-                    if (data.fatal) {
-                        // Switch to fallback if HLS fails
-                        radioAudio.src = station.url;
-                        radioAudio.load();
-                        radioAudio.play();
-                    }
-                });
-            }
+    if (Hls.isSupported() && station.url.includes(".m3u8")) {
+        let hls = new Hls();
+        hls.loadSource(station.url);
+        hls.attachMedia(radioAudio);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            playRadio();
         });
+    } else {
+        radioAudio.src = station.url;
+        playRadio();
+    }
+
+    radioPoster.style.backgroundImage = `url(${station.poster})`;
+    document.getElementById("radio-station-name").innerText = station.name;
+    radioStationSelect.value = index;
 }
 
 function changeRadioStation() {
@@ -503,7 +495,6 @@ window.onload = function () {
     content.style.display = "block";
 };
 </script>
-
 
 
 </body>
