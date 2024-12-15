@@ -343,7 +343,9 @@ fetch('radio.json')
     .then(data => {
         radioStations = data;
         initRadioStations();
-        playRandomStation();  // Play a random station on startup
+        // Randomly pick a station to play on startup
+        let randomIndex = Math.floor(Math.random() * radioStations.length);
+        playStation(randomIndex);
     })
     .catch(error => console.error('Error fetching radio stations:', error));
 
@@ -354,12 +356,6 @@ function initRadioStations() {
         option.textContent = station.name;
         radioStationSelect.appendChild(option);
     });
-}
-
-function playRandomStation() {
-    // Generate a random index for the station
-    let randomIndex = Math.floor(Math.random() * radioStations.length);
-    playStation(randomIndex);
 }
 
 function playStation(index) {
@@ -494,6 +490,7 @@ window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
 };
+
 </script>
 
 
