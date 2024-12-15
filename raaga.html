@@ -618,7 +618,7 @@
         </div>
 <div id="error-popup" class="error-popup">
     <div class="popup-content">
-        <span id="error-message">API Down, Welcome back After Some time or Switch to Radio</span>
+        <span id="error-message"><p>Sorry..</p>API Down, Welcome back After Some time or Switch to Radio</span>
         <button id="switch-to-radio" class="btn-radio">Switch to Radio</button>
     </div>
 </div>
@@ -675,7 +675,7 @@ window.onload = async function () {
 async function searchSongs(query) {
     if (!query) return;
 
-    let url = `https://saavn.dev/api/serch/songs?query=${query}&page=1&limit=50`;
+    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
     try {
         const response = await fetch(url);
         if (!response.ok) {
