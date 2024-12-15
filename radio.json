@@ -1,4 +1,9 @@
 [
+   {
+        "name": "Ap 9 FM",
+        "url": "https://stream.ap9fm.in/radio/8000/radio.mp3",
+        "poster": "https://onlineradiofm.in/assets/image/radio/180/AP-9-Fm-Radio-Telugu.png"
+    },
     {
         "name": "TVTelugu - Exclusive Radio",
         "url": "https://stream-152.zeno.fm/f7punaqmcnbuv?zs=zgARRMwMT9WfdxjzLOGXPQ",
@@ -78,11 +83,6 @@
         "name": "Telugu one Radio",
         "url": "https://stream.torigorbanjara.com:8164/;stream/1",
         "poster": "https://www.teluguoneradio.com/images/tori_logo.png"
-    },
-    {
-        "name": "Ap 9 FM",
-        "url": "https://stream.ap9fm.in/radio/8000/radio.mp3",
-        "poster": "https://onlineradiofm.in/assets/image/radio/180/AP-9-Fm-Radio-Telugu.png"
     },
     {
         "name": "Telugu NRI Radio",
