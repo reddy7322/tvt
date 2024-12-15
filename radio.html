@@ -299,6 +299,7 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
+
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -315,7 +316,7 @@
 
     <audio id="radio-audio" controls></audio>
 
-<script>
+    <script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -342,7 +343,7 @@ fetch('radio.json')
     .then(data => {
         radioStations = data;
         initRadioStations();
-        playRandomStation();  // Play a random station on startup
+        playStation(0);
     })
     .catch(error => console.error('Error fetching radio stations:', error));
 
@@ -353,11 +354,6 @@ function initRadioStations() {
         option.textContent = station.name;
         radioStationSelect.appendChild(option);
     });
-}
-
-function playRandomStation() {
-    let randomIndex = Math.floor(Math.random() * radioStations.length);
-    playStation(randomIndex);
 }
 
 function playStation(index) {
@@ -463,13 +459,21 @@ function setupVisualizer() {
         for (let i = 0; i < bufferLength; i++) {
             barHeight = dataArray[i] / 2;
 
-            const gradient = visualizerCtx.createLinearGradient(0, visualizerCanvas.height - barHeight, 0, visualizerCanvas.height);
+            // Create a gradient
+            const gradient = visualizerCtx.createLinearGradient(
+                0,
+                visualizerCanvas.height - barHeight,
+                0,
+                visualizerCanvas.height
+            );
 
-            gradient.addColorStop(0, '#FF0000');
-            gradient.addColorStop(0.5, '#FECD00');
-            gradient.addColorStop(1, '#349DA1');
+            // Add gradient color stops
+            gradient.addColorStop(0, '#FF0000'); // Red
+            gradient.addColorStop(0.5, '#FECD00'); // Jonquil
+            gradient.addColorStop(1, '#349DA1'); // Dark Cyan
 
             visualizerCtx.fillStyle = gradient;
+
             visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
 
             x += barWidth + 1;
@@ -479,11 +483,13 @@ function setupVisualizer() {
     draw();
 }
 
+// Initialize after page load
 window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
 };
-</script>
+
+    </script>
 
 </body>
 
