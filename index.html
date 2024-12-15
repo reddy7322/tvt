@@ -549,22 +549,26 @@
     <audio id="audio" controls></audio>
 
     <script>
-function toggleLyrics() {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-}
+// Initialize audio context and analyser for visualization
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let analyser = audioContext.createAnalyser();
+analyser.fftSize = 256; // Size of the FFT (the frequency domain representation)
+let bufferLength = analyser.frequencyBinCount;
+let dataArray = new Uint8Array(bufferLength);
 
-const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80','Telugu Old','Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi','P. Susheela',
-    'Ghantasala','S. Janaki','Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy','veturi',
-    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
-    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
-];
+// Create a canvas element to draw the visualizations
+let canvas = document.createElement('canvas');
+document.body.appendChild(canvas);  // Add canvas to the body or wherever you want
+canvas.id = 'visualizationCanvas';
+canvas.width = 200;  // Adjust size as needed
+canvas.height = 200;  // Adjust size as needed
+let canvasContext = canvas.getContext('2d');
+canvas.style.position = 'absolute';  // Position it over the album poster
+canvas.style.top = '50px';  // Adjust position
+canvas.style.left = '50px'; // Adjust position
+canvas.style.pointerEvents = 'none'; // So it doesn't interfere with interactions
 
+// Set up the audio source node
 let audio = document.getElementById("audio");
 let playIcon = document.getElementById("play-icon");
 let songList = document.getElementById("song-list");
@@ -581,7 +585,16 @@ window.onload = async function () {
     await searchSongs(randomQuery);
     document.getElementById("loader").classList.add('hide-loader');
     document.getElementById("content").classList.remove('hide-loader');
+    // Connect audio to the analyser and start visualization
+    setupAudioVisualization();
 };
+
+// Set up audio context and connect analyser
+function setupAudioVisualization() {
+    const source = audioContext.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioContext.destination);
+}
 
 // Fetch songs based on search query
 async function searchSongs(query) {
@@ -667,7 +680,28 @@ audio.ontimeupdate = function () {
     }
 
     highlightCurrentLine(lineIndex);
+
+    // Visualize audio data
+    drawVisualization();
 };
+
+// Function to draw the visualization
+function drawVisualization() {
+    analyser.getByteFrequencyData(dataArray);
+
+    // Clear the canvas
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the frequency bars
+    const barWidth = (canvas.width / bufferLength) * 2.5;
+    let x = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i];
+        canvasContext.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+        canvasContext.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+    }
+}
 
 // Update song list dropdown
 function updateSongList() {
@@ -686,11 +720,6 @@ function updateSongList() {
     }
 }
 
-// Update the selected song in the dropdown
-function updateSongListSelection() {
-    songList.value = currentSongIndex; // Set the current song in the dropdown
-}
-
 // Play selected song
 function playSong() {
     if (songList.value !== "") {
@@ -707,7 +736,7 @@ function loadSong() {
     const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
     audio.src = qualityUrl;
-    // Remove quotes and HTML entities from song name, artist name, and album name
+   // Remove quotes and HTML entities from song name, artist name, and album name
     document.getElementById("song-name").innerText = removeQuotes(song.name);
     document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
@@ -716,9 +745,6 @@ function loadSong() {
 
     // Fetch lyrics
     fetchLyrics(song.id);
-
-    // Update song list selection
-    updateSongListSelection();
 }
 
 // Function to decode HTML entities and remove quotes
@@ -732,6 +758,12 @@ function decodeHtmlEntities(str) {
 function removeQuotes(str) {
     const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
     return decodedStr.replace(/"/g, ''); // Remove the actual quotes
+}
+
+// Toggle lyrics visibility
+function toggleLyrics() {
+    const lyricsContainer = document.getElementById("lyrics-container");
+    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
 }
 
 // Toggle play/pause
@@ -825,56 +857,17 @@ audio.addEventListener('ended', function () {
     nextSong();
 });
 
-// Installable PWA logic
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Add a button to notify the user about installability
-});
-
-document.getElementById('installBtn').addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            deferredPrompt = null;
-        });
-    }
-});
-
-// Prevent audio pause on screen lock using the Wake Lock API
-let wakeLock = null;
-const requestWakeLock = async () => {
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
-    }
-};
-
-const releaseWakeLock = () => {
-    if (wakeLock) {
-        wakeLock.release();
-        wakeLock = null;
-    }
-};
-
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        requestWakeLock();
-    } else {
-        releaseWakeLock();
-    }
-});
-
-// Request wake lock when page is loaded
-window.onload = () => {
-    requestWakeLock();
-};
-
-window.onunload = () => {
-    releaseWakeLock();
-};
+// List of random queries for song search
+const queries = [
+    'Telugu', 'Telugu 90', 'Telugu 80','Telugu Old','Telugu retro', 'Telugu Devotional', 
+    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi','P. Susheela',
+    'Ghantasala','S. Janaki','Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy','veturi',
+    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
+    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
+    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+];
 
     </script>
 </body>
