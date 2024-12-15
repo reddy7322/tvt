@@ -484,8 +484,6 @@
 
             <!-- Album Poster -->
             <div id="album-poster" onclick="toggleLyrics()">
-                <div id="album-poster"></div>
-                <canvas id="visualizer"></canvas>
                 <div id="lyrics-container">
                     <div id="lyrics-text">Loading lyrics...</div>
                 </div>
@@ -590,18 +588,10 @@ async function searchSongs(query) {
     if (!query) return;
 
     let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Failed to fetch songs');
-        }
-        const data = await response.json();
-        songs = data.data.results;
-        updateSongList();
-    } catch (error) {
-        console.error(error);
-        alert("API is currently down. Please switch to a radio station or try again later.");
-    }
+    const response = await fetch(url);
+    const data = await response.json();
+    songs = data.data.results;
+    updateSongList();
 }
 
 // Fetch lyrics for the song and handle smart scrolling
@@ -609,9 +599,6 @@ async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Failed to fetch lyrics');
-        }
         const data = await response.json();
 
         const lyricsContainer = document.getElementById("lyrics-container");
@@ -632,8 +619,9 @@ async function fetchLyrics(songId) {
             lyricsContainer.style.display = 'none';
         }
     } catch (error) {
-        console.error(error);
-        alert("Lyrics not available. Try again later.");
+        console.error('Error fetching lyrics:', error);
+        // Prevent showing error message, instead hide lyrics container
+        document.getElementById("lyrics-container").style.display = 'none';
     }
 }
 
