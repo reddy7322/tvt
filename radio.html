@@ -23,7 +23,7 @@
             height: 100%;
             overflow: hidden;
         }
-      
+
         #radio-station-select {
             width: 100%;
             padding: 10px;
@@ -266,11 +266,14 @@
             <div id="radio-poster"></div>
 
             <div id="radio-controls">
+                <button id="radio-prev" onclick="previousStation()">
+                    <i class="material-icons">skip_previous</i>
+                </button>
                 <button id="radio-play" onclick="toggleRadioPlay()">
                     <i class="material-icons" id="radio-play-icon">play_arrow</i>
                 </button>
-                <button id="radio-volume">
-                    <i class="material-icons">volume_up</i>
+                <button id="radio-next" onclick="nextStation()">
+                    <i class="material-icons">skip_next</i>
                 </button>
             </div>
 
@@ -306,6 +309,7 @@
         let content = document.getElementById("content");
         let radioPoster = document.getElementById("radio-poster");
         let radioStations = [];
+        let currentStationIndex = 0;
 
         let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
@@ -319,55 +323,44 @@
             .then(data => {
                 radioStations = data;
                 initRadioStations();
-                playRandomStation();
+                playStation(0);
             })
             .catch(error => console.error('Error fetching radio stations:', error));
 
         function initRadioStations() {
-            radioStations.forEach(station => {
+            radioStations.forEach((station, index) => {
                 let option = document.createElement("option");
-                option.value = station.name;
+                option.value = index;
                 option.textContent = station.name;
                 radioStationSelect.appendChild(option);
             });
         }
 
-        function playRandomStation() {
-            if (radioStations.length > 0) {
-                let randomIndex = Math.floor(Math.random() * radioStations.length);
-                let station = radioStations[randomIndex];
-                if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                    let hls = new Hls();
-                    hls.loadSource(station.url);
-                    hls.attachMedia(radioAudio);
-                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                        playRadio();
-                    });
-                } else {
-                    radioAudio.src = station.url;
+        function playStation(index) {
+            currentStationIndex = index;
+            let station = radioStations[index];
+
+            if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                let hls = new Hls();
+                hls.loadSource(station.url);
+                hls.attachMedia(radioAudio);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
                     playRadio();
-                }
-                radioPoster.style.backgroundImage = `url(${station.poster})`;
-                document.getElementById("radio-station-name").innerText = station.name;
+                });
+            } else {
+                radioAudio.src = station.url;
+                playRadio();
             }
+
+            radioPoster.style.backgroundImage = `url(${station.poster})`;
+            document.getElementById("radio-station-name").innerText = station.name;
+            radioStationSelect.value = index;
         }
 
         function changeRadioStation() {
-            let selectedStation = radioStationSelect.value;
-            if (selectedStation) {
-                let station = radioStations.find(station => station.name === selectedStation);
-                if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                    let hls = new Hls();
-                    hls.loadSource(station.url);
-                    hls.attachMedia(radioAudio);
-                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                        playRadio();
-                    });
-                } else {
-                    radioAudio.src = station.url;
-                    playRadio();
-                }
-                radioPoster.style.backgroundImage = `url(${station.poster})`;
+            let selectedIndex = parseInt(radioStationSelect.value);
+            if (!isNaN(selectedIndex)) {
+                playStation(selectedIndex);
             }
         }
 
@@ -387,6 +380,16 @@
         function pauseRadio() {
             radioAudio.pause();
             radioPlayIcon.innerText = "play_arrow";
+        }
+
+        function nextStation() {
+            let nextIndex = (currentStationIndex + 1) % radioStations.length;
+            playStation(nextIndex);
+        }
+
+        function previousStation() {
+            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
+            playStation(prevIndex);
         }
 
         radioAudio.ontimeupdate = function () {
