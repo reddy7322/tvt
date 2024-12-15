@@ -334,7 +334,7 @@ let currentStationIndex = 0;
 let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
 musicPageToggleBtn.addEventListener("click", function () {
-    window.location.href = "https://tvt-beryl.vercel.app/";
+    window.location.href = "https://tvt-beryl.vercel.app/"; // Link to Music page
 });
 
 // Fetch radio stations from radio.json
@@ -347,7 +347,10 @@ fetch('radio.json')
         let randomIndex = Math.floor(Math.random() * radioStations.length);
         playStation(randomIndex);
     })
-    .catch(error => console.error('Error fetching radio stations:', error));
+    .catch(error => {
+        console.error('Error fetching radio stations:', error);
+        alert('Unable to load radio stations. Please try again later.');
+    });
 
 function initRadioStations() {
     radioStations.forEach((station, index) => {
@@ -370,13 +373,29 @@ function playStation(index) {
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
             playRadio();
         });
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            console.error('HLS Error:', data);
+            alert('Error loading HLS stream. Please try another station.');
+            pauseRadio();  // Pause on error
+        });
     } else if (station.url.includes(".mp3")) {
         // If it's an MP3 stream, directly set the src
         radioAudio.src = station.url;
+        radioAudio.onerror = function () {
+            console.error('Error loading MP3 stream.');
+            alert('Error loading MP3 stream. Please try another station.');
+            pauseRadio();  // Pause on error
+        };
         playRadio();
     } else {
         // Fallback for other types of streams
         radioAudio.src = station.url;
+        radioAudio.onerror = function () {
+            console.error('Error loading stream.');
+            alert('Error loading stream. Please try another station.');
+            pauseRadio();  // Pause on error
+        };
         playRadio();
     }
 
@@ -402,7 +421,11 @@ function toggleRadioPlay() {
 }
 
 function playRadio() {
-    radioAudio.play();
+    radioAudio.play().catch((error) => {
+        console.error('Error starting audio playback:', error);
+        alert('Unable to start audio playback. Please check your connection or try another station.');
+        pauseRadio();
+    });
     radioPlayIcon.innerText = "pause";
     setupVisualizer();
 }
@@ -503,9 +526,7 @@ radioAudio.onerror = function (e) {
     console.error("Error loading stream: ", e);
     alert("Failed to load radio station. Please try another one.");
 };
-
 </script>
-
 
 </body>
 
