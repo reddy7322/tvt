@@ -23,7 +23,7 @@
             height: 100%;
             overflow: hidden;
         }
-
+      
         #radio-station-select {
             width: 100%;
             padding: 10px;
@@ -159,29 +159,14 @@
             font-weight: bold;
         }
 
-        /* Radio Poster and Visualizer */
-        #radio-poster-container {
-            position: relative;
+        /* Radio Poster */
+        #radio-poster {
             width: 350px;
             height: 350px;
-        }
-
-        #radio-poster {
-            width: 100%;
-            height: 100%;
             background-size: cover;
             background-position: center;
             border-radius: 15px;
-            filter: blur(2px);
-            opacity: 80;
-        }
-
-        #visualizer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            margin-bottom: 15px;
         }
 
         /* Radio Controls */
@@ -278,20 +263,14 @@
                 <p id="radio-station-name">Radio Station</p>
             </div>
 
-            <div id="radio-poster-container">
-                <div id="radio-poster"></div>
-                <canvas id="visualizer"></canvas>
-            </div>
+            <div id="radio-poster"></div>
 
             <div id="radio-controls">
-                <button id="radio-prev" onclick="previousStation()">
-                    <i class="material-icons">skip_previous</i>
-                </button>
                 <button id="radio-play" onclick="toggleRadioPlay()">
                     <i class="material-icons" id="radio-play-icon">play_arrow</i>
                 </button>
-                <button id="radio-next" onclick="nextStation()">
-                    <i class="material-icons">skip_next</i>
+                <button id="radio-volume">
+                    <i class="material-icons">volume_up</i>
                 </button>
             </div>
 
@@ -299,7 +278,7 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
-<p></p>
+
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -317,180 +296,122 @@
     <audio id="radio-audio" controls></audio>
 
     <script>
-let radioAudio = document.getElementById("radio-audio");
-let radioPlayButton = document.getElementById("radio-play");
-let radioPlayIcon = document.getElementById("radio-play-icon");
-let radioProgressBar = document.getElementById("radio-progress-bar");
-let radioTimeDisplay = document.getElementById("radio-time-display");
-let radioStationSelect = document.getElementById("radio-station-select");
-let loader = document.getElementById("loader");
-let content = document.getElementById("content");
-let radioPoster = document.getElementById("radio-poster");
-let visualizerCanvas = document.getElementById("visualizer");
-let visualizerCtx = visualizerCanvas.getContext("2d");
-let radioStations = [];
-let currentStationIndex = 0;
+        let radioAudio = document.getElementById("radio-audio");
+        let radioPlayButton = document.getElementById("radio-play");
+        let radioPlayIcon = document.getElementById("radio-play-icon");
+        let radioProgressBar = document.getElementById("radio-progress-bar");
+        let radioTimeDisplay = document.getElementById("radio-time-display");
+        let radioStationSelect = document.getElementById("radio-station-select");
+        let loader = document.getElementById("loader");
+        let content = document.getElementById("content");
+        let radioPoster = document.getElementById("radio-poster");
+        let radioStations = [];
 
-let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
+        let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
-musicPageToggleBtn.addEventListener("click", function () {
-    window.location.href = "https://tvt-beryl.vercel.app/";
-});
-
-// Fetch radio stations from radio.json
-fetch('radio.json')
-    .then(response => response.json())
-    .then(data => {
-        radioStations = data;
-        initRadioStations();
-        playStation(0);
-    })
-    .catch(error => console.error('Error fetching radio stations:', error));
-
-function initRadioStations() {
-    radioStations.forEach((station, index) => {
-        let option = document.createElement("option");
-        option.value = index;
-        option.textContent = station.name;
-        radioStationSelect.appendChild(option);
-    });
-}
-
-function playStation(index) {
-    currentStationIndex = index;
-    let station = radioStations[index];
-
-    if (Hls.isSupported() && station.url.includes(".m3u8")) {
-        let hls = new Hls();
-        hls.loadSource(station.url);
-        hls.attachMedia(radioAudio);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            playRadio();
+        musicPageToggleBtn.addEventListener("click", function () {
+            window.location.href = "https://tvt-beryl.vercel.app/";
         });
-    } else {
-        radioAudio.src = station.url;
-        playRadio();
-    }
 
-    radioPoster.style.backgroundImage = `url(${station.poster})`;
-    document.getElementById("radio-station-name").innerText = station.name;
-    radioStationSelect.value = index;
-}
+        // Fetch radio stations from radio.json
+        fetch('radio.json')
+            .then(response => response.json())
+            .then(data => {
+                radioStations = data;
+                initRadioStations();
+                playRandomStation();
+            })
+            .catch(error => console.error('Error fetching radio stations:', error));
 
-function changeRadioStation() {
-    let selectedIndex = parseInt(radioStationSelect.value);
-    if (!isNaN(selectedIndex)) {
-        playStation(selectedIndex);
-    }
-}
-
-function toggleRadioPlay() {
-    if (radioAudio.paused) {
-        playRadio();
-    } else {
-        pauseRadio();
-    }
-}
-
-function playRadio() {
-    radioAudio.play();
-    radioPlayIcon.innerText = "pause";
-    setupVisualizer();
-}
-
-function pauseRadio() {
-    radioAudio.pause();
-    radioPlayIcon.innerText = "play_arrow";
-}
-
-function nextStation() {
-    let nextIndex = (currentStationIndex + 1) % radioStations.length;
-    playStation(nextIndex);
-}
-
-function previousStation() {
-    let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-    playStation(prevIndex);
-}
-
-radioAudio.ontimeupdate = function () {
-    let currentTime = radioAudio.currentTime;
-    let duration = radioAudio.duration;
-    let progress = (currentTime / duration) * 100;
-    radioProgressBar.value = progress;
-
-    let minutes = Math.floor(currentTime / 60);
-    let seconds = Math.floor(currentTime % 60);
-    radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-};
-
-function seekRadio() {
-    let value = radioProgressBar.value;
-    let duration = radioAudio.duration;
-    radioAudio.currentTime = (value / 100) * duration;
-}
-
-function setupVisualizer() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaElementSource(radioAudio);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    visualizerCanvas.width = visualizerCanvas.clientWidth;
-    visualizerCanvas.height = visualizerCanvas.clientHeight;
-
-    function draw() {
-        requestAnimationFrame(draw);
-
-        analyser.getByteFrequencyData(dataArray);
-
-        visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-
-        const barWidth = (visualizerCanvas.width / bufferLength) * 2.5;
-        let barHeight;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i] / 2;
-
-            // Create a gradient
-            const gradient = visualizerCtx.createLinearGradient(
-                0,
-                visualizerCanvas.height - barHeight,
-                0,
-                visualizerCanvas.height
-            );
-
-            // Add gradient color stops
-            gradient.addColorStop(0, '#FF0000'); // Red
-            gradient.addColorStop(0.5, '#FECD00'); // Jonquil
-            gradient.addColorStop(1, '#349DA1'); // Dark Cyan
-
-            visualizerCtx.fillStyle = gradient;
-
-            visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
-
-            x += barWidth + 1;
+        function initRadioStations() {
+            radioStations.forEach(station => {
+                let option = document.createElement("option");
+                option.value = station.name;
+                option.textContent = station.name;
+                radioStationSelect.appendChild(option);
+            });
         }
-    }
 
-    draw();
-}
+        function playRandomStation() {
+            if (radioStations.length > 0) {
+                let randomIndex = Math.floor(Math.random() * radioStations.length);
+                let station = radioStations[randomIndex];
+                if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                    let hls = new Hls();
+                    hls.loadSource(station.url);
+                    hls.attachMedia(radioAudio);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        playRadio();
+                    });
+                } else {
+                    radioAudio.src = station.url;
+                    playRadio();
+                }
+                radioPoster.style.backgroundImage = `url(${station.poster})`;
+                document.getElementById("radio-station-name").innerText = station.name;
+            }
+        }
 
-// Initialize after page load
-window.onload = function () {
-    loader.style.display = "none";
-    content.style.display = "block";
-};
+        function changeRadioStation() {
+            let selectedStation = radioStationSelect.value;
+            if (selectedStation) {
+                let station = radioStations.find(station => station.name === selectedStation);
+                if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                    let hls = new Hls();
+                    hls.loadSource(station.url);
+                    hls.attachMedia(radioAudio);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        playRadio();
+                    });
+                } else {
+                    radioAudio.src = station.url;
+                    playRadio();
+                }
+                radioPoster.style.backgroundImage = `url(${station.poster})`;
+            }
+        }
 
+        function toggleRadioPlay() {
+            if (radioAudio.paused) {
+                playRadio();
+            } else {
+                pauseRadio();
+            }
+        }
+
+        function playRadio() {
+            radioAudio.play();
+            radioPlayIcon.innerText = "pause";
+        }
+
+        function pauseRadio() {
+            radioAudio.pause();
+            radioPlayIcon.innerText = "play_arrow";
+        }
+
+        radioAudio.ontimeupdate = function () {
+            let currentTime = radioAudio.currentTime;
+            let duration = radioAudio.duration;
+            let progress = (currentTime / duration) * 100;
+            radioProgressBar.value = progress;
+
+            let minutes = Math.floor(currentTime / 60);
+            let seconds = Math.floor(currentTime % 60);
+            radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+        };
+
+        function seekRadio() {
+            let value = radioProgressBar.value;
+            let duration = radioAudio.duration;
+            radioAudio.currentTime = (value / 100) * duration;
+        }
+
+        // Initialize after page load
+        window.onload = function () {
+            loader.style.display = "none";
+            content.style.display = "block";
+        };
     </script>
-
 </body>
 
 </html>
