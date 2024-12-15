@@ -316,7 +316,7 @@
 
     <audio id="radio-audio" controls></audio>
 
-    <script>
+<script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -343,7 +343,7 @@ fetch('radio.json')
     .then(data => {
         radioStations = data;
         initRadioStations();
-        playStation(0);
+        playRandomStation();  // Play a random station on startup
     })
     .catch(error => console.error('Error fetching radio stations:', error));
 
@@ -354,6 +354,12 @@ function initRadioStations() {
         option.textContent = station.name;
         radioStationSelect.appendChild(option);
     });
+}
+
+function playRandomStation() {
+    // Generate a random index for the station
+    let randomIndex = Math.floor(Math.random() * radioStations.length);
+    playStation(randomIndex);
 }
 
 function playStation(index) {
@@ -488,8 +494,8 @@ window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
 };
+</script>
 
-    </script>
 
 </body>
 
