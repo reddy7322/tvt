@@ -163,7 +163,7 @@
         #radio-poster-container {
             position: relative;
             width: 350px;
-            height: 350px;
+            height: 150px;
         }
 
         #radio-poster {
@@ -181,7 +181,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 50px;
         }
 
         /* Radio Controls */
@@ -299,7 +299,7 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
-<p></p>
+            <p></p>
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -334,7 +334,7 @@ let currentStationIndex = 0;
 let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
 musicPageToggleBtn.addEventListener("click", function () {
-    window.location.href = "https://tvt-beryl.vercel.app/";
+    window.location.href = "https://tvt-beryl.vercel.app/"; // Adjust the URL as needed
 });
 
 // Fetch radio stations from radio.json
@@ -436,7 +436,7 @@ function setupVisualizer() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioContext.createMediaElementSource(radioAudio);
     const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
+    analyser.fftSize = 256; // Small thin bars
 
     source.connect(analyser);
     analyser.connect(audioContext.destination);
@@ -491,8 +491,8 @@ window.onload = function () {
     content.style.display = "block";
 };
 
-</script>
 
+</script>
 
 </body>
 
