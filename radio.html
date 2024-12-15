@@ -316,7 +316,7 @@
 
     <audio id="radio-audio" controls></audio>
 
-    <script>
+<script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -334,7 +334,7 @@ let currentStationIndex = 0;
 let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
 musicPageToggleBtn.addEventListener("click", function () {
-    window.location.href = "https://tvt-beryl.vercel.app/";
+    window.location.href = "https://tvt-beryl.vercel.app/"; // Adjust the URL for your music page
 });
 
 // Fetch radio stations from radio.json
@@ -360,18 +360,41 @@ function playStation(index) {
     currentStationIndex = index;
     let station = radioStations[index];
 
-    if (Hls.isSupported() && station.url.includes(".m3u8")) {
-        let hls = new Hls();
-        hls.loadSource(station.url);
-        hls.attachMedia(radioAudio);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            playRadio();
-        });
-    } else {
-        radioAudio.src = station.url;
-        playRadio();
+    // Clear any previous errors or issues
+    if (radioAudio.error) {
+        radioAudio.error = null;
     }
 
+    // First try with the default audio player
+    radioAudio.src = station.url;
+    radioAudio.load(); // Ensure the audio source is loaded before attempting to play
+    radioAudio.play().then(() => {
+        // Success with default player
+        radioPoster.style.backgroundImage = `url(${station.poster})`;
+        document.getElementById("radio-station-name").innerText = station.name;
+        radioStationSelect.value = index;
+        radioPlayIcon.innerText = "pause";
+        setupVisualizer();
+    }).catch((error) => {
+        // If default audio player fails, fallback to HLS
+        console.error('Audio player failed to load, switching to HLS:', error);
+        if (Hls.isSupported() && station.url.includes(".m3u8")) {
+            let hls = new Hls();
+            hls.loadSource(station.url);
+            hls.attachMedia(radioAudio);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                playRadio();
+            });
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                console.error('HLS error:', data);
+                alert('Error loading the radio stream. Please try another station.');
+            });
+        } else {
+            alert('This station is not supported by the default audio player or HLS.');
+        }
+    });
+
+    // Update radio poster and name
     radioPoster.style.backgroundImage = `url(${station.poster})`;
     document.getElementById("radio-station-name").innerText = station.name;
     radioStationSelect.value = index;
@@ -488,8 +511,8 @@ window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
 };
+</script>
 
-    </script>
 
 </body>
 
