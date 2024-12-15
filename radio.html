@@ -327,154 +327,68 @@
         let content = document.getElementById("content");
         let radioPoster = document.getElementById("radio-poster");
         let visualizerCanvas = document.getElementById("visualizer");
-        let visualizerCtx = visualizerCanvas.getContext("2d");
-        let radioStations = [];
-        let currentStationIndex = 0;
 
-        let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
-
-        musicPageToggleBtn.addEventListener("click", function () {
-            window.location.href = "https://tvt-beryl.vercel.app/";
-        });
-
-        // Fetch radio stations from radio.json
-        fetch('radio.json')
-            .then(response => response.json())
-            .then(data => {
-                radioStations = data;
-                initRadioStations();
-                playStation(0);
-            })
-            .catch(error => console.error('Error fetching radio stations:', error));
-
-        function initRadioStations() {
-            radioStations.forEach((station, index) => {
-                let option = document.createElement("option");
-                option.value = index;
-                option.textContent = station.name;
-                radioStationSelect.appendChild(option);
-            });
-        }
-
-        function playStation(index) {
-            currentStationIndex = index;
-            let station = radioStations[index];
-
-            if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                let hls = new Hls();
-                hls.loadSource(station.url);
-                hls.attachMedia(radioAudio);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    playRadio();
-                });
-            } else {
-                radioAudio.src = station.url;
-                playRadio();
-            }
-
-            radioPoster.style.backgroundImage = `url(${station.poster})`;
-            document.getElementById("radio-station-name").innerText = station.name;
-            radioStationSelect.value = index;
-        }
-
-        function changeRadioStation() {
-            let selectedIndex = parseInt(radioStationSelect.value);
-            if (!isNaN(selectedIndex)) {
-                playStation(selectedIndex);
-            }
-        }
-
-        function toggleRadioPlay() {
-            if (radioAudio.paused) {
-                playRadio();
-            } else {
-                pauseRadio();
-            }
-        }
-
-        function playRadio() {
-            radioAudio.play();
-            radioPlayIcon.innerText = "pause";
-            setupVisualizer();
-        }
-
-        function pauseRadio() {
-            radioAudio.pause();
-            radioPlayIcon.innerText = "play_arrow";
-        }
-
-        function nextStation() {
-            let nextIndex = (currentStationIndex + 1) % radioStations.length;
-            playStation(nextIndex);
-        }
-
-        function previousStation() {
-            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            playStation(prevIndex);
-        }
-
-        radioAudio.ontimeupdate = function () {
-            let currentTime = radioAudio.currentTime;
-            let duration = radioAudio.duration;
-            let progress = (currentTime / duration) * 100;
-            radioProgressBar.value = progress;
-
-            let minutes = Math.floor(currentTime / 60);
-            let seconds = Math.floor(currentTime % 60);
-            radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
-        };
-
-        function seekRadio() {
-            let value = radioProgressBar.value;
-            let duration = radioAudio.duration;
-            radioAudio.currentTime = (value / 100) * duration;
-        }
+        // Audio context for visualizer
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let bufferLength;
+        let canvasContext = visualizerCanvas.getContext("2d");
 
         function setupVisualizer() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaElementSource(radioAudio);
-            const analyser = audioContext.createAnalyser();
-            analyser.fftSize = 256;
-
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            let source = audioContext.createMediaElementSource(radioAudio);
             source.connect(analyser);
             analyser.connect(audioContext.destination);
 
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            visualizerCanvas.width = visualizerCanvas.clientWidth;
-            visualizerCanvas.height = visualizerCanvas.clientHeight;
-
-            function draw() {
-                requestAnimationFrame(draw);
-
-                analyser.getByteFrequencyData(dataArray);
-
-                visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-
-                const barWidth = (visualizerCanvas.width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
-
-                for (let i = 0; i < bufferLength; i++) {
-                    barHeight = dataArray[i] / 2;
-
-                    visualizerCtx.fillStyle = `rgb(${barHeight + 100}, 50, 150)`;
-                    visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
-
-                    x += barWidth + 1;
-                }
-            }
-
-            draw();
+            analyser.fftSize = 256;
+            bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
         }
 
-        // Initialize after page load
-        window.onload = function () {
-            loader.style.display = "none";
-            content.style.display = "block";
-        };
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+            let barWidth = (visualizerCanvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i];
+
+                let red = barHeight + 25 * (i / bufferLength);
+                let green = 250 * (i / bufferLength);
+                let blue = 50;
+
+                canvasContext.fillStyle = `rgb(${red},${green},${blue})`;
+                canvasContext.fillRect(x, visualizerCanvas.height - barHeight / 2, barWidth, barHeight / 2);
+
+                x += barWidth + 1;
+            }
+        }
+
+        radioAudio.addEventListener("play", () => {
+            if (!audioContext) {
+                setupVisualizer();
+            }
+            audioContext.resume().then(() => {
+                drawVisualizer();
+            });
+        });
+
+        radioAudio.addEventListener("pause", () => {
+            if (audioContext) {
+                audioContext.suspend();
+            }
+        });
+
     </script>
+
 </body>
 
 </html>
