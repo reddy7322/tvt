@@ -362,11 +362,14 @@ function playStation(index) {
     currentStationIndex = index;
     let station = radioStations[index];
 
-    // Check if the URL is a .m3u8 (HLS) stream or .mp3 stream
-    if (station.url.includes(".m3u8") && Hls.isSupported()) {
+    // Check if the URL is a supported stream type (.mp3, .m3u8, .aac, etc.)
+    let streamUrl = station.url;
+    let fileExtension = streamUrl.split('.').pop().toLowerCase();
+
+    if (fileExtension === 'm3u8' && Hls.isSupported()) {
         console.log("Playing HLS stream for " + station.name);
         let hls = new Hls();
-        hls.loadSource(station.url);
+        hls.loadSource(streamUrl);
         hls.attachMedia(radioAudio);
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
             console.log("HLS stream loaded successfully");
@@ -378,12 +381,12 @@ function playStation(index) {
             alert("Error loading HLS stream, switching to next station.");
             nextStation();
         });
-    } else if (station.url.includes(".mp3")) {
-        console.log("Playing MP3 stream for " + station.name);
-        radioAudio.src = station.url;
+    } else if (fileExtension === 'mp3' || fileExtension === 'aac' || fileExtension === 'ogg') {
+        console.log("Playing supported MP3/AAC/OGG stream for " + station.name);
+        radioAudio.src = streamUrl;
         radioAudio.onerror = function () {
-            console.error("Error loading MP3 stream: ", station.url);
-            alert("Error loading MP3 stream, switching to next station.");
+            console.error("Error loading stream: ", streamUrl);
+            alert("Error loading stream, switching to next station.");
             nextStation();
         };
         playRadio();
