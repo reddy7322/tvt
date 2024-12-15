@@ -555,9 +555,9 @@ function toggleLyrics() {
 }
 
 const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80','Telugu Old','Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi','P. Susheela',
-    'Ghantasala','S. Janaki','Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy','veturi',
+    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
     'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
     'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
     'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
@@ -597,25 +597,31 @@ async function searchSongs(query) {
 // Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const lyricsText = document.getElementById("lyrics-text");
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
 
-    if (data.data) {
-        const lyrics = data.data.lyrics.split('\n');
-        let formattedLyrics = lyrics.map((line, index) => 
-            `<p class="lyrics-line" id="line-${index}">${line}</p>`
-        ).join('');
-        lyricsText.innerHTML = formattedLyrics;
-        lyricsContainer.style.display = 'block';
+        if (data.data) {
+            const lyrics = data.data.lyrics.split('\n');
+            let formattedLyrics = lyrics.map((line, index) => 
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            ).join('');
+            lyricsText.innerHTML = formattedLyrics;
+            lyricsContainer.style.display = 'block';
 
-        // Initialize the first line as highlighted
-        highlightCurrentLine(0);
-    } else {
-        lyricsText.innerText = 'Lyrics not available.';
-        lyricsContainer.style.display = 'none';
+            // Initialize the first line as highlighted
+            highlightCurrentLine(0);
+        } else {
+            lyricsText.innerText = 'Lyrics not available.';
+            lyricsContainer.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching lyrics:', error);
+        // Prevent showing error message, instead hide lyrics container
+        document.getElementById("lyrics-container").style.display = 'none';
     }
 }
 
