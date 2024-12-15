@@ -1,15 +1,10 @@
 [
-   {
-        "name": "Ap 9 FM",
-        "url": "https://stream.ap9fm.in/radio/8000/radio.mp3",
-        "poster": "https://onlineradiofm.in/assets/image/radio/180/AP-9-Fm-Radio-Telugu.png"
-    },
     {
-        "name": "TVTelugu - Exclusive Radio",
-        "url": "https://stream-152.zeno.fm/f7punaqmcnbuv?zs=zgARRMwMT9WfdxjzLOGXPQ",
-        "poster": "https://tvtelugu.github.io/images/tvtelugu-B.png"
+        "name": "FM Rainbow Visakhapatnam",
+        "url": "https://air.pc.cdn.bitgravity.com/air/live/pbaudio081/chunklist.m3u8",
+        "poster": "https://onlineradiostations.in/uploads/img/air-fm-rainbow-visakhapatnam.jpg"
     },
-    {
+      {
         "name": "AIR Telugu - Hyderabad",
         "url": "https://air.pc.cdn.bitgravity.com/air/live/pbaudio032/chunklist.m3u8",
         "poster": "https://onlineradiofm.in/assets/image/radio/180/air-hyderabad-a.jpg"
@@ -105,11 +100,6 @@
         "poster": "https://onlineradiofm.in/assets/image/radio/180/londonteluguradio.png"
     },
     {
-        "name": "FM Rainbow Visakhapatnam",
-        "url": "https://air.pc.cdn.bitgravity.com/air/live/pbaudio081/chunklist.m3u8",
-        "poster": "https://onlineradiostations.in/uploads/img/air-fm-rainbow-visakhapatnam.jpg"
-    },
-    {
         "name": "Radio City - 91.1 FM Visakhapatnam",
         "url": "https://prclive1.listenon.in/",
         "poster": "https://onlineradiostations.in/uploads/img/radio-city-new-visakhapatnam.jpg"
@@ -199,4 +189,14 @@
         "url": "https://stream-154.zeno.fm/tqhegaztqfhvv?zs=FbWW7wFORm-ad6VAsDrnRQ",
         "poster": "https://i.ibb.co/rxDq0jH/Thaman-Hits.webp"
     }
+    {
+        "name": "Ap 9 FM",
+        "url": "https://stream.ap9fm.in/radio/8000/radio.mp3",
+        "poster": "https://onlineradiofm.in/assets/image/radio/180/AP-9-Fm-Radio-Telugu.png"
+    },
+    {
+        "name": "TVTelugu - Exclusive Radio",
+        "url": "https://stream-152.zeno.fm/f7punaqmcnbuv?zs=zgARRMwMT9WfdxjzLOGXPQ",
+        "poster": "https://tvtelugu.github.io/images/tvtelugu-B.png"
+    },
 ]
