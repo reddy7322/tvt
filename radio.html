@@ -23,11 +23,12 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Hide scrollbars */
         }
 
         .content-wrapper {
             flex: 1; /* Ensures content takes up available space */
-            overflow-y: auto; /* Prevents overflow hiding the footer */
+            overflow: hidden; /* Prevents overflow */
         }
 
         #radio-station-select {
@@ -152,7 +153,7 @@
             align-items: center;
             padding: 10px;
             flex: 1;
-            overflow-y: auto;
+            overflow-y: hidden; /* Hide scrollbars */
         }
 
         /* Radio Header */
@@ -258,6 +259,11 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        /* Hide Radio Player */
+        .hide-radio-player {
+            display: none; /* This hides the radio player */
+        }
     </style>
 </head>
 
@@ -284,7 +290,7 @@
 
     <div class="content-wrapper" id="content" class="hide-loader">
         <!-- Radio Player -->
-        <div id="radio-player-container">
+        <div id="radio-player-container" class="hide-radio-player">
             <div id="radio-header">
                 <p id="radio-station-name">Radio Station</p>
             </div>
@@ -327,6 +333,10 @@
     <audio id="radio-audio" controls></audio>
 
     <script>
+        // Function to hide the radio player and scrollbars
+        function toggleRadioPlayerVisibility() {
+            document.getElementById('radio-player-container').classList.toggle('hide-radio-player');
+        }
         let radioAudio = document.getElementById("radio-audio");
         let radioPlayButton = document.getElementById("radio-play");
         let radioPlayIcon = document.getElementById("radio-play-icon");
