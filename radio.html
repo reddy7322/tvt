@@ -21,7 +21,7 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: hidden;
+            overflow: auto; /* Allow scrolling */
         }
 
         #radio-station-select {
@@ -141,9 +141,10 @@
 
         /* Main Layout */
         .container {
+            min-height: 100vh; /* Ensures the container fills the screen */
             display: flex;
             flex-direction: column;
-            height: 100%;
+            justify-content: space-between; /* Push footer to the bottom */
         }
 
         /* Radio Player */
@@ -327,153 +328,155 @@
     <audio id="radio-audio" controls></audio>
 
     <script>
-let radioAudio = document.getElementById("radio-audio");
-let radioPlayButton = document.getElementById("radio-play");
-let radioPlayIcon = document.getElementById("radio-play-icon");
-let radioProgressBar = document.getElementById("radio-progress-bar");
-let radioTimeDisplay = document.getElementById("radio-time-display");
-let radioStationSelect = document.getElementById("radio-station-select");
-let loader = document.getElementById("loader");
-let content = document.getElementById("content");
-let radioPoster = document.getElementById("radio-poster");
-let radioStations = [];
-let currentStationIndex = 0;
+        let radioAudio = document.getElementById("radio-audio");
+        let radioPlayButton = document.getElementById("radio-play");
+        let radioPlayIcon = document.getElementById("radio-play-icon");
+        let radioProgressBar = document.getElementById("radio-progress-bar");
+        let radioTimeDisplay = document.getElementById("radio-time-display");
+        let radioStationSelect = document.getElementById("radio-station-select");
+        let loader = document.getElementById("loader");
+        let content = document.getElementById("content");
+        let radioPoster = document.getElementById("radio-poster");
+        let radioStations = [];
+        let currentStationIndex = 0;
 
-let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
+        let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
-musicPageToggleBtn.addEventListener("click", function () {
-    window.location.href = "https://tvt-beryl.vercel.app/";
-});
-
-// Fetch radio stations from radio.json
-fetch('radio.json')
-    .then(response => response.json())
-    .then(data => {
-        radioStations = data;
-        initRadioStations();
-        playStation(0);
-    })
-    .catch(error => console.error('Error fetching radio stations:', error));
-
-function initRadioStations() {
-    radioStations.forEach((station, index) => {
-        let option = document.createElement("option");
-        option.value = index;
-        option.textContent = station.name;
-        radioStationSelect.appendChild(option);
-    });
-}
-
-function playStation(index) {
-    currentStationIndex = index;
-    let station = radioStations[index];
-
-    if (Hls.isSupported() && station.url.includes(".m3u8")) {
-        let hls = new Hls();
-        hls.loadSource(station.url);
-        hls.attachMedia(radioAudio);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            playRadio();
+        musicPageToggleBtn.addEventListener("click", function () {
+            window.location.href = "https://tvt-beryl.vercel.app/";
         });
-    } else {
-        radioAudio.src = station.url;
-        playRadio();
-    }
 
-    // Trigger animation for the poster
-    radioPoster.style.animation = 'none';
-    setTimeout(() => {
-        radioPoster.style.animation = '';
-        radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
-    }, 50);
+        // Fetch radio stations from radio.json
+        fetch('radio.json')
+            .then(response => response.json())
+            .then(data => {
+                radioStations = data;
+                initRadioStations();
+                playStation(0);
+            })
+            .catch(error => console.error('Error fetching radio stations:', error));
 
-    document.getElementById("radio-station-name").innerText = station.name;
-    radioStationSelect.value = index;
-}
+        function initRadioStations() {
+            radioStations.forEach((station, index) => {
+                let option = document.createElement("option");
+                option.value = index;
+                option.textContent = station.name;
+                radioStationSelect.appendChild(option);
+            });
+        }
 
-function changeRadioStation() {
-    let selectedIndex = parseInt(radioStationSelect.value);
-    if (!isNaN(selectedIndex)) {
-        playStation(selectedIndex);
-    }
-}
+        function playStation(index) {
+            currentStationIndex = index;
+            let station = radioStations[index];
 
-function toggleRadioPlay() {
-    if (radioAudio.paused) {
-        playRadio();
-    } else {
-        pauseRadio();
-    }
-}
+            if (Hls.isSupported() && station.url.includes(".m3u8")) {
+                let hls = new Hls();
+                hls.loadSource(station.url);
+                hls.attachMedia(radioAudio);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    playRadio();
+                });
+            } else {
+                radioAudio.src = station.url;
+                playRadio();
+            }
 
-function playRadio() {
-    radioAudio.play();
-    radioPlayIcon.innerText = "pause";
-}
+            // Trigger animation for the poster
+            radioPoster.style.animation = 'none';
+            setTimeout(() => {
+                radioPoster.style.animation = '';
+                radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
+            }, 50);
 
-function pauseRadio() {
-    radioAudio.pause();
-    radioPlayIcon.innerText = "play_arrow";
-}
+            document.getElementById("radio-station-name").innerText = station.name;
+            radioStationSelect.value = index;
+        }
 
-function nextStation() {
-    let nextIndex = (currentStationIndex + 1) % radioStations.length;
-    playStation(nextIndex);
-}
+        function changeRadioStation() {
+            let selectedIndex = parseInt(radioStationSelect.value);
+            if (!isNaN(selectedIndex)) {
+                playStation(selectedIndex);
+            }
+        }
 
-function previousStation() {
-    let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-    playStation(prevIndex);
-}
+        function toggleRadioPlay() {
+            if (radioAudio.paused) {
+                playRadio();
+            } else {
+                pauseRadio();
+            }
+        }
 
-radioAudio.ontimeupdate = function () {
-    let currentTime = radioAudio.currentTime;
-    let duration = radioAudio.duration;
-    let progress = (currentTime / duration) * 100;
-    radioProgressBar.value = progress;
-(minutes = currentTime / 60);
-let seconds = Math.floor(currentTime % 60);
-seconds = seconds < 10 ? "0" + seconds : seconds;
-radioTimeDisplay.innerText = `${minutes}:${seconds}`;
-};
+        function playRadio() {
+            radioAudio.play();
+            radioPlayIcon.innerText = "pause";
+        }
 
-radioProgressBar.oninput = function () {
-let duration = radioAudio.duration;
-let seekTime = (radioProgressBar.value / 100) * duration;
-radioAudio.currentTime = seekTime;
-};
+        function pauseRadio() {
+            radioAudio.pause();
+            radioPlayIcon.innerText = "play_arrow";
+        }
 
-radioAudio.onended = function () {
-nextStation();
-};
+        function nextStation() {
+            let nextIndex = (currentStationIndex + 1) % radioStations.length;
+            playStation(nextIndex);
+        }
 
-// Update digital clock with IST and AM/PM
-function updateDigitalClock() {
-    const now = new Date();
-    const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    const istTime = new Date(now.getTime() + offset);
-    
-    let hours = istTime.getUTCHours();
-    const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
-    const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    
-    hours = hours % 12 || 12; // Convert to 12-hour format
-    document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
-}
+        function previousStation() {
+            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
+            playStation(prevIndex);
+        }
 
-setInterval(updateDigitalClock, 1000);
+        radioAudio.ontimeupdate = function () {
+            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
+                let currentTime = radioAudio.currentTime;
+                let duration = radioAudio.duration;
+                let progress = (currentTime / duration) * 100;
+                radioProgressBar.value = progress;
 
-window.onload = function () {
-    setTimeout(() => {
-        loader.classList.add("hide-loader");
-        content.classList.remove("hide-loader");
-    }, 1000);
-    updateDigitalClock(); // Initialize clock on load
-};
+                let minutes = Math.floor(currentTime / 60);
+                let seconds = Math.floor(currentTime % 60);
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
+            }
+        };
 
+        radioProgressBar.oninput = function () {
+            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
+                let duration = radioAudio.duration;
+                let seekTime = (radioProgressBar.value / 100) * duration;
+                radioAudio.currentTime = seekTime;
+            }
+        };
+
+        radioAudio.onended = function () {
+            nextStation();
+        };
+
+        // Update digital clock with IST and AM/PM
+        function updateDigitalClock() {
+            const now = new Date();
+            const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+            const istTime = new Date(now.getTime() + offset);
+            
+            let hours = istTime.getUTCHours();
+            const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
+            const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
+            const ampm = hours >= 12 ? "PM" : "AM";
+            
+            hours = hours % 12 || 12; // Convert to 12-hour format
+            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+        }
+
+        setInterval(updateDigitalClock, 1000);
+
+        window.onload = function () {
+            setTimeout(() => {
+                loader.classList.add("hide-loader");
+                content.classList.remove("hide-loader");
+            }, 1500);
+        };
     </script>
-
 </body>
 
 </html>
