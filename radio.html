@@ -21,7 +21,7 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: auto; /* Allow scrolling */
+            overflow: auto;
         }
 
         #radio-station-select {
@@ -122,8 +122,12 @@
 
         #digital-clock {
             margin-left: 20px;
-            font-size: 18px;
+            font-size: 24px;
             font-weight: normal;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         #search-container {
@@ -141,10 +145,10 @@
 
         /* Main Layout */
         .container {
-            min-height: 100vh; /* Ensures the container fills the screen */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Push footer to the bottom */
+            justify-content: space-between;
         }
 
         /* Radio Player */
@@ -259,6 +263,67 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        /* Flip Clock Styles */
+        .flip-clock {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .flip-clock span {
+            margin: 0 10px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .flip-clock span:before, .flip-clock span:after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: #333;
+            border-radius: 5px;
+            transform-origin: bottom;
+            animation: flipAnimation 1s ease-in-out infinite;
+        }
+
+        .flip-clock span span {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        @keyframes flipAnimation {
+            0% {
+                transform: rotateX(0deg);
+            }
+            50% {
+                transform: rotateX(180deg);
+            }
+            100% {
+                transform: rotateX(360deg);
+            }
+        }
+
+        .flip-clock span span.current, .flip-clock span span.next {
+            opacity: 1;
+        }
+
+        .flip-clock span span.next {
+            transform: rotateX(180deg);
+        }
+
+        .flip-clock span span.current {
+            opacity: 0;
+        }
     </style>
 </head>
 
@@ -325,7 +390,7 @@
         </footer>
     </div>
 
-    <audio id="radio-audio" controls></audio>
+    <audio id="radio-audio" controls style="display:none;"></audio>
 
     <script>
         let radioAudio = document.getElementById("radio-audio");
@@ -343,7 +408,7 @@
         let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
         musicPageToggleBtn.addEventListener("click", function () {
-            window.location.href = "https://tvt-beryl.vercel.app/";
+            window.location.href = "https://tvt-swara.vercel.app/";
         });
 
         // Fetch radio stations from radio.json
@@ -465,18 +530,44 @@
             const ampm = hours >= 12 ? "PM" : "AM";
             
             hours = hours % 12 || 12; // Convert to 12-hour format
-            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+
+            let timeString = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+            let date = istTime.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Update flip clock UI
+            flipClockTime(timeString);
+            document.getElementById("digital-clock").innerHTML = `${timeString}<div class="flip-clock">${date}</div>`;
         }
 
-        setInterval(updateDigitalClock, 1000);
+        // Flip clock animation
+        function flipClockTime(timeString) {
+            const timeDigits = timeString.replace(/[^0-9]/g, '').split('');
+            let timeDisplay = document.querySelector(".flip-clock");
 
-        window.onload = function () {
-            setTimeout(() => {
-                loader.classList.add("hide-loader");
-                content.classList.remove("hide-loader");
-            }, 1500);
-        };
+            timeDigits.forEach((digit, index) => {
+                let digitSpan = document.createElement('span');
+                let current = document.createElement('span');
+                let next = document.createElement('span');
+
+                current.classList.add('current');
+                next.classList.add('next');
+                current.innerHTML = digit;
+                next.innerHTML = digit;
+                digitSpan.appendChild(current);
+                digitSpan.appendChild(next);
+
+                timeDisplay.appendChild(digitSpan);
+            });
+        }
+
+        // Hide loader after content is loaded
+        window.addEventListener('load', () => {
+            loader.classList.add("hide-loader");
+            content.classList.remove("hide-loader");
+            setInterval(updateDigitalClock, 1000);
+        });
     </script>
+
 </body>
 
 </html>
