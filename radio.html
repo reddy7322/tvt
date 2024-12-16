@@ -21,14 +21,13 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: hidden; /* Hide the scrollbars */
-        }
-
-        .container {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            height: 100vh; /* Ensures the footer stays at the bottom */
+        }
+
+        .content-wrapper {
+            flex: 1; /* Ensures content takes up available space */
+            overflow-y: auto; /* Prevents overflow hiding the footer */
         }
 
         #radio-station-select {
@@ -248,8 +247,6 @@
             padding: 15px;
             font-size: 14px;
             background-color: #222;
-            position: relative;
-            bottom: 0;
             width: 100%;
         }
 
@@ -285,7 +282,7 @@
         </div>
     </div>
 
-    <div class="container" id="content" class="hide-loader">
+    <div class="content-wrapper" id="content" class="hide-loader">
         <!-- Radio Player -->
         <div id="radio-player-container">
             <div id="radio-header">
