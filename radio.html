@@ -159,7 +159,7 @@
             font-weight: bold;
         }
 
-        /* Radio Poster and Visualizer */
+        /* Radio Poster */
         #radio-poster-container {
             position: relative;
             width: 350px;
@@ -174,14 +174,6 @@
             border-radius: 15px;
             filter: blur(2px);
             opacity: 80;
-        }
-
-        #visualizer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
         }
 
         /* Radio Controls */
@@ -280,7 +272,6 @@
 
             <div id="radio-poster-container">
                 <div id="radio-poster"></div>
-                <canvas id="visualizer"></canvas>
             </div>
 
             <div id="radio-controls">
@@ -326,8 +317,6 @@ let radioStationSelect = document.getElementById("radio-station-select");
 let loader = document.getElementById("loader");
 let content = document.getElementById("content");
 let radioPoster = document.getElementById("radio-poster");
-let visualizerCanvas = document.getElementById("visualizer");
-let visualizerCtx = visualizerCanvas.getContext("2d");
 let radioStations = [];
 let currentStationIndex = 0;
 
@@ -395,7 +384,6 @@ function toggleRadioPlay() {
 function playRadio() {
     radioAudio.play();
     radioPlayIcon.innerText = "pause";
-    setupVisualizer();
 }
 
 function pauseRadio() {
@@ -428,59 +416,6 @@ function seekRadio() {
     let value = radioProgressBar.value;
     let duration = radioAudio.duration;
     radioAudio.currentTime = (value / 100) * duration;
-}
-
-function setupVisualizer() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaElementSource(radioAudio);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-
-    source.connect(analyser);
-    analyser.connect(audioContext.destination);
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    visualizerCanvas.width = visualizerCanvas.clientWidth;
-    visualizerCanvas.height = visualizerCanvas.clientHeight;
-
-    function draw() {
-        requestAnimationFrame(draw);
-
-        analyser.getByteFrequencyData(dataArray);
-
-        visualizerCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-
-        const barWidth = (visualizerCanvas.width / bufferLength) * 2.5;
-        let barHeight;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i] / 2;
-
-            // Create a gradient
-            const gradient = visualizerCtx.createLinearGradient(
-                0,
-                visualizerCanvas.height - barHeight,
-                0,
-                visualizerCanvas.height
-            );
-
-            // Add gradient color stops
-            gradient.addColorStop(0, '#FF0000'); // Red
-            gradient.addColorStop(0.5, '#FECD00'); // Jonquil
-            gradient.addColorStop(1, '#349DA1'); // Dark Cyan
-
-            visualizerCtx.fillStyle = gradient;
-
-            visualizerCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
-
-            x += barWidth + 1;
-        }
-    }
-
-    draw();
 }
 
 // Initialize after page load
