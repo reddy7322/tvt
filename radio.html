@@ -116,6 +116,14 @@
         #logo-text {
             font-size: 24px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        #digital-clock {
+            margin-left: 20px;
+            font-size: 18px;
+            font-weight: normal;
         }
 
         #search-container {
@@ -264,7 +272,7 @@
     <div id="header">
         <div id="logo-container">
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
-            <span id="logo-text">Sɯαɾα™</span>
+            <span id="logo-text">Sɯαɾα™ <span id="digital-clock"></span></span>
         </div>
         <div id="search-container">
             <!-- Music Page Switch Toggle -->
@@ -376,7 +384,7 @@ function playStation(index) {
     radioPoster.style.animation = 'none';
     setTimeout(() => {
         radioPoster.style.animation = '';
-        radioPoster.style.backgroundImage = `url(${station.poster})`;
+        radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
     }, 50);
 
     document.getElementById("radio-station-name").innerText = station.name;
@@ -423,22 +431,36 @@ radioAudio.ontimeupdate = function () {
     let duration = radioAudio.duration;
     let progress = (currentTime / duration) * 100;
     radioProgressBar.value = progress;
-
-    let minutes = Math.floor(currentTime / 60);
-    let seconds = Math.floor(currentTime % 60);
-    radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+(minutes = currentTime / 60);
+let seconds = Math.floor(currentTime % 60);
+seconds = seconds < 10 ? "0" + seconds : seconds;
+radioTimeDisplay.innerText = `${minutes}:${seconds}`;
 };
 
-function seekRadio() {
-    let value = radioProgressBar.value;
-    let duration = radioAudio.duration;
-    radioAudio.currentTime = (value / 100) * duration;
-}
+radioProgressBar.oninput = function () {
+let duration = radioAudio.duration;
+let seekTime = (radioProgressBar.value / 100) * duration;
+radioAudio.currentTime = seekTime;
+};
 
-// Initialize after page load
+radioAudio.onended = function () {
+nextStation();
+};
+
 window.onload = function () {
-    loader.style.display = "none";
-    content.style.display = "block";
+setTimeout(() => {
+loader.classList.add("hide-loader");
+content.classList.remove("hide-loader");
+}, 1000);
+
+// Initialize digital clock
+setInterval(() => {
+const now = new Date();
+const hours = now.getHours().toString().padStart(2, "0");
+const minutes = now.getMinutes().toString().padStart(2, "0");
+const seconds = now.getSeconds().toString().padStart(2, "0");
+document.getElementById("digital-clock").innerText = `${hours}:${minutes}:${seconds}`;
+}, 1000);
 };
 
     </script>
