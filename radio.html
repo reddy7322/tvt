@@ -21,14 +21,7 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Hide scrollbars */
-        }
-
-        .content-wrapper {
-            flex: 1; /* Ensures content takes up available space */
-            overflow: hidden; /* Prevents overflow */
+            overflow: hidden;
         }
 
         #radio-station-select {
@@ -123,14 +116,6 @@
         #logo-text {
             font-size: 24px;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        #digital-clock {
-            margin-left: 20px;
-            font-size: 18px;
-            font-weight: normal;
         }
 
         #search-container {
@@ -147,13 +132,20 @@
         }
 
         /* Main Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Radio Player */
         #radio-player-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px;
             flex: 1;
-            overflow-y: hidden; /* Hide scrollbars */
+            overflow-y: auto;
         }
 
         /* Radio Header */
@@ -247,8 +239,7 @@
             text-align: center;
             padding: 15px;
             font-size: 14px;
-            background-color: #222;
-            width: 100%;
+            margin-top: 20px;
         }
 
         .footer a {
@@ -258,11 +249,6 @@
 
         .footer a:hover {
             text-decoration: underline;
-        }
-
-        /* Hide Radio Player */
-        .hide-radio-player {
-            display: none; /* This hides the radio player */
         }
     </style>
 </head>
@@ -278,7 +264,7 @@
     <div id="header">
         <div id="logo-container">
             <img src="https://tvtelugu.github.io/images/tvtelugu.ico" alt="Logo" id="page-logo" />
-            <span id="logo-text">Sɯαɾα™ <span id="digital-clock"></span></span>
+            <span id="logo-text">Sɯαɾα™</span>
         </div>
         <div id="search-container">
             <!-- Music Page Switch Toggle -->
@@ -288,9 +274,9 @@
         </div>
     </div>
 
-    <div class="content-wrapper" id="content" class="hide-loader">
+    <div class="container" id="content" class="hide-loader">
         <!-- Radio Player -->
-        <div id="radio-player-container" class="hide-radio-player">
+        <div id="radio-player-container">
             <div id="radio-header">
                 <p id="radio-station-name">Radio Station</p>
             </div>
@@ -323,166 +309,140 @@
             </div>
 
         </div>
+
+        <!-- Footer Section -->
+        <footer class="footer">
+            <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
+        </footer>
     </div>
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
-    </footer>
+    <audio id="radio-audio" controls></audio>
 
     <script>
-        // Function to hide the radio player and scrollbars
-        function toggleRadioPlayerVisibility() {
-            document.getElementById('radio-player-container').classList.toggle('hide-radio-player');
-        }
-        let radioPlayButton = document.getElementById("radio-play");
-        let radioPlayIcon = document.getElementById("radio-play-icon");
-        let radioProgressBar = document.getElementById("radio-progress-bar");
-        let radioTimeDisplay = document.getElementById("radio-time-display");
-        let radioStationSelect = document.getElementById("radio-station-select");
-        let loader = document.getElementById("loader");
-        let content = document.getElementById("content");
-        let radioPoster = document.getElementById("radio-poster");
-        let radioStations = [];
-        let currentStationIndex = 0;
+let radioAudio = document.getElementById("radio-audio");
+let radioPlayButton = document.getElementById("radio-play");
+let radioPlayIcon = document.getElementById("radio-play-icon");
+let radioProgressBar = document.getElementById("radio-progress-bar");
+let radioTimeDisplay = document.getElementById("radio-time-display");
+let radioStationSelect = document.getElementById("radio-station-select");
+let loader = document.getElementById("loader");
+let content = document.getElementById("content");
+let radioPoster = document.getElementById("radio-poster");
+let radioStations = [];
+let currentStationIndex = 0;
 
-        let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
+let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
-        musicPageToggleBtn.addEventListener("click", function () {
-            window.location.href = "https://tvt-swara.vercel.app/";
+musicPageToggleBtn.addEventListener("click", function () {
+    window.location.href = "https://tvt-beryl.vercel.app/";
+});
+
+// Fetch radio stations from radio.json
+fetch('radio.json')
+    .then(response => response.json())
+    .then(data => {
+        radioStations = data;
+        initRadioStations();
+        playStation(0);
+    })
+    .catch(error => console.error('Error fetching radio stations:', error));
+
+function initRadioStations() {
+    radioStations.forEach((station, index) => {
+        let option = document.createElement("option");
+        option.value = index;
+        option.textContent = station.name;
+        radioStationSelect.appendChild(option);
+    });
+}
+
+function playStation(index) {
+    currentStationIndex = index;
+    let station = radioStations[index];
+
+    if (Hls.isSupported() && station.url.includes(".m3u8")) {
+        let hls = new Hls();
+        hls.loadSource(station.url);
+        hls.attachMedia(radioAudio);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            playRadio();
         });
+    } else {
+        radioAudio.src = station.url;
+        playRadio();
+    }
 
-        // Fetch radio stations from radio.json
-        fetch('radio.json')
-            .then(response => response.json())
-            .then(data => {
-                radioStations = data;
-                initRadioStations();
-                playStation(0);
-            })
-            .catch(error => console.error('Error fetching radio stations:', error));
+    // Trigger animation for the poster
+    radioPoster.style.animation = 'none';
+    setTimeout(() => {
+        radioPoster.style.animation = '';
+        radioPoster.style.backgroundImage = `url(${station.poster})`;
+    }, 50);
 
-        function initRadioStations() {
-            radioStations.forEach((station, index) => {
-                let option = document.createElement("option");
-                option.value = index;
-                option.textContent = station.name;
-                radioStationSelect.appendChild(option);
-            });
-        }
+    document.getElementById("radio-station-name").innerText = station.name;
+    radioStationSelect.value = index;
+}
 
-        function playStation(index) {
-            currentStationIndex = index;
-            let station = radioStations[index];
+function changeRadioStation() {
+    let selectedIndex = parseInt(radioStationSelect.value);
+    if (!isNaN(selectedIndex)) {
+        playStation(selectedIndex);
+    }
+}
 
-            if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                let hls = new Hls();
-                hls.loadSource(station.url);
-                hls.attachMedia(radioAudio);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    playRadio();
-                });
-            } else {
-                radioAudio.src = station.url;
-                playRadio();
-            }
+function toggleRadioPlay() {
+    if (radioAudio.paused) {
+        playRadio();
+    } else {
+        pauseRadio();
+    }
+}
 
-            // Trigger animation for the poster
-            radioPoster.style.animation = 'none';
-            setTimeout(() => {
-                radioPoster.style.animation = '';
-                radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
-            }, 50);
+function playRadio() {
+    radioAudio.play();
+    radioPlayIcon.innerText = "pause";
+}
 
-            document.getElementById("radio-station-name").innerText = station.name;
-            radioStationSelect.value = index;
-        }
+function pauseRadio() {
+    radioAudio.pause();
+    radioPlayIcon.innerText = "play_arrow";
+}
 
-        function changeRadioStation() {
-            let selectedIndex = parseInt(radioStationSelect.value);
-            if (!isNaN(selectedIndex)) {
-                playStation(selectedIndex);
-            }
-        }
+function nextStation() {
+    let nextIndex = (currentStationIndex + 1) % radioStations.length;
+    playStation(nextIndex);
+}
 
-        function toggleRadioPlay() {
-            if (radioAudio.paused) {
-                playRadio();
-            } else {
-                pauseRadio();
-            }
-        }
+function previousStation() {
+    let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
+    playStation(prevIndex);
+}
 
-        function playRadio() {
-            radioAudio.play();
-            radioPlayIcon.innerText = "pause";
-        }
+radioAudio.ontimeupdate = function () {
+    let currentTime = radioAudio.currentTime;
+    let duration = radioAudio.duration;
+    let progress = (currentTime / duration) * 100;
+    radioProgressBar.value = progress;
 
-        function pauseRadio() {
-            radioAudio.pause();
-            radioPlayIcon.innerText = "play_arrow";
-        }
+    let minutes = Math.floor(currentTime / 60);
+    let seconds = Math.floor(currentTime % 60);
+    radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+};
 
-        function nextStation() {
-            let nextIndex = (currentStationIndex + 1) % radioStations.length;
-            playStation(nextIndex);
-        }
+function seekRadio() {
+    let value = radioProgressBar.value;
+    let duration = radioAudio.duration;
+    radioAudio.currentTime = (value / 100) * duration;
+}
 
-        function previousStation() {
-            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            playStation(prevIndex);
-        }
+// Initialize after page load
+window.onload = function () {
+    loader.style.display = "none";
+    content.style.display = "block";
+};
 
-        radioAudio.ontimeupdate = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let currentTime = radioAudio.currentTime;
-                let duration = radioAudio.duration;
-                let progress = (currentTime / duration) * 100;
-                radioProgressBar.value = progress;
-
-                let minutes = Math.floor(currentTime / 60);
-                let seconds = Math.floor(currentTime % 60);
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
-            }
-        };
-
-        radioProgressBar.oninput = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let duration = radioAudio.duration;
-                let seekTime = (radioProgressBar.value / 100) * duration;
-                radioAudio.currentTime = seekTime;
-            }
-        };
-
-        radioAudio.onended = function () {
-            nextStation();
-        };
-
-        // Update digital clock with IST and AM/PM
-        function updateDigitalClock() {
-            const now = new Date();
-            const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-            const istTime = new Date(now.getTime() + offset);
-            
-            let hours = istTime.getUTCHours();
-            const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
-            const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
-            const ampm = hours >= 12 ? "PM" : "AM";
-            
-            hours = hours % 12 || 12; // Convert to 12-hour format
-            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
-        }
-
-        setInterval(updateDigitalClock, 1000);
-
-        window.onload = function () {
-            setTimeout(() => {
-                loader.classList.add("hide-loader");
-                content.classList.remove("hide-loader");
-            }, 1500);
-        };
     </script>
+
 </body>
 
 </html>
