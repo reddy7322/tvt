@@ -120,16 +120,6 @@
             align-items: center;
         }
 
-        #digital-clock {
-            margin-left: 20px;
-            font-size: 24px;
-            font-weight: normal;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
         #search-container {
             display: flex;
             align-items: center;
@@ -468,96 +458,59 @@
             if (radioAudio.paused) {
                 playRadio();
             } else {
-                pauseRadio();
+                radioAudio.pause();
+                radioPlayIcon.innerText = 'play_arrow';
             }
         }
 
         function playRadio() {
             radioAudio.play();
-            radioPlayIcon.innerText = "pause";
-        }
-
-        function pauseRadio() {
-            radioAudio.pause();
-            radioPlayIcon.innerText = "play_arrow";
-        }
-
-        function nextStation() {
-            let nextIndex = (currentStationIndex + 1) % radioStations.length;
-            playStation(nextIndex);
+            radioPlayIcon.innerText = 'pause';
+            updateRadioProgress();
         }
 
         function previousStation() {
-            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            playStation(prevIndex);
+            currentStationIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
+            playStation(currentStationIndex);
         }
 
-        radioAudio.ontimeupdate = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let currentTime = radioAudio.currentTime;
-                let duration = radioAudio.duration;
-                let progress = (currentTime / duration) * 100;
-                radioProgressBar.value = progress;
+        function nextStation() {
+            currentStationIndex = (currentStationIndex + 1) % radioStations.length;
+            playStation(currentStationIndex);
+        }
 
-                let minutes = Math.floor(currentTime / 60);
-                let seconds = Math.floor(currentTime % 60);
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
-            }
-        };
+        function updateRadioProgress() {
+            setInterval(() => {
+                if (!radioAudio.paused) {
+                    let progress = (radioAudio.currentTime / radioAudio.duration) * 100;
+                    radioProgressBar.value = progress;
 
-        radioProgressBar.oninput = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let duration = radioAudio.duration;
-                let seekTime = (radioProgressBar.value / 100) * duration;
-                radioAudio.currentTime = seekTime;
-            }
-        };
+                    let minutes = Math.floor(radioAudio.currentTime / 60);
+                    let seconds = Math.floor(radioAudio.currentTime % 60);
+                    radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+            }, 1000);
+        }
 
-        radioAudio.onended = function () {
-            nextStation();
-        };
-
-        // Update digital clock with IST and AM/PM
+        // Flip clock update every second
         function updateDigitalClock() {
-            const now = new Date();
-            const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-            const istTime = new Date(now.getTime() + offset);
-            
-            let hours = istTime.getUTCHours();
-            const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
-            const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
-            const ampm = hours >= 12 ? "PM" : "AM";
-            
-            hours = hours % 12 || 12; // Convert to 12-hour format
+            let now = new Date();
+            let timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('digital-clock').innerText = timeString;
 
-            let timeString = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
-            let date = istTime.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-            // Update flip clock UI
-            flipClockTime(timeString);
-            document.getElementById("digital-clock").innerHTML = `${timeString}<div class="flip-clock">${date}</div>`;
-        }
-
-        // Flip clock animation
-        function flipClockTime(timeString) {
-            const timeDigits = timeString.replace(/[^0-9]/g, '').split('');
-            let timeDisplay = document.querySelector(".flip-clock");
-
-            timeDigits.forEach((digit, index) => {
-                let digitSpan = document.createElement('span');
-                let current = document.createElement('span');
-                let next = document.createElement('span');
-
-                current.classList.add('current');
-                next.classList.add('next');
-                current.innerHTML = digit;
-                next.innerHTML = digit;
-                digitSpan.appendChild(current);
-                digitSpan.appendChild(next);
-
-                timeDisplay.appendChild(digitSpan);
+            // Show date and day
+            let dateString = now.toLocaleDateString([], {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
+            let dateElement = document.getElementById('date-day');
+            if (!dateElement) {
+                dateElement = document.createElement('p');
+                dateElement.id = 'date-day';
+                dateElement.style.fontSize = '18px';
+                dateElement.style.fontWeight = 'normal';
+                document.getElementById('header').appendChild(dateElement);
+            }
+            dateElement.innerText = dateString;
         }
 
         // Hide loader after content is loaded
