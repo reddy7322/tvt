@@ -396,7 +396,7 @@
             radioPoster.style.animation = 'none';
             setTimeout(() => {
                 radioPoster.style.animation = '';
-                radioPoster.style.backgroundImage = url(${station.poster || 'https://via.placeholder.com/350'});
+                radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
             }, 50);
 
             document.getElementById("radio-station-name").innerText = station.name;
@@ -448,7 +448,7 @@
                 let minutes = Math.floor(currentTime / 60);
                 let seconds = Math.floor(currentTime % 60);
                 seconds = seconds < 10 ? "0" + seconds : seconds;
-                radioTimeDisplay.innerText = ${minutes}:${seconds};
+                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
             }
         };
 
@@ -476,7 +476,7 @@
             const ampm = hours >= 12 ? "PM" : "AM";
             
             hours = hours % 12 || 12; // Convert to 12-hour format
-            document.getElementById("digital-clock").innerText = ${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm};
+            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
         }
 
         setInterval(updateDigitalClock, 1000);
