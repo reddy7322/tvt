@@ -447,20 +447,29 @@ radioAudio.onended = function () {
 nextStation();
 };
 
-window.onload = function () {
-setTimeout(() => {
-loader.classList.add("hide-loader");
-content.classList.remove("hide-loader");
-}, 1000);
+// Update digital clock with IST and AM/PM
+function updateDigitalClock() {
+    const now = new Date();
+    const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    const istTime = new Date(now.getTime() + offset);
+    
+    let hours = istTime.getUTCHours();
+    const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
+    const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+}
 
-// Initialize digital clock
-setInterval(() => {
-const now = new Date();
-const hours = now.getHours().toString().padStart(2, "0");
-const minutes = now.getMinutes().toString().padStart(2, "0");
-const seconds = now.getSeconds().toString().padStart(2, "0");
-document.getElementById("digital-clock").innerText = `${hours}:${minutes}:${seconds}`;
-}, 1000);
+setInterval(updateDigitalClock, 1000);
+
+window.onload = function () {
+    setTimeout(() => {
+        loader.classList.add("hide-loader");
+        content.classList.remove("hide-loader");
+    }, 1000);
+    updateDigitalClock(); // Initialize clock on load
 };
 
     </script>
