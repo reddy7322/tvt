@@ -380,114 +380,75 @@
             currentStationIndex = index;
             let station = radioStations[index];
 
-            if (Hls.isSupported() && station.url.includes(".m3u8")) {
-                let hls = new Hls();
-                hls.loadSource(station.url);
-                hls.attachMedia(radioAudio);
-                hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                    playRadio();
-                });
-            } else {
-                radioAudio.src = station.url;
-                playRadio();
-            }
+            document.getElementById("radio-station-name").textContent = station.name;
+            radioAudio.src = station.streamUrl;
+            radioPoster.style.backgroundImage = `url(${station.image})`;
 
-            // Trigger animation for the poster
-            radioPoster.style.animation = 'none';
-            setTimeout(() => {
-                radioPoster.style.animation = '';
-                radioPoster.style.backgroundImage = `url(${station.poster || 'https://via.placeholder.com/350'})`;
-            }, 50);
+            radioAudio.play();
+            radioPlayIcon.textContent = "pause";
+            loader.classList.add("hide-loader");
+            content.classList.remove("hide-loader");
 
-            document.getElementById("radio-station-name").innerText = station.name;
-            radioStationSelect.value = index;
-        }
-
-        function changeRadioStation() {
-            let selectedIndex = parseInt(radioStationSelect.value);
-            if (!isNaN(selectedIndex)) {
-                playStation(selectedIndex);
-            }
+            radioAudio.onplay = function () {
+                setInterval(updateProgressBar, 1000);
+            };
         }
 
         function toggleRadioPlay() {
             if (radioAudio.paused) {
-                playRadio();
+                radioAudio.play();
+                radioPlayIcon.textContent = "pause";
             } else {
-                pauseRadio();
+                radioAudio.pause();
+                radioPlayIcon.textContent = "play_arrow";
             }
         }
 
-        function playRadio() {
-            radioAudio.play();
-            radioPlayIcon.innerText = "pause";
+        function updateProgressBar() {
+            let currentTime = radioAudio.currentTime;
+            let duration = radioAudio.duration;
+            let progress = (currentTime / duration) * 100;
+            radioProgressBar.value = progress;
+            let minutes = Math.floor(currentTime / 60);
+            let seconds = Math.floor(currentTime % 60);
+            radioTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function pauseRadio() {
-            radioAudio.pause();
-            radioPlayIcon.innerText = "play_arrow";
-        }
-
-        function nextStation() {
-            let nextIndex = (currentStationIndex + 1) % radioStations.length;
-            playStation(nextIndex);
+        function seekRadio() {
+            let seekTime = (radioProgressBar.value / 100) * radioAudio.duration;
+            radioAudio.currentTime = seekTime;
         }
 
         function previousStation() {
-            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            playStation(prevIndex);
+            let newIndex = (currentStationIndex === 0) ? radioStations.length - 1 : currentStationIndex - 1;
+            playStation(newIndex);
         }
 
-        radioAudio.ontimeupdate = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let currentTime = radioAudio.currentTime;
-                let duration = radioAudio.duration;
-                let progress = (currentTime / duration) * 100;
-                radioProgressBar.value = progress;
-
-                let minutes = Math.floor(currentTime / 60);
-                let seconds = Math.floor(currentTime % 60);
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
-            }
-        };
-
-        radioProgressBar.oninput = function () {
-            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
-                let duration = radioAudio.duration;
-                let seekTime = (radioProgressBar.value / 100) * duration;
-                radioAudio.currentTime = seekTime;
-            }
-        };
-
-        radioAudio.onended = function () {
-            nextStation();
-        };
-
-        // Update digital clock with IST and AM/PM
-        function updateDigitalClock() {
-            const now = new Date();
-            const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-            const istTime = new Date(now.getTime() + offset);
-            
-            let hours = istTime.getUTCHours();
-            const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
-            const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
-            const ampm = hours >= 12 ? "PM" : "AM";
-            
-            hours = hours % 12 || 12; // Convert to 12-hour format
-            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
+        function nextStation() {
+            let newIndex = (currentStationIndex === radioStations.length - 1) ? 0 : currentStationIndex + 1;
+            playStation(newIndex);
         }
 
-        setInterval(updateDigitalClock, 1000);
+        function changeRadioStation() {
+            let stationIndex = radioStationSelect.value;
+            if (stationIndex) {
+                playStation(parseInt(stationIndex));
+            }
+        }
 
-        window.onload = function () {
-            setTimeout(() => {
-                loader.classList.add("hide-loader");
-                content.classList.remove("hide-loader");
-            }, 1500);
-        };
+        // Add Web Bluetooth support for connected devices
+        if (navigator.bluetooth) {
+            navigator.bluetooth.requestDevice({ filters: [{ services: ['audio'] }] })
+                .then(device => {
+                    console.log('Bluetooth device connected:', device);
+                    // Add logic to control audio based on device
+                })
+                .catch(error => {
+                    console.error('Bluetooth connection failed:', error);
+                });
+        }
     </script>
+
 </body>
 
 </html>
