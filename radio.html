@@ -21,7 +21,16 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: auto; /* Allow scrolling */
+            overflow: hidden; /* Hide the scrollbars */
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto; /* Allow smart scroll */
+            -webkit-overflow-scrolling: touch;
         }
 
         #radio-station-select {
@@ -145,6 +154,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between; /* Push footer to the bottom */
+            overflow-y: scroll; /* Smart Scroll */
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Radio Player */
@@ -310,7 +321,7 @@
                 <input type="range" id="radio-progress-bar" value="0" max="100" onchange="seekRadio()" />
                 <span id="radio-time-display">0:00</span>
             </div>
-
+<p></p>
             <div id="radio-station-list">
                 <select id="radio-station-select" onchange="changeRadioStation()">
                     <option value="">Select a station</option>
@@ -318,13 +329,14 @@
             </div>
 
         </div>
-        <!-- Audio player hidden -->
         <audio id="radio-audio" controls style="display:none;"></audio>
         <!-- Footer Section -->
         <footer class="footer">
             <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
         </footer>
     </div>
+
+    <audio id="radio-audio" controls></audio>
 
     <script>
         let radioAudio = document.getElementById("radio-audio");
