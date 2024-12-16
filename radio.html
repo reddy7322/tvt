@@ -21,7 +21,7 @@
             background-color: #121212;
             color: white;
             height: 100%;
-            overflow: auto;
+            overflow: auto; /* Allow scrolling */
         }
 
         #radio-station-select {
@@ -120,6 +120,12 @@
             align-items: center;
         }
 
+        #digital-clock {
+            margin-left: 20px;
+            font-size: 18px;
+            font-weight: normal;
+        }
+
         #search-container {
             display: flex;
             align-items: center;
@@ -135,10 +141,10 @@
 
         /* Main Layout */
         .container {
-            min-height: 100vh;
+            min-height: 100vh; /* Ensures the container fills the screen */
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: space-between; /* Push footer to the bottom */
         }
 
         /* Radio Player */
@@ -253,67 +259,6 @@
         .footer a:hover {
             text-decoration: underline;
         }
-
-        /* Flip Clock Styles */
-        .flip-clock {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .flip-clock span {
-            margin: 0 10px;
-            display: inline-block;
-            position: relative;
-        }
-
-        .flip-clock span:before, .flip-clock span:after {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: #333;
-            border-radius: 5px;
-            transform-origin: bottom;
-            animation: flipAnimation 1s ease-in-out infinite;
-        }
-
-        .flip-clock span span {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        @keyframes flipAnimation {
-            0% {
-                transform: rotateX(0deg);
-            }
-            50% {
-                transform: rotateX(180deg);
-            }
-            100% {
-                transform: rotateX(360deg);
-            }
-        }
-
-        .flip-clock span span.current, .flip-clock span span.next {
-            opacity: 1;
-        }
-
-        .flip-clock span span.next {
-            transform: rotateX(180deg);
-        }
-
-        .flip-clock span span.current {
-            opacity: 0;
-        }
     </style>
 </head>
 
@@ -373,14 +318,14 @@
             </div>
 
         </div>
-
+        <audio id="radio-audio" controls style="display:none;"></audio>
         <!-- Footer Section -->
         <footer class="footer">
             <p>© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href="https://t.me/tvtelugu" target="_blank">𝐌𝐚𝐝𝐡𝐮</a></p>
         </footer>
     </div>
 
-    <audio id="radio-audio" controls style="display:none;"></audio>
+    <audio id="radio-audio" controls></audio>
 
     <script>
         let radioAudio = document.getElementById("radio-audio");
@@ -398,7 +343,7 @@
         let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
         musicPageToggleBtn.addEventListener("click", function () {
-            window.location.href = "https://tvt-swara.vercel.app/";
+            window.location.href = "https://tvt-beryl.vercel.app/";
         });
 
         // Fetch radio stations from radio.json
@@ -458,69 +403,80 @@
             if (radioAudio.paused) {
                 playRadio();
             } else {
-                radioAudio.pause();
-                radioPlayIcon.innerText = 'play_arrow';
+                pauseRadio();
             }
         }
 
         function playRadio() {
             radioAudio.play();
-            radioPlayIcon.innerText = 'pause';
-            updateRadioProgress();
+            radioPlayIcon.innerText = "pause";
         }
 
-        function previousStation() {
-            currentStationIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
-            playStation(currentStationIndex);
+        function pauseRadio() {
+            radioAudio.pause();
+            radioPlayIcon.innerText = "play_arrow";
         }
 
         function nextStation() {
-            currentStationIndex = (currentStationIndex + 1) % radioStations.length;
-            playStation(currentStationIndex);
+            let nextIndex = (currentStationIndex + 1) % radioStations.length;
+            playStation(nextIndex);
         }
 
-        function updateRadioProgress() {
-            setInterval(() => {
-                if (!radioAudio.paused) {
-                    let progress = (radioAudio.currentTime / radioAudio.duration) * 100;
-                    radioProgressBar.value = progress;
-
-                    let minutes = Math.floor(radioAudio.currentTime / 60);
-                    let seconds = Math.floor(radioAudio.currentTime % 60);
-                    radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                }
-            }, 1000);
+        function previousStation() {
+            let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
+            playStation(prevIndex);
         }
 
-        // Flip clock update every second
-        function updateDigitalClock() {
-            let now = new Date();
-            let timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('digital-clock').innerText = timeString;
+        radioAudio.ontimeupdate = function () {
+            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
+                let currentTime = radioAudio.currentTime;
+                let duration = radioAudio.duration;
+                let progress = (currentTime / duration) * 100;
+                radioProgressBar.value = progress;
 
-            // Show date and day
-            let dateString = now.toLocaleDateString([], {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
-            let dateElement = document.getElementById('date-day');
-            if (!dateElement) {
-                dateElement = document.createElement('p');
-                dateElement.id = 'date-day';
-                dateElement.style.fontSize = '18px';
-                dateElement.style.fontWeight = 'normal';
-                document.getElementById('header').appendChild(dateElement);
+                let minutes = Math.floor(currentTime / 60);
+                let seconds = Math.floor(currentTime % 60);
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                radioTimeDisplay.innerText = `${minutes}:${seconds}`;
             }
-            dateElement.innerText = dateString;
+        };
+
+        radioProgressBar.oninput = function () {
+            if (!isNaN(radioAudio.duration)) { // Check if duration is valid
+                let duration = radioAudio.duration;
+                let seekTime = (radioProgressBar.value / 100) * duration;
+                radioAudio.currentTime = seekTime;
+            }
+        };
+
+        radioAudio.onended = function () {
+            nextStation();
+        };
+
+        // Update digital clock with IST and AM/PM
+        function updateDigitalClock() {
+            const now = new Date();
+            const offset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+            const istTime = new Date(now.getTime() + offset);
+            
+            let hours = istTime.getUTCHours();
+            const minutes = istTime.getUTCMinutes().toString().padStart(2, "0");
+            const seconds = istTime.getUTCSeconds().toString().padStart(2, "0");
+            const ampm = hours >= 12 ? "PM" : "AM";
+            
+            hours = hours % 12 || 12; // Convert to 12-hour format
+            document.getElementById("digital-clock").innerText = `${hours.toString().padStart(2, "0")}:${minutes}:${seconds} ${ampm}`;
         }
 
-        // Hide loader after content is loaded
-        window.addEventListener('load', () => {
-            loader.classList.add("hide-loader");
-            content.classList.remove("hide-loader");
-            setInterval(updateDigitalClock, 1000);
-        });
-    </script>
+        setInterval(updateDigitalClock, 1000);
 
+        window.onload = function () {
+            setTimeout(() => {
+                loader.classList.add("hide-loader");
+                content.classList.remove("hide-loader");
+            }, 1500);
+        };
+    </script>
 </body>
 
 </html>
