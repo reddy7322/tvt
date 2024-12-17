@@ -714,33 +714,57 @@ function loadSong() {
     updateSongListSelection();
 }
 
+// Fetch lyrics
+async function fetchLyrics(songId) {
+    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
+
+        if (data.data && data.data.lyrics) {
+            const lyrics = data.data.lyrics.split('\n');
+            lyricsText.innerHTML = lyrics.map((line, index) => 
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            ).join('');
+            lyricsContainer.style.display = 'block';
+        } else {
+            lyricsText.innerText = 'Lyrics not available.';
+            lyricsContainer.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching lyrics:', error);
+        document.getElementById("lyrics-container").style.display = 'none';
+    }
+}
+
 // Download song with proper tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url; // Fetch highest quality
+    const audioUrl = song.downloadUrl[4].url;
 
     try {
         const response = await fetch(audioUrl);
-        const audioBuffer = await response.arrayBuffer(); // Fetch MP3 as buffer
+        const audioBuffer = await response.arrayBuffer();
         const writer = new ID3Writer(audioBuffer);
 
-        // Add Metadata (Tags)
-        writer.setFrame('TIT2', song.name) // Song Title
+        writer.setFrame('TIT2', song.name) // Title
               .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
-              .setFrame('TALB', song.album.name) // Album Name
+              .setFrame('TALB', song.album.name) // Album
               .setFrame('TYER', new Date().getFullYear().toString()) // Year
               .setFrame('APIC', {
                   type: 3,
                   data: await getAlbumArt(song.image[2].url),
                   description: 'Album Cover'
-              }); // Album Art
+              });
 
         writer.addTag();
 
         const taggedBlob = writer.getBlob();
         const url = URL.createObjectURL(taggedBlob);
 
-        // Clean and sanitize the filename
         const sanitizedName = sanitizeFileName(`${song.name} - ${song.artists.primary[0].name}.mp3`);
         const a = document.createElement('a');
         a.href = url;
@@ -751,11 +775,10 @@ async function downloadAudio() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     } catch (error) {
-        console.error("Error downloading or adding tags:", error);
+        console.error("Error downloading:", error);
     }
 }
 
-// Helper to fetch album art as ArrayBuffer
 async function getAlbumArt(imageUrl) {
     const response = await fetch(imageUrl);
     return await response.arrayBuffer();
@@ -765,32 +788,34 @@ function sanitizeFileName(name) {
     return name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '').replace(/\.mp3$/, '') + ".mp3";
 }
 
-// Highlight lyrics line and scroll
-function highlightCurrentLine(lineIndex) {
-    const lines = document.querySelectorAll('.lyrics-line');
-    lines.forEach(line => line.classList.remove('highlight'));
-
-    const currentLine = lines[lineIndex];
-    if (currentLine) {
-        currentLine.classList.add('highlight');
-        scrollToLine(currentLine);
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
     }
 }
 
-// Seek song based on progress bar
 function seekSong() {
     audio.currentTime = audio.duration * (progressBar.value / 100);
 }
 
-// Switch quality and reload song
-function changeQuality() {
-    if (audio.src) {
-        loadSong();
-        audio.play();
-    }
+audio.addEventListener('timeupdate', function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    timeDisplay.innerText = formatTime(audio.currentTime) + " / " + formatTime(audio.duration);
+});
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Previous, Next, and Shuffle logic
+audio.addEventListener('ended', nextSong);
+
 function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     loadSong();
@@ -803,18 +828,13 @@ function nextSong() {
     audio.play();
 }
 
-function shufflePlaylist() {
-    songs.sort(() => Math.random() - 0.5);
-    updateSongList();
-}
-
-// Wake Lock API
+// Wake Lock
 let wakeLock = null;
 async function requestWakeLock() {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
     } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
+        console.error(`${err.name}: ${err.message}`);
     }
 }
 
@@ -828,9 +848,6 @@ document.addEventListener('visibilitychange', () => {
     else releaseWakeLock();
 });
 
-window.onunload = releaseWakeLock;
-
-audio.addEventListener('ended', nextSong);
 
 		</script>
 	 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@4.1.1/dist/browser-id3-writer.min.js"></script>
