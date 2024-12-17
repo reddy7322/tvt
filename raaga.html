@@ -924,7 +924,15 @@
         const sec = Math.floor(seconds % 60) || 0;
         return `${min}:${sec.toString().padStart(2, "0")}`;
     }
+
+    // Ensure song selection works
+    songList.addEventListener('change', (e) => {
+        currentSongIndex = parseInt(e.target.value, 10);
+        loadSong();
+        audio.play();
+    });
 </script>
+
 
 
 
