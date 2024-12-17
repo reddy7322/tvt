@@ -920,13 +920,23 @@ function formatTime(seconds) {
 
 // Ensure ID3Writer script is loaded properly
 (function loadID3Writer() {
+    if (typeof ID3Writer !== 'undefined') {
+        console.log("ID3Writer already loaded.");
+        return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js";
     script.onload = () => {
         console.log("ID3Writer loaded successfully!");
     };
+    script.onerror = () => {
+        console.error("Failed to load ID3Writer library.");
+        alert("ID3Writer library could not be loaded. Cannot add tags.");
+    };
     document.head.appendChild(script);
 })();
 </script>
+
 </body>
 </html>
