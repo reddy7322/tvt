@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP3 Tag Editor</title>
+</head>
+<body>
+
+<input type="file" id="mp3-file" />
+<button onclick="addId3Tags()">Add ID3 Tags</button>
+
+<script type="module">
+    // Dynamically import the ID3Writer from the new CDN
+    import ID3Writer from 'https://cdn.jsdelivr.net/npm/browser-id3-writer@6.1.0/+esm';
+
+    document.getElementById('mp3-file').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                addId3Tags(arrayBuffer);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    });
+
+    function addId3Tags(mp3Buffer) {
+        const writer = new ID3Writer(mp3Buffer);
+
+        // Set the ID3 tags here
+        writer.setFrame("TIT2", "Song Title");
+        writer.setFrame("TPE1", ["Artist Name"]);
+        writer.setFrame("TALB", "Album Name");
+        writer.setFrame("TRCK", "1");
+
+        // You can also set other frames, e.g., picture or lyrics if needed
+        // writer.setFrame("APIC", { type: 3, data: imageData, description: "Cover Art" });
+
+        // Add the tag and get the updated MP3 file
+        writer.addTag();
+
+        // Generate the updated MP3 file and create a download link
+        const updatedMp3Blob = writer.getBlob();
+        const url = URL.createObjectURL(updatedMp3Blob);
+
+        // Create a link to download the modified MP3 file
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = "modified_song.mp3";
+        downloadLink.click();
+    }
+</script>
+
+</body>
+</html>
