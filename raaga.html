@@ -713,28 +713,53 @@ function loadSong() {
 }
 
 // Download song with clean name and tags
-function downloadAudio() {
+async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url;
+    const audioUrl = song.downloadUrl[4].url; // Fetch highest quality
 
-    fetch(audioUrl)
-        .then(response => response.blob())
-        .then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            const sanitizedName = sanitizeFileName(`${song.name} - ${song.artists.primary[0].name}.mp3`);
+    try {
+        const response = await fetch(audioUrl);
+        const audioBuffer = await response.arrayBuffer(); // Fetch MP3 as buffer
+        const writer = new ID3Writer(audioBuffer);
 
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = sanitizedName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+        // Add Metadata (Tags)
+        writer.setFrame('TIT2', song.name) // Song Title
+              .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
+              .setFrame('TALB', song.album.name) // Album Name
+              .setFrame('TYER', new Date().getFullYear().toString()) // Year
+              .setFrame('APIC', {
+                  type: 3,
+                  data: await getAlbumArt(song.image[2].url),
+                  description: 'Album Cover'
+              }); // Album Art
 
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(error => console.error('Download error:', error));
+        writer.addTag();
+
+        const taggedBlob = writer.getBlob();
+        const url = URL.createObjectURL(taggedBlob);
+
+        // Clean and sanitize the filename
+        const sanitizedName = sanitizeFileName(`${song.name} - ${song.artists.primary[0].name}.mp3`);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sanitizedName;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Error downloading or adding tags:", error);
+    }
 }
 
+// Helper to fetch album art as ArrayBuffer
+async function getAlbumArt(imageUrl) {
+    const response = await fetch(imageUrl);
+    return await response.arrayBuffer();
+}
+
+// Sanitize filenames for safe downloads
 function sanitizeFileName(name) {
     return name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '').replace(/\.mp3$/, '') + ".mp3";
 }
