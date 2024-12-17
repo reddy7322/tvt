@@ -752,31 +752,53 @@ function highlightCurrentLine(lineIndex) {
 // Download song with proper tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url; // Fetch highest quality
+
+    // Find the highest quality URL (or fallback)
+    const audioUrl = song.downloadUrl.find(url => url.quality === '320kbps')?.url || song.downloadUrl[0]?.url;
+
+    if (!audioUrl) {
+        alert("Audio URL not found!");
+        return;
+    }
 
     try {
+        // Fetch MP3 as ArrayBuffer
         const response = await fetch(audioUrl);
-        const audioBuffer = await response.arrayBuffer(); // Fetch MP3 as buffer
+        if (!response.ok) throw new Error("Failed to fetch audio");
+
+        const audioBuffer = await response.arrayBuffer();
+
+        // Check if ID3Writer exists
+        if (typeof ID3Writer === 'undefined') {
+            alert("ID3Writer library not loaded. Cannot add tags.");
+            console.error("ID3Writer library not loaded.");
+            return;
+        }
+
         const writer = new ID3Writer(audioBuffer);
 
         // Add Metadata (Tags)
-        writer.setFrame('TIT2', song.name) // Song Title
-              .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
-              .setFrame('TALB', song.album.name) // Album Name
-              .setFrame('TYER', new Date().getFullYear().toString()) // Year
-              .setFrame('APIC', {
-                  type: 3,
-                  data: await getAlbumArt(song.image[2].url),
-                  description: 'Album Cover'
-              }); // Album Art
+        writer
+            .setFrame('TIT2', song.name) // Song Title
+            .setFrame('TPE1', [song.artists.primary[0]?.name || "Unknown Artist"]) // Artist
+            .setFrame('TALB', song.album.name || "Unknown Album") // Album Name
+            .setFrame('TYER', new Date().getFullYear().toString()) // Year
+            .setFrame('APIC', {
+                type: 3,
+                data: await getAlbumArt(song.image[2]?.url), // Fetch Album Art
+                description: 'Album Cover'
+            });
 
         writer.addTag();
 
+        // Convert to Blob and trigger download
         const taggedBlob = writer.getBlob();
         const url = URL.createObjectURL(taggedBlob);
 
-        const sanitizedName = sanitizeFileName(`${song.name} - ${song.artists.primary[0].name}.mp3`);
-        const a = document.createElement('a');
+        // Generate sanitized file name
+        const sanitizedName = sanitizeFileName(`${song.name} - ${song.artists.primary[0]?.name || "Artist"}.mp3`);
+
+        const a = document.createElement("a");
         a.href = url;
         a.download = sanitizedName;
 
@@ -784,16 +806,26 @@ async function downloadAudio() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+
     } catch (error) {
-        console.error("Error downloading or adding tags:", error);
+        console.error("Error downloading song:", error);
+        alert("Failed to download the song. Please try again.");
     }
 }
 
+// Helper function to fetch album art
 async function getAlbumArt(imageUrl) {
-    const response = await fetch(imageUrl);
-    return await response.arrayBuffer();
+    try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error("Failed to fetch album art");
+        return await response.arrayBuffer();
+    } catch (error) {
+        console.error("Error fetching album art:", error);
+        return null;
+    }
 }
 
+// Helper function to sanitize file names
 function sanitizeFileName(name) {
     return name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '').replace(/\.mp3$/, '') + ".mp3";
 }
