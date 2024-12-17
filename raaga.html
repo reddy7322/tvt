@@ -927,16 +927,12 @@ function formatTime(seconds) {
 (function loadID3Writer() {
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js";
-    script.onload = () => {
-        console.log("ID3Writer loaded successfully!");
-    };
-    script.onerror = () => {
-        console.error("Failed to load ID3Writer library.");
-        alert("ID3Writer library could not be loaded. Cannot add tags.");
-    };
+    script.onload = () => console.log("ID3Writer loaded successfully.");
+    script.onerror = () => console.error("ID3Writer failed to load.");
     document.head.appendChild(script);
 })();
 </script>
+
 
 
 
