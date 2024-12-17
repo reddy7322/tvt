@@ -636,7 +636,7 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-		<script>
+<script>
 function toggleLyrics() {
     const lyricsContainer = document.getElementById("lyrics-container");
     lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
@@ -768,7 +768,7 @@ async function downloadAudio() {
 
         const audioBuffer = await response.arrayBuffer();
 
-        // Check if ID3Writer exists
+        // Ensure ID3Writer is loaded before usage
         if (typeof ID3Writer === 'undefined') {
             alert("ID3Writer library not loaded. Cannot add tags.");
             console.error("ID3Writer library not loaded.");
@@ -918,11 +918,15 @@ function formatTime(seconds) {
     return `${min}:${sec.toString().padStart(2, "0")}`;
 }
 
-
-		</script>
-	<script>
-    console.log(typeof ID3Writer !== 'undefined' ? 'ID3Writer loaded successfully!' : 'ID3Writer failed to load.');
+// Ensure ID3Writer script is loaded properly
+(function loadID3Writer() {
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js";
+    script.onload = () => {
+        console.log("ID3Writer loaded successfully!");
+    };
+    document.head.appendChild(script);
+})();
 </script>
-	 <script src="https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js"></script>
 </body>
 </html>
