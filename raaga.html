@@ -637,6 +637,8 @@
     <audio id="audio" controls></audio>
 
 <script>
+<script>
+// Function to toggle lyrics
 function toggleLyrics() {
     const lyricsContainer = document.getElementById("lyrics-container");
     lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
@@ -669,8 +671,11 @@ async function searchSongs(query) {
     let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('API Down');
-
+        if (!response.ok) {
+            console.error(`Error fetching songs: ${response.statusText}`);
+            alert('Error fetching songs. Please try again.');
+            return;
+        }
         const data = await response.json();
         songs = data.data.results;
         updateSongList();
@@ -770,8 +775,8 @@ async function downloadAudio() {
 
         // Ensure ID3Writer is loaded before usage
         if (typeof ID3Writer === 'undefined') {
+            console.error("ID3Writer library not loaded. Cannot add tags.");
             alert("ID3Writer library not loaded. Cannot add tags.");
-            console.error("ID3Writer library not loaded.");
             return;
         }
 
@@ -920,11 +925,6 @@ function formatTime(seconds) {
 
 // Ensure ID3Writer script is loaded properly
 (function loadID3Writer() {
-    if (typeof ID3Writer !== 'undefined') {
-        console.log("ID3Writer already loaded.");
-        return;
-    }
-
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js";
     script.onload = () => {
@@ -937,6 +937,7 @@ function formatTime(seconds) {
     document.head.appendChild(script);
 })();
 </script>
+
 
 
 </body>
