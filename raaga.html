@@ -920,6 +920,9 @@ function formatTime(seconds) {
 
 
 		</script>
-	 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@4.1.1/dist/browser-id3-writer.min.js"></script>
+	<script>
+    console.log(typeof ID3Writer !== 'undefined' ? 'ID3Writer loaded successfully!' : 'ID3Writer failed to load.');
+</script>
+	 <script src="https://cdnjs.cloudflare.com/ajax/libs/id3-writer/2.0.3/ID3Writer.min.js"></script>
 </body>
 </html>
