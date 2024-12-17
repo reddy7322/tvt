@@ -676,7 +676,7 @@ async function searchSongs(query) {
         updateSongList();
     } catch (error) {
         console.error('Error fetching songs:', error);
-        showErrorPopup();
+        alert('Error fetching songs. Please try again.');
     }
 }
 
@@ -714,51 +714,61 @@ function loadSong() {
     updateSongListSelection();
 }
 
-// Fetch lyrics
+// Fetch and display lyrics
 async function fetchLyrics(songId) {
-    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
-        const response = await fetch(url);
-        const data = await response.json();
+        let response = await fetch(`https://saavn.dev/api/lyrics?id=${songId}`);
+        if (!response.ok) throw new Error('Failed to fetch lyrics');
 
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
+        let data = await response.json();
+        const lyricsContainer = document.getElementById("lyrics-text");
+        lyricsContainer.innerHTML = "";
 
-        if (data.data && data.data.lyrics) {
-            const lyrics = data.data.lyrics.split('\n');
-            lyricsText.innerHTML = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
-            ).join('');
-            lyricsContainer.style.display = 'block';
-        } else {
-            lyricsText.innerText = 'Lyrics not available.';
-            lyricsContainer.style.display = 'none';
-        }
+        const lyrics = data.data.lyrics.split("\n");
+        lyrics.forEach((line, index) => {
+            const p = document.createElement("p");
+            p.classList.add("lyrics-line");
+            p.innerText = line;
+            p.dataset.index = index;
+            lyricsContainer.appendChild(p);
+        });
     } catch (error) {
         console.error('Error fetching lyrics:', error);
-        document.getElementById("lyrics-container").style.display = 'none';
+    }
+}
+
+// Highlight lyrics line and scroll
+function highlightCurrentLine(lineIndex) {
+    const lines = document.querySelectorAll('.lyrics-line');
+    lines.forEach(line => line.classList.remove('highlight'));
+
+    const currentLine = lines[lineIndex];
+    if (currentLine) {
+        currentLine.classList.add('highlight');
+        currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
 // Download song with proper tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url;
+    const audioUrl = song.downloadUrl[4].url; // Fetch highest quality
 
     try {
         const response = await fetch(audioUrl);
-        const audioBuffer = await response.arrayBuffer();
+        const audioBuffer = await response.arrayBuffer(); // Fetch MP3 as buffer
         const writer = new ID3Writer(audioBuffer);
 
-        writer.setFrame('TIT2', song.name) // Title
+        // Add Metadata (Tags)
+        writer.setFrame('TIT2', song.name) // Song Title
               .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
-              .setFrame('TALB', song.album.name) // Album
+              .setFrame('TALB', song.album.name) // Album Name
               .setFrame('TYER', new Date().getFullYear().toString()) // Year
               .setFrame('APIC', {
                   type: 3,
                   data: await getAlbumArt(song.image[2].url),
                   description: 'Album Cover'
-              });
+              }); // Album Art
 
         writer.addTag();
 
@@ -775,7 +785,7 @@ async function downloadAudio() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     } catch (error) {
-        console.error("Error downloading:", error);
+        console.error("Error downloading or adding tags:", error);
     }
 }
 
@@ -788,34 +798,20 @@ function sanitizeFileName(name) {
     return name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '').replace(/\.mp3$/, '') + ".mp3";
 }
 
-function togglePlay() {
-    if (audio.paused) {
-        audio.play();
-        playIcon.innerText = "pause";
-    } else {
-        audio.pause();
-        playIcon.innerText = "play_arrow";
-    }
-}
-
+// Seek song based on progress bar
 function seekSong() {
     audio.currentTime = audio.duration * (progressBar.value / 100);
 }
 
-audio.addEventListener('timeupdate', function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    timeDisplay.innerText = formatTime(audio.currentTime) + " / " + formatTime(audio.duration);
-});
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+// Switch quality and reload song
+function changeQuality() {
+    if (audio.src) {
+        loadSong();
+        audio.play();
+    }
 }
 
-audio.addEventListener('ended', nextSong);
-
+// Previous, Next, and Shuffle logic
 function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     loadSong();
@@ -828,13 +824,18 @@ function nextSong() {
     audio.play();
 }
 
-// Wake Lock
+function shufflePlaylist() {
+    songs.sort(() => Math.random() - 0.5);
+    updateSongList();
+}
+
+// Wake Lock API
 let wakeLock = null;
 async function requestWakeLock() {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
     } catch (err) {
-        console.error(`${err.name}: ${err.message}`);
+        console.error(`${err.name}, ${err.message}`);
     }
 }
 
@@ -847,6 +848,43 @@ document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') requestWakeLock();
     else releaseWakeLock();
 });
+
+window.onunload = releaseWakeLock;
+
+audio.addEventListener('ended', nextSong);
+
+function updateSongListSelection() {
+    songList.value = currentSongIndex;
+}
+
+function removeQuotes(str) {
+    return str.replace(/['"]+/g, '');
+}
+
+playIcon.addEventListener("click", () => {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
+    }
+});
+
+audio.addEventListener("timeupdate", () => {
+    const progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress || 0;
+
+    const currentTime = formatTime(audio.currentTime);
+    const duration = formatTime(audio.duration);
+    timeDisplay.innerText = `${currentTime} / ${duration}`;
+});
+
+function formatTime(seconds) {
+    const min = Math.floor(seconds / 60) || 0;
+    const sec = Math.floor(seconds % 60) || 0;
+    return `${min}:${sec.toString().padStart(2, "0")}`;
+}
 
 
 		</script>
