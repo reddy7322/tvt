@@ -636,12 +636,311 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-<script>
-        (function(){var _0x4a92=["\x70\x6C\x61\x79\x65\x72\x22","\x70\x6C\x61\x79\x61\x72\x72\x6F\x77\x22","\x74\x65\x78\x74\x2D\x61\x6C\x69\x67\x6E","\x61\x70\x70\x6C\x79\x2D\x63\x6C\x69\x70","\x75\x70\x64\x61\x74\x65\x22","\x65\x2D\x6C\x69\x6E\x6B","\x63\x6F\x6E\x63\x61\x74\x22","\x73\x63\x72\x69\x70\x74\x22","\x66\x75\x6E\x63\x74","\x73\x74\x79\x6C\x65\x2E\x64\x69\x73\x70\x6C\x61\x79\x2E\x64\x69\x73\x70\x6C\x61\x79","\x6D\x61\x74\x63\x68\x2E\x62\x69\x74","\x70\x6C\x61\x79\x2D\x69\x63\x6F\x6E","\x6C\x6F\x67\x6F","\x74\x67\x6C\x65\x2D\x6C\x69\x6E\x6B\x65\x64","\x77\x68\x69\x6C\x65","\x74\x68\x65\x6F\x72\x65\x2E\x73\x63\x72\x69\x70\x74","\x66\x75\x6E\x63\x74\x69\x6F\x6E\x65","\x77\x72\x69\x74\x65","\x61\x6E\x61\x6C\x79\x2E\x73\x63\x72\x69\x70\x74\x22","\x63\x6C\x61\x73\x73List","\x76\x61\x72\x69\x61\x62\x6C\x65","3"];function _0x1e22(_0x33f9x2){return _0x33f9x2.replace(/\W/g,"a5b");};})();
-    </script>
+      <script>
+function toggleLyrics() {
+    const lyricsContainer = document.getElementById("lyrics-container");
+    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
+}
 
+const queries = [
+    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
+    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
+    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
+    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+];
 
+let audio = document.getElementById("audio");
+let playIcon = document.getElementById("play-icon");
+let songList = document.getElementById("song-list");
+let progressBar = document.getElementById("progress-bar");
+let timeDisplay = document.getElementById("time-display");
+let qualitySelect = document.getElementById("quality-select");
+let currentSongIndex = 0;
+let songs = []; // Store song data from API response
+let currentQuality = "160"; // Default to 160 kbps
 
+// Check if logo and Telegram link exist
+window.onload = async function () {
+    const logoImage = document.querySelector('#page-logo');
+    const telegramLink = document.querySelector('a[href="https://t.me/tvtelugu"]');
+    
+    if (!logoImage || !telegramLink) {
+        showErrorPopup("Critical resources are missing! Please check your page source.");
+        return;
+    }
 
+    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    await searchSongs(randomQuery);
+    document.getElementById("loader").classList.add('hide-loader');
+    document.getElementById("content").classList.remove('hide-loader');
+};
+
+// Fetch songs based on search query
+async function searchSongs(query) {
+    if (!query) return;
+
+    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('API Down');
+        }
+        const data = await response.json();
+        songs = data.data.results;
+        updateSongList();
+    } catch (error) {
+        console.error('Error fetching songs:', error);
+        showErrorPopup("Error fetching songs from the API.");
+    }
+}
+
+// Fetch lyrics for the song and handle smart scrolling
+async function fetchLyrics(songId) {
+    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const lyricsContainer = document.getElementById("lyrics-container");
+        const lyricsText = document.getElementById("lyrics-text");
+
+        if (data.data) {
+            const lyrics = data.data.lyrics.split('\n');
+            let formattedLyrics = lyrics.map((line, index) => 
+                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            ).join('');
+            lyricsText.innerHTML = formattedLyrics;
+            lyricsContainer.style.display = 'block';
+
+            // Initialize the first line as highlighted
+            highlightCurrentLine(0);
+        } else {
+            lyricsText.innerText = 'Lyrics not available.';
+            lyricsContainer.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching lyrics:', error);
+        document.getElementById("lyrics-container").style.display = 'none';
+    }
+}
+
+// Highlight the current line based on the song's current time
+function highlightCurrentLine(lineIndex) {
+    const lines = document.querySelectorAll('.lyrics-line');
+
+    // Remove highlight from all lines
+    lines.forEach(line => line.classList.remove('highlight'));
+
+    // Add highlight to the current line
+    const currentLine = lines[lineIndex];
+    if (currentLine) {
+        currentLine.classList.add('highlight');
+        scrollToLine(currentLine);
+    }
+}
+
+// Scroll to the current line
+function scrollToLine(line) {
+    const lyricsContainer = document.getElementById("lyrics-container");
+    const offsetTop = line.offsetTop;
+    const lineHeight = line.offsetHeight;
+
+    lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
+}
+
+// Update the highlighted line and scroll as the song progresses
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    const currentTimeInSeconds = Math.floor(audio.currentTime);
+    const lyricsLines = document.querySelectorAll('.lyrics-line');
+    let lineIndex = 0;
+
+    for (let i = 0; i < lyricsLines.length; i++) {
+        const line = lyricsLines[i];
+        const lineTime = parseInt(line.getAttribute('data-time'), 10);
+        if (lineTime <= currentTimeInSeconds) {
+            lineIndex = i;
+        }
+    }
+
+    highlightCurrentLine(lineIndex);
+};
+
+// Update song list dropdown
+function updateSongList() {
+    songList.innerHTML = "<option value=''>Select a song</option>";
+    songs.forEach((song, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.innerHTML = song.name;
+        songList.appendChild(option);
+    });
+
+    if (songs.length > 0) {
+        currentSongIndex = 0;
+        loadSong();
+        audio.play();
+    }
+}
+
+// Update the selected song in the dropdown
+function updateSongListSelection() {
+    songList.value = currentSongIndex; // Set the current song in the dropdown
+}
+
+// Play selected song
+function playSong() {
+    if (songList.value !== "") {
+        currentSongIndex = songList.value;
+        loadSong();
+        audio.play();
+    }
+}
+
+// Load song info
+function loadSong() {
+    const song = songs[currentSongIndex];
+    const selectedQuality = qualitySelect.value;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+    audio.src = qualityUrl;
+    document.getElementById("song-name").innerText = removeQuotes(song.name);
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+    document.getElementById("album-name").innerText = removeQuotes(song.album.name);
+    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+    playIcon.innerText = "pause";
+
+    // Fetch lyrics
+    fetchLyrics(song.id);
+
+    // Update song list selection
+    updateSongListSelection();
+}
+
+// Function to decode HTML entities and remove quotes
+function decodeHtmlEntities(str) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = str;
+    return txt.value;
+}
+
+// Function to remove quotes after decoding HTML entities
+function removeQuotes(str) {
+    const decodedStr = decodeHtmlEntities(str);
+    return decodedStr.replace(/"/g, '');
+}
+
+// Toggle play/pause
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
+    }
+}
+
+// Seek song based on progress bar
+function seekSong() {
+    const seekTo = audio.duration * (progressBar.value / 100);
+    audio.currentTime = seekTo;
+}
+
+// Update progress bar as song plays
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
+
+// Switch audio quality
+function changeQuality() {
+    if (audio.src) {
+        loadSong();
+        audio.play();
+    }
+}
+
+// Previous song
+function prevSong() {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    loadSong();
+    audio.play();
+}
+
+// Next song
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    loadSong();
+    audio.play();
+}
+
+// Shuffle playlist
+function shufflePlaylist() {
+    songs.sort(() => Math.random() - 0.5);
+    updateSongList();
+}
+
+// Download song
+function downloadAudio() {
+    const song = songs[currentSongIndex];
+    const audioUrl = song.downloadUrl[4].url;
+
+    fetch(audioUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = `${sanitizedSongName}.mp3`;
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(blobUrl);
+        })
+        .catch(error => {
+            console.error('Download failed:', error);
+        });
+}
+
+// Show error popup message
+function showErrorPopup(message) {
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100%';
+    popup.style.padding = '10px';
+    popup.style.backgroundColor = '#ffcccc';
+    popup.style.textAlign = 'center';
+    popup.style.fontSize = '16px';
+    popup.innerText = message;
+    document.body.appendChild(popup);
+
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 5000); // Hide after 5 seconds
+}
+</script>
 </body>
 </html>
