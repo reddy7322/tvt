@@ -635,7 +635,163 @@
 
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
-<script src="js/app.min.js"></script>
+<script>
+(function() {
+    function t() {
+        const e = document.getElementById("lyrics-container");
+        e.style.display = e.style.display === "flex" ? "none" : "flex";
+    }
+    const e = [
+        'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+        'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+        'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
+        'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+        'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
+        'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+        'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
+        'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+    ], o = document.getElementById("audio"), r = document.getElementById("play-icon"), n = document.getElementById("song-list"), a = document.getElementById("progress-bar"), i = document.getElementById("time-display"), s = document.getElementById("quality-select"), c = 0, u = [];
+    window.onload = async function () {
+        const t = document.querySelector('#page-logo'), e = document.querySelector('a[href="https://t.me/tvtelugu"]');
+        if (!t || !e) {
+            e("Critical resources are missing! Please check your page source.");
+            return;
+        }
+        const l = e[Math.floor(Math.random() * e.length)];
+        await f(l);
+        document.getElementById("loader").classList.add('hide-loader');
+        document.getElementById("content").classList.remove('hide-loader');
+    };
+    async function f(t) {
+        if (!t) return;
+        let e = `https://saavn.dev/api/search/songs?query=${t}&page=1&limit=50`;
+        try {
+            const t = await fetch(e);
+            if (!t.ok) throw new Error('API Down');
+            const e = await t.json();
+            u = e.data.results;
+            d();
+        } catch (t) {
+            console.error('Error fetching songs:', t);
+            h("Error fetching songs from the API.");
+        }
+    }
+    async function l(t) {
+        let e = `https://saavn.dev/api/songs/${t}/lyrics`;
+        try {
+            const t = await fetch(e), e = await t.json();
+            const n = document.getElementById("lyrics-container"), a = document.getElementById("lyrics-text");
+            if (e.data) {
+                const t = e.data.lyrics.split('\n');
+                let e = t.map((t, e) => `<p class="lyrics-line" id="line-${e}">${t}</p>`).join('');
+                a.innerHTML = e, n.style.display = 'block', h(0);
+            } else a.innerText = 'Lyrics not available.', n.style.display = 'none';
+        } catch (t) {
+            console.error('Error fetching lyrics:', t), document.getElementById("lyrics-container").style.display = 'none';
+        }
+    }
+    function h(t) {
+        const e = document.querySelectorAll('.lyrics-line');
+        e.forEach(e => e.classList.remove('highlight'));
+        const n = e[t];
+        n && (n.classList.add('highlight'), m(n));
+    }
+    function m(t) {
+        const e = document.getElementById("lyrics-container");
+        const n = t.offsetTop, a = t.offsetHeight;
+        e.scrollTop = n - (e.offsetHeight / 2) + (a / 2);
+    }
+    o.ontimeupdate = function () {
+        let t = (o.currentTime / o.duration) * 100;
+        a.value = t;
+        let e = Math.floor(o.currentTime / 60), n = Math.floor(o.currentTime % 60);
+        i.innerText = `${e}:${n < 10 ? '0' : ''}${n}`;
+        const a = Math.floor(o.currentTime), r = document.querySelectorAll('.lyrics-line');
+        let s = 0;
+        for (let e = 0; e < r.length; e++) {
+            const t = r[e], n = parseInt(t.getAttribute('data-time'), 10);
+            n <= a && (s = e);
+        }
+        h(s);
+    };
+    function d() {
+        n.innerHTML = "<option value=''>Select a song</option>";
+        u.forEach((t, e) => {
+            const n = document.createElement("option");
+            n.value = e, n.innerHTML = t.name, n.appendChild(n);
+        }), u.length > 0 && (c = 0, v(), o.play());
+    }
+    function v() {
+        const t = u[c];
+        const e = s.value, r = t.downloadUrl.find(t => t.quality === `${e}kbps`).url;
+        o.src = r;
+        document.getElementById("song-name").innerText = y(t.name);
+        document.getElementById("song-artist").innerText = y(t.artists.primary[0].name);
+        document.getElementById("album-name").innerText = y(t.album.name);
+        document.getElementById("album-poster").style.backgroundImage = `url(${t.image[2].url})`;
+        r.innerText = "pause";
+        l(t.id);
+        u();
+    }
+    function y(t) {
+        return t.replace(/"/g, '');
+    }
+    function r() {
+        if (o.paused) o.play(), r.innerText = "pause";
+        else o.pause(), r.innerText = "play_arrow";
+    }
+    function p() {
+        const t = o.duration * (a.value / 100);
+        o.currentTime = t;
+    }
+    function b() {
+        if (o.src) {
+            v();
+            o.play();
+        }
+    }
+    function E() {
+        c = (c - 1 + u.length) % u.length, v(), o.play();
+    }
+    function f() {
+        c = (c + 1) % u.length, v(), o.play();
+    }
+    function T() {
+        u.sort(() => Math.random() - 0.5), d();
+    }
+    function k() {
+        const t = u[c];
+        const e = t.downloadUrl[4].url;
+        fetch(e)
+            .then(t => {
+                if (!t.ok) throw new Error('Network response was not ok');
+                return t.blob();
+            })
+            .then(t => {
+                const e = URL.createObjectURL(t), r = t.name.replace(/\.[^/.]+$/, ''), n = document.createElement('a');
+                n.href = e, n.download = `${r}.mp3`, document.body.appendChild(n), n.click(), document.body.removeChild(n), URL.revokeObjectURL(e);
+            })
+            .catch(t => console.error('Download failed:', t));
+    }
+    function w(t) {
+        const e = document.createElement('div');
+        e.style.position = 'fixed';
+        e.style.top = '0';
+        e.style.left = '0';
+        e.style.width = '100%';
+        e.style.padding = '10px';
+        e.style.backgroundColor = '#ffcccc';
+        e.style.textAlign = 'center';
+        e.style.fontSize = '16px';
+        e.innerText = t;
+        document.body.appendChild(e);
+        setTimeout(() => {
+            e.style.display = 'none';
+        }, 5000);
+    }
+})();
+</script>
+
 
 </body>
 </html>
