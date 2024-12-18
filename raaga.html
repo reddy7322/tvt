@@ -637,6 +637,7 @@
     <audio id="audio" controls></audio>
 
 		<script>
+// Function to toggle lyrics container visibility
 function toggleLyrics() {
     const lyricsContainer = document.getElementById("lyrics-container");
     lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
@@ -660,7 +661,6 @@ window.onload = async function () {
     await searchSongs(randomQuery);
     document.getElementById("loader").classList.add('hide-loader');
     document.getElementById("content").classList.remove('hide-loader');
-    requestWakeLock();
 };
 
 // Fetch songs based on search query
@@ -678,54 +678,8 @@ async function searchSongs(query) {
         updateSongList();
     } catch (error) {
         console.error('Error fetching songs:', error);
-        showErrorPopup();
+        showErrorPopup(); // Show error message when API is down
     }
-}
-
-// Fetch lyrics for the song and handle smart scrolling
-async function fetchLyrics(songId) {
-    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
-
-        if (data.data) {
-            const lyrics = data.data.lyrics.split('\n');
-            let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
-            ).join('');
-            lyricsText.innerHTML = formattedLyrics;
-            lyricsContainer.style.display = 'block';
-            highlightCurrentLine(0);
-        } else {
-            lyricsText.innerText = 'Lyrics not available.';
-            lyricsContainer.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error fetching lyrics:', error);
-        document.getElementById("lyrics-container").style.display = 'none';
-    }
-}
-
-// Highlight the current line based on the song's current time
-function highlightCurrentLine(lineIndex) {
-    const lines = document.querySelectorAll('.lyrics-line');
-    lines.forEach(line => line.classList.remove('highlight'));
-    const currentLine = lines[lineIndex];
-    if (currentLine) {
-        currentLine.classList.add('highlight');
-        scrollToLine(currentLine);
-    }
-}
-
-function scrollToLine(line) {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const offsetTop = line.offsetTop;
-    const lineHeight = line.offsetHeight;
-    lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
 }
 
 // Update song list dropdown
@@ -745,18 +699,7 @@ function updateSongList() {
     }
 }
 
-function updateSongListSelection() {
-    songList.value = currentSongIndex;
-}
-
-function playSong() {
-    if (songList.value !== "") {
-        currentSongIndex = songList.value;
-        loadSong();
-        audio.play();
-    }
-}
-
+// Load song info
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
@@ -768,10 +711,12 @@ function loadSong() {
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
+
     fetchLyrics(song.id);
     updateSongListSelection();
 }
 
+// Function to decode HTML entities and remove quotes
 function decodeHtmlEntities(str) {
     const txt = document.createElement("textarea");
     txt.innerHTML = str;
@@ -783,25 +728,10 @@ function removeQuotes(str) {
     return decodedStr.replace(/"/g, '');
 }
 
-function togglePlay() {
-    if (audio.paused) {
-        audio.play();
-        playIcon.innerText = "pause";
-    } else {
-        audio.pause();
-        playIcon.innerText = "play_arrow";
-    }
-}
-
-function seekSong() {
-    const seekTo = audio.duration * (progressBar.value / 100);
-    audio.currentTime = seekTo;
-}
-
-// Download song with ID3 tags
+// Function to download the current song with ID3 tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url; // Select the appropriate quality URL
+    const audioUrl = song.downloadUrl[4].url; // Select appropriate quality URL
 
     try {
         const response = await fetch(audioUrl);
@@ -809,20 +739,18 @@ async function downloadAudio() {
             throw new Error('Failed to fetch audio file');
         }
         const audioBlob = await response.blob();
-        const metadataBlob = await addID3Tags(audioBlob, song); // Add ID3 tags to the audio blob
+        const metadataBlob = await addID3Tags(audioBlob, song); // Add ID3 tags to audio blob
         const blobUrl = URL.createObjectURL(metadataBlob);
 
-        // Sanitize the song name to remove invalid characters
         const sanitizedSongName = song.name.replace(/[^a-zA-Z0-9\s]/g, '_');
 
         const downloadLink = document.createElement('a');
         downloadLink.href = blobUrl;
-        downloadLink.download = `${sanitizedSongName}.mp3`; // Save file as MP3
+        downloadLink.download = `${sanitizedSongName}.mp3`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
 
-        // Revoke the object URL to free memory
         URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error('Error downloading audio:', error);
@@ -830,92 +758,52 @@ async function downloadAudio() {
     }
 }
 
-// Function to add ID3 tags to the audio file using the ID3Writer library
+// Function to add ID3 tags using ID3Writer library
 async function addID3Tags(audioBlob, song) {
     const { ID3Writer } = window;
 
-    // Initialize ID3Writer with the audio blob
     const writer = new ID3Writer(audioBlob);
-
-    // Add metadata tags
-    writer.setFrame('TIT2', song.name) // Title
-        .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
-        .setFrame('TALB', song.album.name) // Album
-        .setFrame('APIC', { // Album artwork
-            type: 3, // Cover (front)
-            data: await fetchImageAsBlob(song.image[2].url), // Convert image URL to blob
+    writer.setFrame('TIT2', song.name)
+        .setFrame('TPE1', [song.artists.primary[0].name])
+        .setFrame('TALB', song.album.name)
+        .setFrame('APIC', {
+            type: 3,
+            data: await fetchImageAsBlob(song.image[2].url),
             description: 'Album cover'
         });
 
-    // Write the tags and generate the final Blob
     writer.addTag();
     return writer.getBlob();
 }
 
-// Helper function to fetch album artwork and convert to blob
+// Helper function to fetch album artwork as blob
 async function fetchImageAsBlob(imageUrl) {
     try {
         const response = await fetch(imageUrl);
         if (!response.ok) {
             throw new Error('Failed to fetch album artwork');
         }
-        return await response.arrayBuffer(); // Return ArrayBuffer for the APIC frame
+        return await response.arrayBuffer();
     } catch (error) {
         console.error('Error fetching album artwork:', error);
         return null;
     }
 }
 
-// Next song
-function nextSong() {
-    currentSongIndex = (currentSongIndex + 1) % songs.length;
-    loadSong();
-    audio.play();
-}
-
-// Previous song
-function prevSong() {
-    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    loadSong();
-    audio.play();
-}
-
-// Show error popup
+// Error popup when API fails
 function showErrorPopup() {
     const popup = document.getElementById('error-popup');
     popup.style.display = 'block';
-    document.getElementById('switch-to-radio').onclick = () => {
+
+    const radioButton = document.getElementById('switch-to-radio');
+    radioButton.onclick = () => {
         window.location.href = 'https://tvt-swara.vercel.app/radio.html';
     };
+
     setTimeout(() => {
         popup.style.display = 'none';
     }, 80000);
 }
-
-// Wake lock for screen
-let wakeLock = null;
-async function requestWakeLock() {
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {
-        console.error(err.name, err.message);
-    }
-}
-
-function releaseWakeLock() {
-    if (wakeLock) {
-        wakeLock.release();
-        wakeLock = null;
-    }
-}
-
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        requestWakeLock();
-    } else {
-        releaseWakeLock();
-    }
-});
 
 		</script>
 	<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer"></script>
