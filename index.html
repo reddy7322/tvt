@@ -636,61 +636,82 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-		<script>
-function toggleLyrics() {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-}
+<script>
+// Footer protection: Prevent API usage if footer is tampered with
+const originalFooterContent = "© 𝟐𝟎𝟐𝟒 || Sɯαɾα™ Made with ❤️ by <a href=\"https://t.me/tvtelugu\" target=\"_blank\">𝐌𝐚𝐝𝐡𝐮</a>";
 
-const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
-    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
-    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
-    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
-];
-
-let audio = document.getElementById("audio");
-let playIcon = document.getElementById("play-icon");
-let songList = document.getElementById("song-list");
-let progressBar = document.getElementById("progress-bar");
-let timeDisplay = document.getElementById("time-display");
-let qualitySelect = document.getElementById("quality-select");
-let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "160"; // Default to 160 kbps
-
-// Auto-fetch random query and play the first song on page load
-window.onload = async function () {
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    await searchSongs(randomQuery);
-    document.getElementById("loader").classList.add('hide-loader');
-    document.getElementById("content").classList.remove('hide-loader');
-};
-
-// Fetch songs based on search query
-async function searchSongs(query) {
-    if (!query) return;
-
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('API Down');
-        }
-        const data = await response.json();
-        songs = data.data.results;
-        updateSongList();
-    } catch (error) {
-        console.error('Error fetching songs:', error);
-        showErrorPopup(); // Show error message when API is down
+function checkFooterIntegrity() {
+    const footer = document.querySelector('.footer p');
+    if (footer && footer.innerHTML !== originalFooterContent) {
+        console.error("Footer content has been tampered with. Disabling API functionality.");
+        disableAPI();
     }
 }
 
-// Fetch lyrics for the song and handle smart scrolling
+function disableAPI() {
+    // Disable all API-dependent functionalities
+    window.searchSongs = function () {
+        console.error("API usage disabled due to footer tampering.");
+    };
+
+    window.fetchLyrics = function () {
+        console.error("API usage disabled due to footer tampering.");
+    };
+
+    document.body.innerHTML = "<h1 style='color:red; text-align:center;'>Unauthorized Copy Detected. API Functionality Disabled!</h1>";
+}
+
+// Check footer integrity on page load
+window.onload = function () {
+    checkFooterIntegrity();
+
+    // Proceed with the rest of your logic only if the footer is intact
+    if (document.querySelector('.footer p').innerHTML === originalFooterContent) {
+        initializePlayer();
+    }
+};
+
+// Initialize the audio player and other functionalities
+function initializePlayer() {
+    const queries = [
+        'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+        'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+        'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
+        'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+        'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
+        'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+        'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
+        'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+    ];
+
+    let audio = document.getElementById("audio");
+    let playIcon = document.getElementById("play-icon");
+    let songList = document.getElementById("song-list");
+    let progressBar = document.getElementById("progress-bar");
+    let timeDisplay = document.getElementById("time-display");
+    let qualitySelect = document.getElementById("quality-select");
+    let currentSongIndex = 0;
+    let songs = []; // Store song data from API response
+
+    async function searchSongs(query) {
+        if (!query) return;
+
+        let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('API Down');
+            }
+            const data = await response.json();
+            songs = data.data.results;
+            updateSongList();
+        } catch (error) {
+            console.error('Error fetching songs:', error);
+            showErrorPopup(); // Show error message when API is down
+        }
+    }
+
+    // Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
@@ -995,6 +1016,8 @@ function showErrorPopup() {
     }, 80000); // Hide after 80 seconds (you can adjust this)
 }
 
-		</script>
+}
+</script>
+
 </body>
 </html>
