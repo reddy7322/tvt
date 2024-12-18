@@ -646,7 +646,13 @@ window.onload = function() {
     const validLogoText = "Sɯαɾα™";
     const validLogoImageSrc = "https://tvtelugu.github.io/images/tvtelugu.ico";
 
+    console.log("Checking logo and footer credentials...");
+
     if (logoText && logoImage && footerText) {
+        console.log("Logo text found:", logoText.innerText);
+        console.log("Logo image src:", logoImage.src);
+        console.log("Footer text:", footerText.innerText);
+
         // Check logo and footer content
         if (logoText.innerText !== validLogoText || logoImage.src !== validLogoImageSrc) {
             showError("Invalid credentials. Page cannot be loaded.");
@@ -657,7 +663,8 @@ window.onload = function() {
         return;
     }
 
-    // Proceed with the rest of the code if credentials match
+    console.log("Credentials validated, loading page...");
+
     const queries = [
         'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
         'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
@@ -950,6 +957,7 @@ window.onload = function() {
     }
 };
 </script>
+
 
 </body>
 </html>
