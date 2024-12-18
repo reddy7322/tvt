@@ -801,39 +801,69 @@ function seekSong() {
 // Download song with ID3 tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url;
+    const audioUrl = song.downloadUrl[4].url; // Select the appropriate quality URL
 
     try {
         const response = await fetch(audioUrl);
         if (!response.ok) {
             throw new Error('Failed to fetch audio file');
         }
-        const blob = await response.blob();
-        const metadataBlob = await addID3Tags(blob, song);
+        const audioBlob = await response.blob();
+        const metadataBlob = await addID3Tags(audioBlob, song); // Add ID3 tags to the audio blob
         const blobUrl = URL.createObjectURL(metadataBlob);
 
-        const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `${sanitizedSongName}.mp3`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        // Sanitize the song name to remove invalid characters
+        const sanitizedSongName = song.name.replace(/[^a-zA-Z0-9\s]/g, '_');
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = blobUrl;
+        downloadLink.download = `${sanitizedSongName}.mp3`; // Save file as MP3
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        // Revoke the object URL to free memory
         URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error('Error downloading audio:', error);
+        alert('An error occurred while downloading the file.');
     }
 }
 
-// Add ID3 tags to audio
+// Function to add ID3 tags to the audio file using the ID3Writer library
 async function addID3Tags(audioBlob, song) {
-    const ID3Writer = window.ID3Writer;
+    const { ID3Writer } = window;
+
+    // Initialize ID3Writer with the audio blob
     const writer = new ID3Writer(audioBlob);
-    writer.setFrame('TIT2', song.name)
-        .setFrame('TPE1', [song.artists.primary[0].name])
-        .setFrame('TALB', song.album.name);
+
+    // Add metadata tags
+    writer.setFrame('TIT2', song.name) // Title
+        .setFrame('TPE1', [song.artists.primary[0].name]) // Artist
+        .setFrame('TALB', song.album.name) // Album
+        .setFrame('APIC', { // Album artwork
+            type: 3, // Cover (front)
+            data: await fetchImageAsBlob(song.image[2].url), // Convert image URL to blob
+            description: 'Album cover'
+        });
+
+    // Write the tags and generate the final Blob
     writer.addTag();
     return writer.getBlob();
+}
+
+// Helper function to fetch album artwork and convert to blob
+async function fetchImageAsBlob(imageUrl) {
+    try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch album artwork');
+        }
+        return await response.arrayBuffer(); // Return ArrayBuffer for the APIC frame
+    } catch (error) {
+        console.error('Error fetching album artwork:', error);
+        return null;
+    }
 }
 
 // Next song
@@ -888,5 +918,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 		</script>
+	<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer"></script>
+
 </body>
 </html>
