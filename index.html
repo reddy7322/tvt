@@ -636,365 +636,400 @@
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
 
-		<script>
-function toggleLyrics() {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
-}
-
-const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
-    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
-    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
-    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
-];
-
-let audio = document.getElementById("audio");
-let playIcon = document.getElementById("play-icon");
-let songList = document.getElementById("song-list");
-let progressBar = document.getElementById("progress-bar");
-let timeDisplay = document.getElementById("time-display");
-let qualitySelect = document.getElementById("quality-select");
-let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "160"; // Default to 160 kbps
-
-// Auto-fetch random query and play the first song on page load
-window.onload = async function () {
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    await searchSongs(randomQuery);
-    document.getElementById("loader").classList.add('hide-loader');
-    document.getElementById("content").classList.remove('hide-loader');
-};
-
-// Fetch songs based on search query
-async function searchSongs(query) {
-    if (!query) return;
-
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('API Down');
-        }
-        const data = await response.json();
-        songs = data.data.results;
-        updateSongList();
-    } catch (error) {
-        console.error('Error fetching songs:', error);
-        showErrorPopup(); // Show error message when API is down
-    }
-}
-
-// Fetch lyrics for the song and handle smart scrolling
-async function fetchLyrics(songId) {
-    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const lyricsContainer = document.getElementById("lyrics-container");
-        const lyricsText = document.getElementById("lyrics-text");
-
-        if (data.data) {
-            const lyrics = data.data.lyrics.split('\n');
-            let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
-            ).join('');
-            lyricsText.innerHTML = formattedLyrics;
-            lyricsContainer.style.display = 'block';
-
-            // Initialize the first line as highlighted
-            highlightCurrentLine(0);
-        } else {
-            lyricsText.innerText = 'Lyrics not available.';
-            lyricsContainer.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Error fetching lyrics:', error);
-        // Prevent showing error message, instead hide lyrics container
-        document.getElementById("lyrics-container").style.display = 'none';
-    }
-}
-
-// Highlight the current line based on the song's current time
-function highlightCurrentLine(lineIndex) {
-    const lines = document.querySelectorAll('.lyrics-line');
-
-    // Remove highlight from all lines
-    lines.forEach(line => line.classList.remove('highlight'));
-
-    // Add highlight to the current line
-    const currentLine = lines[lineIndex];
-    if (currentLine) {
-        currentLine.classList.add('highlight');
-        scrollToLine(currentLine);
-    }
-}
-
-// Scroll to the current line
-function scrollToLine(line) {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const offsetTop = line.offsetTop;
-    const lineHeight = line.offsetHeight;
-
-    // Adjust scroll position to center the current line in the container
-    lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
-}
-
-// Update the highlighted line and scroll as the song progresses
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-    // Determine which line to highlight based on the current time of the song
-    const currentTimeInSeconds = Math.floor(audio.currentTime);
-    const lyricsLines = document.querySelectorAll('.lyrics-line');
-    let lineIndex = 0;
-
-    // Find the line corresponding to the current time
-    for (let i = 0; i < lyricsLines.length; i++) {
-        const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
-        if (lineTime <= currentTimeInSeconds) {
-            lineIndex = i;
-        }
-    }
-
-    highlightCurrentLine(lineIndex);
-};
-
-// Update song list dropdown
-function updateSongList() {
-    songList.innerHTML = "<option value=''>Select a song</option>";
-    songs.forEach((song, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.innerHTML = song.name;
-        songList.appendChild(option);
-    });
-
-    if (songs.length > 0) {
-        currentSongIndex = 0;
-        loadSong();
-        audio.play();
-    }
-}
-
-// Update the selected song in the dropdown
-function updateSongListSelection() {
-    songList.value = currentSongIndex; // Set the current song in the dropdown
-}
-
-// Play selected song
-function playSong() {
-    if (songList.value !== "") {
-        currentSongIndex = songList.value;
-        loadSong();
-        audio.play();
-    }
-}
-
-// Load song info
-function loadSong() {
-    const song = songs[currentSongIndex];
-    const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
-
-    audio.src = qualityUrl;
-    // Remove quotes and HTML entities from song name, artist name, and album name
-    document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
-    document.getElementById("album-name").innerText = removeQuotes(song.album.name);
-    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-    playIcon.innerText = "pause";
-
-    // Fetch lyrics
-    fetchLyrics(song.id);
-
-    // Update song list selection
-    updateSongListSelection();
-}
-
-// Function to decode HTML entities and remove quotes
-function decodeHtmlEntities(str) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = str;
-    return txt.value; // This decodes HTML entities
-}
-
-// Function to remove quotes after decoding HTML entities
-function removeQuotes(str) {
-    const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
-    return decodedStr.replace(/"/g, ''); // Remove the actual quotes
-}
-
-// Toggle play/pause
-function togglePlay() {
-    if (audio.paused) {
-        audio.play();
-        playIcon.innerText = "pause";
-    } else {
-        audio.pause();
-        playIcon.innerText = "play_arrow";
-    }
-}
-
-// Seek song based on progress bar
-function seekSong() {
-    const seekTo = audio.duration * (progressBar.value / 100);
-    audio.currentTime = seekTo;
-}
-
-// Update progress bar as song plays
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-};
-
-// Switch audio quality
-function changeQuality() {
-    if (audio.src) {
-        loadSong();
-        audio.play();
-    }
-}
-
-// Previous song
-function prevSong() {
-    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    loadSong();
-    audio.play();
-}
-
-// Next song
-function nextSong() {
-    currentSongIndex = (currentSongIndex + 1) % songs.length;
-    loadSong();
-    audio.play();
-}
-
-// Shuffle playlist
-function shufflePlaylist() {
-    songs.sort(() => Math.random() - 0.5);
-    updateSongList();
-}
-
-// Download song
-function downloadAudio() {
-    const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
-
-    fetch(audioUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-
-            // Sanitize the song name to remove existing extensions
-            const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            URL.revokeObjectURL(blobUrl);
-        })
-        .catch(error => {
-            console.error('Error downloading audio:', error);
-        });
-}
-
-// Automatically play the next song when the current song ends
-audio.addEventListener('ended', function () {
-    nextSong();
-});
-
-// Installable PWA logic
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Add a button to notify the user about installability
-});
-
-document.getElementById('installBtn').addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            deferredPrompt = null;
-        });
-    }
-});
-
-// Prevent audio pause on screen lock using the Wake Lock API
-let wakeLock = null;
-const requestWakeLock = async () => {
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-    } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
-    }
-};
-
-const releaseWakeLock = () => {
-    if (wakeLock) {
-        wakeLock.release();
-        wakeLock = null;
-    }
-};
-
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        requestWakeLock();
-    } else {
-        releaseWakeLock();
-    }
-});
-
-// Request wake lock when page is loaded
-window.onload = () => {
-    requestWakeLock();
-};
-
-window.onunload = () => {
-    releaseWakeLock();
-};
-
-// Function to show the error popup when API is down
-function showErrorPopup() {
-    const popup = document.getElementById('error-popup');
-    popup.style.display = 'block';
-
-    // Add a click event to the "Switch to Radio" button
-    const radioButton = document.getElementById('switch-to-radio');
-    radioButton.onclick = () => {
-        window.location.href = 'https://tvt-swara.app/radio.html'; // Redirect to radio page
+<script>
+    // Check if the required links are available before loading the main API
+    const checkLinksAvailability = () => {
+        const link1 = "https://tvtelugu.github.io/images/tvtelugu.ico";
+        const link2 = "https://t.me/tvtelugu";
+        
+        // Check if both links are available
+        fetch(link1)
+            .then(response1 => {
+                if (response1.ok) {
+                    fetch(link2)
+                        .then(response2 => {
+                            if (response2.ok) {
+                                // Both links are available, proceed to load the API
+                                loadMainAPI();
+                            } else {
+                                console.error('Link 2 is not available');
+                                showErrorPopup();
+                            }
+                        })
+                        .catch(error2 => {
+                            console.error('Error fetching Link 2:', error2);
+                            showErrorPopup();
+                        });
+                } else {
+                    console.error('Link 1 is not available');
+                    showErrorPopup();
+                }
+            })
+            .catch(error1 => {
+                console.error('Error fetching Link 1:', error1);
+                showErrorPopup();
+            });
     };
 
-    // Hide the popup after a few seconds
-    setTimeout(() => {
-        popup.style.display = 'none';
-    }, 80000); // Hide after 80 seconds (you can adjust this)
-}
+    // Main API loading function
+    const loadMainAPI = () => {
+        const queries = [
+            'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+            'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+            'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
+            'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
+            'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
+            'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+            'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
+            'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+        ];
 
-		</script>
+        let audio = document.getElementById("audio");
+        let playIcon = document.getElementById("play-icon");
+        let songList = document.getElementById("song-list");
+        let progressBar = document.getElementById("progress-bar");
+        let timeDisplay = document.getElementById("time-display");
+        let qualitySelect = document.getElementById("quality-select");
+        let currentSongIndex = 0;
+        let songs = []; // Store song data from API response
+        let currentQuality = "160"; // Default to 160 kbps
+
+        // Auto-fetch random query and play the first song on page load
+        window.onload = async function () {
+            const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+            await searchSongs(randomQuery);
+            document.getElementById("loader").classList.add('hide-loader');
+            document.getElementById("content").classList.remove('hide-loader');
+        };
+
+        // Fetch songs based on search query
+        async function searchSongs(query) {
+            if (!query) return;
+
+            let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('API Down');
+                }
+                const data = await response.json();
+                songs = data.data.results;
+                updateSongList();
+            } catch (error) {
+                console.error('Error fetching songs:', error);
+                showErrorPopup(); // Show error message when API is down
+            }
+        }
+
+        // Fetch lyrics for the song and handle smart scrolling
+        async function fetchLyrics(songId) {
+            const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                const lyricsContainer = document.getElementById("lyrics-container");
+                const lyricsText = document.getElementById("lyrics-text");
+
+                if (data.data) {
+                    const lyrics = data.data.lyrics.split('\n');
+                    let formattedLyrics = lyrics.map((line, index) => 
+                        `<p class="lyrics-line" id="line-${index}">${line}</p>`
+                    ).join('');
+                    lyricsText.innerHTML = formattedLyrics;
+                    lyricsContainer.style.display = 'block';
+
+                    // Initialize the first line as highlighted
+                    highlightCurrentLine(0);
+                } else {
+                    lyricsText.innerText = 'Lyrics not available.';
+                    lyricsContainer.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error fetching lyrics:', error);
+                // Prevent showing error message, instead hide lyrics container
+                document.getElementById("lyrics-container").style.display = 'none';
+            }
+        }
+
+        // Highlight the current line based on the song's current time
+        function highlightCurrentLine(lineIndex) {
+            const lines = document.querySelectorAll('.lyrics-line');
+
+            // Remove highlight from all lines
+            lines.forEach(line => line.classList.remove('highlight'));
+
+            // Add highlight to the current line
+            const currentLine = lines[lineIndex];
+            if (currentLine) {
+                currentLine.classList.add('highlight');
+                scrollToLine(currentLine);
+            }
+        }
+
+        // Scroll to the current line
+        function scrollToLine(line) {
+            const lyricsContainer = document.getElementById("lyrics-container");
+            const offsetTop = line.offsetTop;
+            const lineHeight = line.offsetHeight;
+
+            // Adjust scroll position to center the current line in the container
+            lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
+        }
+
+        // Update the highlighted line and scroll as the song progresses
+        audio.ontimeupdate = function () {
+            let progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            let minutes = Math.floor(audio.currentTime / 60);
+            let seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            // Determine which line to highlight based on the current time of the song
+            const currentTimeInSeconds = Math.floor(audio.currentTime);
+            const lyricsLines = document.querySelectorAll('.lyrics-line');
+            let lineIndex = 0;
+
+            // Find the line corresponding to the current time
+            for (let i = 0; i < lyricsLines.length; i++) {
+                const line = lyricsLines[i];
+                const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
+                if (lineTime <= currentTimeInSeconds) {
+                    lineIndex = i;
+                }
+            }
+
+            highlightCurrentLine(lineIndex);
+        };
+
+        // Update song list dropdown
+        function updateSongList() {
+            songList.innerHTML = "<option value=''>Select a song</option>";
+            songs.forEach((song, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.innerHTML = song.name;
+                songList.appendChild(option);
+            });
+
+            if (songs.length > 0) {
+                currentSongIndex = 0;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Update the selected song in the dropdown
+        function updateSongListSelection() {
+            songList.value = currentSongIndex; // Set the current song in the dropdown
+        }
+
+        // Play selected song
+        function playSong() {
+            if (songList.value !== "") {
+                currentSongIndex = songList.value;
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Load song info
+        function loadSong() {
+            const song = songs[currentSongIndex];
+            const selectedQuality = qualitySelect.value;
+            const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+
+            audio.src = qualityUrl;
+            // Remove quotes and HTML entities from song name, artist name, and album name
+            document.getElementById("song-name").innerText = removeQuotes(song.name);
+            document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+            document.getElementById("album-name").innerText = removeQuotes(song.album.name);
+            document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+            playIcon.innerText = "pause";
+
+            // Fetch lyrics
+            fetchLyrics(song.id);
+
+            // Update song list selection
+            updateSongListSelection();
+        }
+
+        // Function to decode HTML entities and remove quotes
+        function decodeHtmlEntities(str) {
+            const txt = document.createElement("textarea");
+            txt.innerHTML = str;
+            return txt.value; // This decodes HTML entities
+        }
+
+        // Function to remove quotes after decoding HTML entities
+        function removeQuotes(str) {
+            const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
+            return decodedStr.replace(/"/g, ''); // Remove the actual quotes
+        }
+
+        // Toggle play/pause
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playIcon.innerText = "pause";
+            } else {
+                audio.pause();
+                playIcon.innerText = "play_arrow";
+            }
+        }
+
+        // Seek song based on progress bar
+        function seekSong() {
+            const seekTo = audio.duration * (progressBar.value / 100);
+            audio.currentTime = seekTo;
+        }
+
+        // Update progress bar as song plays
+        audio.ontimeupdate = function () {
+            let progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            let minutes = Math.floor(audio.currentTime / 60);
+            let seconds = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        };
+
+        // Switch audio quality
+        function changeQuality() {
+            if (audio.src) {
+                loadSong();
+                audio.play();
+            }
+        }
+
+        // Previous song
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong();
+            audio.play();
+        }
+
+        // Next song
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong();
+            audio.play();
+        }
+
+        // Shuffle playlist
+        function shufflePlaylist() {
+            songs.sort(() => Math.random() - 0.5);
+            updateSongList();
+        }
+
+        // Download song
+        function downloadAudio() {
+            const song = songs[currentSongIndex];
+            const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
+
+            fetch(audioUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    // Sanitize the song name to remove existing extensions
+                    const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
+
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    URL.revokeObjectURL(blobUrl);
+                })
+                .catch(error => {
+                    console.error('Error downloading audio:', error);
+                });
+        }
+
+        // Automatically play the next song when the current song ends
+        audio.addEventListener('ended', function () {
+            nextSong();
+        });
+
+        // Installable PWA logic
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Add a button to notify the user about installability
+        });
+
+        document.getElementById('installBtn').addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        // Prevent audio pause on screen lock using the Wake Lock API
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        };
+
+        const releaseWakeLock = () => {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLock();
+            } else {
+                releaseWakeLock();
+            }
+        });
+
+        // Request wake lock when page is loaded
+        window.onload = () => {
+            requestWakeLock();
+        };
+
+        window.onunload = () => {
+            releaseWakeLock();
+        };
+
+        // Function to show the error popup when API is down
+        function showErrorPopup() {
+            const popup = document.getElementById('error-popup');
+            popup.style.display = 'block';
+
+            // Add a click event to the "Switch to Radio" button
+            const radioButton = document.getElementById('switch-to-radio');
+            radioButton.onclick = () => {
+                window.location.href = 'https://tvt-swara.app/radio.html'; // Redirect to radio page
+            };
+
+            // Hide the popup after a few seconds
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 80000); // Hide after 80 seconds (you can adjust this)
+        }
+    };
+
+    // Call the function to check the availability of the required links
+    checkLinksAvailability();
+</script>
+
 </body>
 </html>
