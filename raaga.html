@@ -646,10 +646,7 @@ function toggleLyrics() {
 const queries = ['Telugu'];
 
 let audio = document.getElementById("audio");
-let playIcon = document.getElementById("play-icon");
 let songList = document.getElementById("song-list");
-let progressBar = document.getElementById("progress-bar");
-let timeDisplay = document.getElementById("time-display");
 let qualitySelect = document.getElementById("quality-select");
 let currentSongIndex = 0;
 let songs = []; // Store song data from API response
@@ -674,10 +671,13 @@ async function searchSongs(query) {
             throw new Error('API Down');
         }
         const data = await response.json();
+        if (!data || !data.data || !data.data.results || data.data.results.length === 0) {
+            throw new Error('No songs found');
+        }
         songs = data.data.results;
         updateSongList();
     } catch (error) {
-        console.error('Error fetching songs:', error);
+        console.error('Error fetching songs:', error.message);
         showErrorPopup(); // Show error message when API is down
     }
 }
@@ -703,14 +703,19 @@ function updateSongList() {
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`)?.url;
+
+    if (!qualityUrl) {
+        console.error('No available URL for the selected quality');
+        alert('No URL found for the selected quality. Try another song or quality.');
+        return;
+    }
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
     document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
-    playIcon.innerText = "pause";
 
     fetchLyrics(song.id);
     updateSongListSelection();
@@ -731,7 +736,13 @@ function removeQuotes(str) {
 // Function to download the current song with ID3 tags
 async function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url; // Select appropriate quality URL
+    const audioUrl = song.downloadUrl[4]?.url || song.downloadUrl[0]?.url; // Select appropriate quality URL
+
+    if (!audioUrl) {
+        console.error('Audio URL is missing for the selected song.');
+        alert('Audio URL not found. Please select a different song.');
+        return;
+    }
 
     try {
         const response = await fetch(audioUrl);
@@ -753,7 +764,7 @@ async function downloadAudio() {
 
         URL.revokeObjectURL(blobUrl);
     } catch (error) {
-        console.error('Error downloading audio:', error);
+        console.error('Error downloading audio:', error.message);
         alert('An error occurred while downloading the file.');
     }
 }
@@ -785,7 +796,7 @@ async function fetchImageAsBlob(imageUrl) {
         }
         return await response.arrayBuffer();
     } catch (error) {
-        console.error('Error fetching album artwork:', error);
+        console.error('Error fetching album artwork:', error.message);
         return null;
     }
 }
@@ -804,6 +815,7 @@ function showErrorPopup() {
         popup.style.display = 'none';
     }, 80000);
 }
+
 
 		</script>
 	<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer"></script>
