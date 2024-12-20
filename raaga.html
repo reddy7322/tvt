@@ -635,6 +635,7 @@
 
     <!-- Audio Player -->
     <audio id="audio" controls></audio>
+
 <script>
 function toggleLyrics() {
     const lyricsContainer = document.getElementById("lyrics-container");
@@ -659,23 +660,16 @@ let progressBar = document.getElementById("progress-bar");
 let timeDisplay = document.getElementById("time-display");
 let qualitySelect = document.getElementById("quality-select");
 let currentSongIndex = 0;
-let songs = []; // Store song data from API response
-let currentQuality = "160"; // Default to 160 kbps
+let songs = [];
+let currentQuality = "160";
 
-// Check if logo and Telegram link exist
+// Auto-fetch random query and play the first song on page load
 window.onload = async function () {
-    const logoImage = document.querySelector('#page-logo');
-    const telegramLink = document.querySelector('a[href="https://t.me/tvtelugu"]');
-    
-    if (!logoImage || !telegramLink) {
-        showErrorPopup("Critical resources are missing! Please check your page source.");
-        return;
-    }
-
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
     await searchSongs(randomQuery);
     document.getElementById("loader").classList.add('hide-loader');
     document.getElementById("content").classList.remove('hide-loader');
+    requestWakeLock();
 };
 
 // Fetch songs based on search query
@@ -693,7 +687,7 @@ async function searchSongs(query) {
         updateSongList();
     } catch (error) {
         console.error('Error fetching songs:', error);
-        showErrorPopup("Error fetching songs from the API.");
+        showErrorPopup();
     }
 }
 
@@ -715,7 +709,6 @@ async function fetchLyrics(songId) {
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'block';
 
-            // Initialize the first line as highlighted
             highlightCurrentLine(0);
         } else {
             lyricsText.innerText = 'Lyrics not available.';
@@ -727,14 +720,9 @@ async function fetchLyrics(songId) {
     }
 }
 
-// Highlight the current line based on the song's current time
 function highlightCurrentLine(lineIndex) {
     const lines = document.querySelectorAll('.lyrics-line');
-
-    // Remove highlight from all lines
     lines.forEach(line => line.classList.remove('highlight'));
-
-    // Add highlight to the current line
     const currentLine = lines[lineIndex];
     if (currentLine) {
         currentLine.classList.add('highlight');
@@ -742,16 +730,13 @@ function highlightCurrentLine(lineIndex) {
     }
 }
 
-// Scroll to the current line
 function scrollToLine(line) {
     const lyricsContainer = document.getElementById("lyrics-container");
     const offsetTop = line.offsetTop;
     const lineHeight = line.offsetHeight;
-
     lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
 }
 
-// Update the highlighted line and scroll as the song progresses
 audio.ontimeupdate = function () {
     let progress = (audio.currentTime / audio.duration) * 100;
     progressBar.value = progress;
@@ -774,7 +759,6 @@ audio.ontimeupdate = function () {
     highlightCurrentLine(lineIndex);
 };
 
-// Update song list dropdown
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
     songs.forEach((song, index) => {
@@ -791,12 +775,10 @@ function updateSongList() {
     }
 }
 
-// Update the selected song in the dropdown
 function updateSongListSelection() {
-    songList.value = currentSongIndex; // Set the current song in the dropdown
+    songList.value = currentSongIndex;
 }
 
-// Play selected song
 function playSong() {
     if (songList.value !== "") {
         currentSongIndex = songList.value;
@@ -805,7 +787,6 @@ function playSong() {
     }
 }
 
-// Load song info
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
@@ -818,27 +799,21 @@ function loadSong() {
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
 
-    // Fetch lyrics
     fetchLyrics(song.id);
-
-    // Update song list selection
     updateSongListSelection();
 }
 
-// Function to decode HTML entities and remove quotes
 function decodeHtmlEntities(str) {
     const txt = document.createElement("textarea");
     txt.innerHTML = str;
     return txt.value;
 }
 
-// Function to remove quotes after decoding HTML entities
 function removeQuotes(str) {
     const decodedStr = decodeHtmlEntities(str);
     return decodedStr.replace(/"/g, '');
 }
 
-// Toggle play/pause
 function togglePlay() {
     if (audio.paused) {
         audio.play();
@@ -849,22 +824,11 @@ function togglePlay() {
     }
 }
 
-// Seek song based on progress bar
 function seekSong() {
     const seekTo = audio.duration * (progressBar.value / 100);
     audio.currentTime = seekTo;
 }
 
-// Update progress bar as song plays
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-};
-
-// Switch audio quality
 function changeQuality() {
     if (audio.src) {
         loadSong();
@@ -872,27 +836,23 @@ function changeQuality() {
     }
 }
 
-// Previous song
 function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     loadSong();
     audio.play();
 }
 
-// Next song
 function nextSong() {
     currentSongIndex = (currentSongIndex + 1) % songs.length;
     loadSong();
     audio.play();
 }
 
-// Shuffle playlist
 function shufflePlaylist() {
     songs.sort(() => Math.random() - 0.5);
     updateSongList();
 }
 
-// Download song
 function downloadAudio() {
     const song = songs[currentSongIndex];
     const audioUrl = song.downloadUrl[4].url;
@@ -906,6 +866,7 @@ function downloadAudio() {
         })
         .then(blob => {
             const blobUrl = URL.createObjectURL(blob);
+
             const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
             const a = document.createElement('a');
             a.href = blobUrl;
@@ -918,31 +879,78 @@ function downloadAudio() {
             URL.revokeObjectURL(blobUrl);
         })
         .catch(error => {
-            console.error('Download failed:', error);
+            console.error('Error downloading audio:', error);
         });
 }
 
-// Show error popup message
-function showErrorPopup(message) {
-    const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.top = '0';
-    popup.style.left = '0';
-    popup.style.width = '100%';
-    popup.style.padding = '10px';
-    popup.style.backgroundColor = '#ffcccc';
-    popup.style.textAlign = 'center';
-    popup.style.fontSize = '16px';
-    popup.innerText = message;
-    document.body.appendChild(popup);
+audio.addEventListener('ended', function () {
+    nextSong();
+});
+
+let wakeLock = null;
+const requestWakeLock = async () => {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+    }
+};
+
+const releaseWakeLock = () => {
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+    }
+};
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        requestWakeLock();
+    } else {
+        releaseWakeLock();
+    }
+});
+
+function showErrorPopup() {
+    const popup = document.getElementById('error-popup');
+    popup.style.display = 'block';
+
+    const radioButton = document.getElementById('switch-to-radio');
+    radioButton.onclick = () => {
+        window.location.href = 'https://tvt-swara.app/radio.html';
+    };
 
     setTimeout(() => {
         popup.style.display = 'none';
-    }, 5000); // Hide after 5 seconds
+    }, 80000);
 }
+
+// TV Remote Functionality
+window.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+            prevSong();
+            break;
+        case 'ArrowDown':
+            nextSong();
+            break;
+        case 'ArrowLeft':
+            audio.currentTime -= 10;
+            break;
+        case 'ArrowRight':
+            audio.currentTime += 10;
+            break;
+        case 'Enter':
+            togglePlay();
+            break;
+        case 'Backspace':
+            toggleLyrics();
+            break;
+        default:
+            console.log(`Unhandled key: ${event.key}`);
+    }
+});
 </script>
-
-
 
 </body>
 </html>
