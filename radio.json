@@ -1,4 +1,5 @@
 [
+
         {
         "name": "Radio Mirchi Bay Area Telugu",
         "url": "https://17653.live.streamtheworld.com/MTL_TEL_ESTAAC/HLS/playlist.m3u8",
@@ -88,6 +89,31 @@
         "name": "Telugu NRI Radio",
         "url": "http://104.167.4.67:8332/;stream.mp3",
         "poster": "https://onlineradiofm.in/assets/image/radio/180/TeluguNRIRadio.webp"
+    },
+   {
+        "name": "Telugu Thejam",
+        "url": "https://stream-154.zeno.fm/b2mhz1fd6ehvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJiMm1oejFmZDZlaHZ2IiwiaG9zdCI6InN0cmVhbS0xNTQuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6InZBZXJaZHlzU0ZLazA2UFlhYkRhR1EiLCJpYXQiOjE3MzQ3MTYwOTIsImV4cCI6MTczNDcxNjE1Mn0.robvuXCMaCtbJzLD8nyxXioRGwWaR2ZOq-tH45XCgj8",
+        "poster": "https://images.zeno.fm/JQrw5s7qTZ6Gjs4qXIZliqDZVVxD4k__pIm_Zvki03U/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0kxUGVxMGdvTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0loSm1IcndnTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2MTcxNTY2MjAwMA.webp"
+    },
+   {
+        "name": "",
+        "url": "",
+        "poster": ""
+    },
+   {
+        "name": "",
+        "url": "",
+        "poster": ""
+    },
+   {
+        "name": "",
+        "url": "",
+        "poster": ""
+    },
+   {
+        "name": "",
+        "url": "",
+        "poster": ""
     },
     {
         "name": "Radio Myind Media",
