@@ -707,10 +707,9 @@ if (window.matchMedia("(max-width: 768px)").matches) {
 async function searchSongs(query) {
     if (!query) return;
 
-    // Obfuscated URL (base64 encoded example)
-    const apiUrl = atob("aHR0cHM6Ly9zYWF2bi5kZXYvYXBpL3NlYXJjaC9zb25ncy?cXVlcnk9"+encodeURIComponent(query)+"&cGFnZT0xJmxpbWl0PTUw");
+    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
     try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('API Down');
         }
@@ -725,9 +724,9 @@ async function searchSongs(query) {
 
 // Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
-    const apiUrl = atob("aHR0cHM6Ly9zYWF2bi5kZXYvYXBpL3NvbmczLyRwb2lkP3Nvbmck");
+    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(url);
         const data = await response.json();
 
         const lyricsContainer = document.getElementById("lyrics-container");
@@ -1042,7 +1041,6 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
-
 // Update Mobile Notification Panel with Album Poster
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
