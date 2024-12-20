@@ -12,309 +12,245 @@
     <link href="https://fonts.googleapis.com/css2?family=Parkinson&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Anek+Telugu:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-   <style>
-    /* General Reset and Layout */
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Parkinson', sans-serif;
-        background-color: #121212;
-        color: white;
-        height: 100%;
-        overflow: hidden;
-    }
-
-    #radio-station-select {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        background-color: #222;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        outline: none;
-        appearance: none;
-        cursor: pointer;
-    }
-
-    #radio-station-select:hover {
-        background-color: #333;
-    }
-
-    #radio-station-select option {
-        background-color: #121212;
-        color: white;
-    }
-
-    #music-page-toggle-btn {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 30px;
-        cursor: pointer;
-    }
-
-       /* Hide content by default */
-.hide-loader {
-    display: none;
-}
-
-    /* Loader Styles */
-    .loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #121212;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-    .loader .spinner {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
+    <style>
+        /* General Reset and Layout */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Parkinson', sans-serif;
+            background-color: #121212;
+            color: white;
+            height: 100%;
+            overflow: hidden;
         }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
 
-    /* Hide loader when page is loaded */
-    .hide-loader {
-        display: none;
-    }
-
-    /* Header Section */
-    #header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        background-color: #222;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    #logo-container {
-        display: flex;
-        align-items: center;
-    }
-
-    #page-logo {
-        width: 40px;
-        height: 40px;
-        margin-right: 10px;
-    }
-
-    #logo-text {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    #search-container {
-        display: flex;
-        align-items: center;
-    }
-
-    #search-btn {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 30px;
-        cursor: pointer;
-    }
-
-    /* Main Layout */
-    .container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    /* Radio Player */
-    #radio-player-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-        flex: 1;
-        overflow-y: auto;
-    }
-
-    /* Radio Header */
-    #radio-header {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
-    #radio-station-name {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    /* Radio Poster */
-    #radio-poster-container {
-        position: relative;
-        width: 350px;
-        height: 350px;
-    }
-
-    #radio-poster {
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        border-radius: 15px;
-        position: absolute;
-        transform-origin: top;
-        animation: upfolder-reveal 0.6s ease-in-out;
-    }
-
-    @keyframes upfolder-reveal {
-        0% {
-            transform: scaleY(0);
-        }
-        100% {
-            transform: scaleY(1);
-        }
-    }
-
-    /* Radio Controls */
-    #radio-controls {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    #radio-controls button {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 40px;
-        cursor: pointer;
-    }
-
-    /* Progress Bar */
-    .progress-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    #radio-progress-bar {
-        width: 100%;
-        height: 10px;
-        background-color: #333;
-        border-radius: 5px;
-        outline: none;
-        cursor: pointer;
-    }
-
-    #radio-progress-bar::-webkit-slider-thumb {
-        background: #FF4081;
-        border: none;
-        height: 20px;
-        width: 20px;
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-    #radio-time-display {
-        font-size: 14px;
-        color: #FFF;
-    }
-
-    /* Footer Styling */
-    .footer {
-        color: white;
-        text-align: center;
-        padding: 5px;
-        font-size: 14px;
-        margin-top: 20px;
-    }
-
-    .footer a {
-        color: #FF4081;
-        text-decoration: none;
-    }
-
-    .footer a:hover {
-        text-decoration: underline;
-    }
-
-    /* Mobile/Tablet */
-    @media (max-width: 768px) {
-        /* Adjust elements for smaller screens */
-        #radio-progress-bar {
+        #radio-station-select {
             width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #222;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
         }
 
-        #radio-poster {
-            width: 100%;
-            height: auto;
-        }
-    }
-
-    /* Android TV/Smart TV */
-    @media (min-width: 1024px) and (max-width: 1920px) {
-        body {
-            font-size: 18px;
+        #radio-station-select:hover {
+            background-color: #333;
         }
 
-        #radio-play, #radio-next, #radio-prev, #radio-station-select {
-            font-size: 30px;
-            padding: 20px;
-        }
-
-        #radio-poster {
-            width: 80%;
-            height: auto;
-            margin: 20px auto;
-        }
-
-        #radio-progress-bar {
-            width: 70%;
-            margin: 0 auto;
-        }
-
-        /* Hide the mobile notification panel on larger screens */
-        #mobile-notification-panel {
-            display: none;
-        }
-
-        #radio-time-display {
-            font-size: 30px;
-        }
-
-        #radio-station-name {
-            font-size: 30px;
+        #radio-station-select option {
+            background-color: #121212;
+            color: white;
         }
 
         #music-page-toggle-btn {
-            display: none; /* Hide the music page toggle button on TV */
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
         }
-    }
 
-    /* Large TV Screens */
-    @media (min-width: 1920px) {
-        body {
+        /* Loader Styles */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Hide loader when page is loaded */
+        .hide-loader {
+            display: none;
+        }
+
+        /* Header Section */
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #222;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #page-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        #logo-text {
             font-size: 24px;
+            font-weight: bold;
         }
-    }
-</style>
 
+        #search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #search-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Radio Player */
+        #radio-player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Radio Header */
+        #radio-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #radio-station-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Radio Poster */
+        #radio-poster-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+        }
+
+        #radio-poster {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            position: absolute;
+            transform-origin: top;
+            animation: upfolder-reveal 0.6s ease-in-out;
+        }
+
+        @keyframes upfolder-reveal {
+            0% {
+                transform: scaleY(0);
+            }
+
+            100% {
+                transform: scaleY(1);
+            }
+        }
+
+        /* Radio Controls */
+        #radio-controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #radio-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #radio-progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #radio-progress-bar::-webkit-slider-thumb {
+            background: #FF4081;
+            border: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #radio-time-display {
+            font-size: 14px;
+            color: #FFF;
+        }
+
+        /* Footer Styling */
+        .footer {
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: #FF4081;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
@@ -381,8 +317,8 @@
     </div>
 
     <audio id="radio-audio" controls></audio>
-<script>
-// Initialize elements
+
+    <script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -395,32 +331,21 @@ let radioPoster = document.getElementById("radio-poster");
 let radioStations = [];
 let currentStationIndex = 0;
 
-let mobileNotificationPanel = document.getElementById("mobile-notification-panel");
-let nextSongButton = document.getElementById("next-song-button");
-let prevSongButton = document.getElementById("prev-song-button");
+let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
+
+musicPageToggleBtn.addEventListener("click", function () {
+    window.location.href = "https://tvt-swara.vercel.app/";
+});
 
 // Fetch radio stations from radio.json
 fetch('radio.json')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Stations loaded:', data); // Debug log
         radioStations = data;
         initRadioStations();
-        playStation(0); // Start playing first station
-        loader.classList.add("hide-loader"); // Hide loader after loading
-        content.classList.remove("hide-loader"); // Show content
+        playStation(0);
     })
-    .catch(error => {
-        console.error('Error fetching radio stations:', error);
-        loader.classList.add("hide-loader");
-        content.classList.remove("hide-loader");
-        alert('Failed to load radio stations.'); // Alert in case of failure
-    });
+    .catch(error => console.error('Error fetching radio stations:', error));
 
 function initRadioStations() {
     radioStations.forEach((station, index) => {
@@ -447,7 +372,7 @@ function playStation(index) {
         playRadio();
     }
 
-    // Update poster image
+    // Trigger animation for the poster
     radioPoster.style.animation = 'none';
     setTimeout(() => {
         radioPoster.style.animation = '';
@@ -493,37 +418,6 @@ function previousStation() {
     playStation(prevIndex);
 }
 
-// Mobile Notification Buttons
-nextSongButton.addEventListener("click", nextStation);
-prevSongButton.addEventListener("click", previousStation);
-
-// Keyboard Control: Left Arrow for Previous, Right Arrow for Next, Space for Play/Pause
-document.addEventListener('keydown', function (event) {
-    if (event.code === "ArrowRight") {
-        nextStation();
-    } else if (event.code === "ArrowLeft") {
-        previousStation();
-    } else if (event.code === "Space") {
-        toggleRadioPlay();
-    }
-});
-
-// Smart TV Remote Button Functions
-document.addEventListener('keydown', function (event) {
-    if (event.code === "Enter") {
-        toggleRadioPlay();
-    } else if (event.code === "ArrowRight") {
-        nextStation();
-    } else if (event.code === "ArrowLeft") {
-        previousStation();
-    } else if (event.code === "ArrowDown") {
-        // You can add additional functionality for "ArrowDown" if needed
-    } else if (event.code === "ArrowUp") {
-        // You can add additional functionality for "ArrowUp" if needed
-    }
-});
-
-// Update Progress Bar and Time
 radioAudio.ontimeupdate = function () {
     let currentTime = radioAudio.currentTime;
     let duration = radioAudio.duration;
@@ -541,19 +435,13 @@ function seekRadio() {
     radioAudio.currentTime = (value / 100) * duration;
 }
 
-radioProgressBar.addEventListener("input", seekRadio);
-
-// Hide loader after page load
+// Initialize after page load
 window.onload = function () {
-    console.log('Page is loading...');
-    // Ensure content is fully loaded
-    setTimeout(function () {
-        loader.classList.add("hide-loader");
-        content.classList.remove("hide-loader");
-        console.log('Loader hidden, content displayed.');
-    }, 1000); // Delay to check if everything loads (adjust as needed)
+    loader.style.display = "none";
+    content.style.display = "block";
 };
-</script>
+
+    </script>
 
 </body>
 
