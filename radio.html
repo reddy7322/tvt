@@ -318,7 +318,7 @@
 
     <audio id="radio-audio" controls></audio>
 
-    <script>
+<script>
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -330,6 +330,9 @@ let content = document.getElementById("content");
 let radioPoster = document.getElementById("radio-poster");
 let radioStations = [];
 let currentStationIndex = 0;
+let mobileNotificationPanel = document.getElementById("mobile-notification-panel");
+let nextSongButton = document.getElementById("next-song-button");
+let prevSongButton = document.getElementById("prev-song-button");
 
 let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
@@ -381,6 +384,14 @@ function playStation(index) {
 
     document.getElementById("radio-station-name").innerText = station.name;
     radioStationSelect.value = index;
+
+    // Show the mobile notification panel
+    if (mobileNotificationPanel) {
+        mobileNotificationPanel.style.display = 'block';
+        setTimeout(() => {
+            mobileNotificationPanel.style.display = 'none';
+        }, 5000); // Hide notification after 5 seconds
+    }
 }
 
 function changeRadioStation() {
@@ -418,6 +429,33 @@ function previousStation() {
     playStation(prevIndex);
 }
 
+// Mobile Notification Buttons
+nextSongButton.addEventListener("click", nextStation);
+prevSongButton.addEventListener("click", previousStation);
+
+// Keyboard Control: Left Arrow for Previous, Right Arrow for Next, Space for Play/Pause
+document.addEventListener('keydown', function (event) {
+    if (event.code === "ArrowRight") {
+        nextStation();
+    } else if (event.code === "ArrowLeft") {
+        previousStation();
+    } else if (event.code === "Space") {
+        toggleRadioPlay();
+    }
+});
+
+// Smart TV Remote Button Functions
+document.addEventListener('keydown', function (event) {
+    if (event.code === "Enter") {
+        toggleRadioPlay();
+    } else if (event.code === "ArrowRight") {
+        nextStation();
+    } else if (event.code === "ArrowLeft") {
+        previousStation();
+    }
+});
+
+// Update Progress Bar and Time
 radioAudio.ontimeupdate = function () {
     let currentTime = radioAudio.currentTime;
     let duration = radioAudio.duration;
@@ -441,7 +479,8 @@ window.onload = function () {
     content.style.display = "block";
 };
 
-    </script>
+</script>
+
 
 </body>
 
