@@ -700,9 +700,7 @@ async function searchSongs(query) {
     let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
     try {
         const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('API Down');
-        }
+        if (!response.ok) throw new Error('API Down');
         const data = await response.json();
         songs = data.data.results;
         updateSongList();
@@ -718,19 +716,15 @@ async function fetchLyrics(songId) {
     try {
         const response = await fetch(url);
         const data = await response.json();
-
         const lyricsContainer = document.getElementById("lyrics-container");
         const lyricsText = document.getElementById("lyrics-text");
 
         if (data.data) {
             const lyrics = data.data.lyrics.split('\n');
-            let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+            lyricsText.innerHTML = lyrics.map((line, index) => 
+                `<p class="lyrics-line" data-time="${index * 10}" id="line-${index}">${line}</p>`
             ).join('');
-            lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'block';
-
-            // Initialize the first line as highlighted
             highlightCurrentLine(0);
         } else {
             lyricsText.innerText = 'Lyrics not available.';
@@ -738,7 +732,6 @@ async function fetchLyrics(songId) {
         }
     } catch (error) {
         console.error('Error fetching lyrics:', error);
-        // Prevent showing error message, instead hide lyrics container
         document.getElementById("lyrics-container").style.display = 'none';
     }
 }
@@ -746,19 +739,13 @@ async function fetchLyrics(songId) {
 // Highlight the current line based on the song's current time
 function highlightCurrentLine(lineIndex) {
     const lines = document.querySelectorAll('.lyrics-line');
-
-    // Remove highlight from all lines
     lines.forEach(line => line.classList.remove('highlight'));
-
-    // Add highlight to the current line
     const currentLine = lines[lineIndex];
     if (currentLine) {
         currentLine.classList.add('highlight');
         scrollToLine(currentLine);
     }
 }
-
-
 
 // Update the highlighted line and scroll as the song progresses
 audio.ontimeupdate = function () {
@@ -768,18 +755,14 @@ audio.ontimeupdate = function () {
     let seconds = Math.floor(audio.currentTime % 60);
     timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
-    // Determine which line to highlight based on the current time of the song
     const currentTimeInSeconds = Math.floor(audio.currentTime);
     const lyricsLines = document.querySelectorAll('.lyrics-line');
     let lineIndex = 0;
 
-    // Find the line corresponding to the current time
     for (let i = 0; i < lyricsLines.length; i++) {
         const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
-        if (lineTime <= currentTimeInSeconds) {
-            lineIndex = i;
-        }
+        const lineTime = parseInt(line.getAttribute('data-time'), 10);
+        if (lineTime <= currentTimeInSeconds) lineIndex = i;
     }
 
     highlightCurrentLine(lineIndex);
@@ -827,7 +810,6 @@ function loadSong() {
 
     fetchLyrics(song.id);
     updateSongListSelection();
-
     updateMediaSession(song);
 }
 
@@ -913,14 +895,11 @@ function downloadAudio() {
 
     fetch(audioUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.blob();
         })
         .then(blob => {
             const blobUrl = URL.createObjectURL(blob);
-
             const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
             const a = document.createElement('a');
             a.href = blobUrl;
@@ -929,12 +908,9 @@ function downloadAudio() {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-
             URL.revokeObjectURL(blobUrl);
         })
-        .catch(error => {
-            console.error('Error downloading audio:', error);
-        });
+        .catch(error => console.error('Error downloading audio:', error));
 }
 
 audio.addEventListener('ended', function () {
@@ -982,26 +958,13 @@ function showErrorPopup() {
 // TV Remote and Mobile Gesture Enhancements
 window.addEventListener('keydown', (event) => {
     switch (event.key) {
-        case 'ArrowUp':
-            prevSong();
-            break;
-        case 'ArrowDown':
-            nextSong();
-            break;
-        case 'ArrowLeft':
-            audio.currentTime -= 10;
-            break;
-        case 'ArrowRight':
-            audio.currentTime += 10;
-            break;
-        case 'Enter':
-            togglePlay();
-            break;
-        case 'Backspace':
-            toggleLyrics();
-            break;
-        default:
-            console.log(`Unhandled key: ${event.key}`);
+        case 'ArrowUp': prevSong(); break;
+        case 'ArrowDown': nextSong(); break;
+        case 'ArrowLeft': audio.currentTime -= 10; break;
+        case 'ArrowRight': audio.currentTime += 10; break;
+        case 'Enter': togglePlay(); break;
+        case 'Backspace': toggleLyrics(); break;
+        default: console.log(`Unhandled key: ${event.key}`);
     }
 });
 
@@ -1037,22 +1000,8 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
-// Update Mobile Notification Panel with Album Poster
-function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
-            album: removeQuotes(song.album.name),
-            artwork: [
-                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
-                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
-                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
-            ]
-        });
-    }
-}
 </script>
+
 
 
 
