@@ -541,10 +541,11 @@ radioProgressBar.addEventListener("input", seekRadio);
 
 // Hide loader after page load
 window.onload = function () {
+    // Make sure the page elements are fully loaded
     setTimeout(function () {
         loader.classList.add("hide-loader");
         content.classList.remove("hide-loader");
-    }, 500);
+    }, 500); // Adjust this time based on your content load speed
 };
 
 </script>
