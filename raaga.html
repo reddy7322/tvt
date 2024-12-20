@@ -758,17 +758,29 @@ function highlightCurrentLine(lineIndex) {
     }
 }
 
-// Scroll to the current line
-function scrollToLine(line) {
-    const lyricsContainer = document.getElementById("lyrics-container");
-    const offsetTop = line.offsetTop;
-    const lineHeight = line.offsetHeight;
-
-    // Adjust scroll position to center the current line in the container
-    lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
-}
 
 
+// Update the highlighted line and scroll as the song progresses
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    // Determine which line to highlight based on the current time of the song
+    const currentTimeInSeconds = Math.floor(audio.currentTime);
+    const lyricsLines = document.querySelectorAll('.lyrics-line');
+    let lineIndex = 0;
+
+    // Find the line corresponding to the current time
+    for (let i = 0; i < lyricsLines.length; i++) {
+        const line = lyricsLines[i];
+        const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
+        if (lineTime <= currentTimeInSeconds) {
+            lineIndex = i;
+        }
+    }
 
     highlightCurrentLine(lineIndex);
 };
