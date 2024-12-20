@@ -250,6 +250,65 @@
         .footer a:hover {
             text-decoration: underline;
         }
+        /* Mobile/Tablet */
+@media (max-width: 768px) {
+    /* Adjust elements for smaller screens */
+    #radio-progress-bar {
+        width: 100%;
+    }
+
+    #radio-poster {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* Android TV/Smart TV */
+@media (min-width: 1024px) and (max-width: 1920px) {
+    body {
+        font-size: 18px;
+    }
+
+    #radio-play, #radio-next, #radio-prev, #radio-station-select {
+        font-size: 30px;
+        padding: 20px;
+    }
+
+    #radio-poster {
+        width: 80%;
+        height: auto;
+        margin: 20px auto;
+    }
+
+    #radio-progress-bar {
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    /* Hide the mobile notification panel on larger screens */
+    #mobile-notification-panel {
+        display: none;
+    }
+
+    #radio-time-display {
+        font-size: 30px;
+    }
+
+    #radio-station-name {
+        font-size: 30px;
+    }
+
+    #music-page-toggle-btn {
+        display: none; /* Hide the music page toggle button on TV */
+    }
+}
+
+/* Large TV Screens */
+@media (min-width: 1920px) {
+    body {
+        font-size: 24px;
+    }
+}
     </style>
 </head>
 
@@ -317,8 +376,8 @@
     </div>
 
     <audio id="radio-audio" controls></audio>
-
 <script>
+// Initialize elements
 let radioAudio = document.getElementById("radio-audio");
 let radioPlayButton = document.getElementById("radio-play");
 let radioPlayIcon = document.getElementById("radio-play-icon");
@@ -334,6 +393,7 @@ let mobileNotificationPanel = document.getElementById("mobile-notification-panel
 let nextSongButton = document.getElementById("next-song-button");
 let prevSongButton = document.getElementById("prev-song-button");
 
+// Music Page Toggle Button
 let musicPageToggleBtn = document.getElementById("music-page-toggle-btn");
 
 musicPageToggleBtn.addEventListener("click", function () {
@@ -375,7 +435,7 @@ function playStation(index) {
         playRadio();
     }
 
-    // Trigger animation for the poster
+    // Update poster image
     radioPoster.style.animation = 'none';
     setTimeout(() => {
         radioPoster.style.animation = '';
@@ -452,6 +512,10 @@ document.addEventListener('keydown', function (event) {
         nextStation();
     } else if (event.code === "ArrowLeft") {
         previousStation();
+    } else if (event.code === "ArrowDown") {
+        // You can add additional functionality for "ArrowDown" if needed
+    } else if (event.code === "ArrowUp") {
+        // You can add additional functionality for "ArrowUp" if needed
     }
 });
 
@@ -480,6 +544,7 @@ window.onload = function () {
 };
 
 </script>
+
 
 
 </body>
