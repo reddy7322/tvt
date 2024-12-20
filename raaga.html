@@ -660,8 +660,8 @@ let progressBar = document.getElementById("progress-bar");
 let timeDisplay = document.getElementById("time-display");
 let qualitySelect = document.getElementById("quality-select");
 let currentSongIndex = 0;
-let songs = [];
-let currentQuality = "160";
+let songs = []; // Store song data from API response
+let currentQuality = "160"; // Default to 160 kbps
 
 // Auto-fetch random query and play the first song on page load
 window.onload = async function () {
@@ -669,7 +669,6 @@ window.onload = async function () {
     await searchSongs(randomQuery);
     document.getElementById("loader").classList.add('hide-loader');
     document.getElementById("content").classList.remove('hide-loader');
-    requestWakeLock();
 };
 
 // Fetch songs based on search query
@@ -687,7 +686,7 @@ async function searchSongs(query) {
         updateSongList();
     } catch (error) {
         console.error('Error fetching songs:', error);
-        showErrorPopup();
+        showErrorPopup(); // Show error message when API is down
     }
 }
 
@@ -709,6 +708,7 @@ async function fetchLyrics(songId) {
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'block';
 
+            // Initialize the first line as highlighted
             highlightCurrentLine(0);
         } else {
             lyricsText.innerText = 'Lyrics not available.';
@@ -716,13 +716,19 @@ async function fetchLyrics(songId) {
         }
     } catch (error) {
         console.error('Error fetching lyrics:', error);
+        // Prevent showing error message, instead hide lyrics container
         document.getElementById("lyrics-container").style.display = 'none';
     }
 }
 
+// Highlight the current line based on the song's current time
 function highlightCurrentLine(lineIndex) {
     const lines = document.querySelectorAll('.lyrics-line');
+
+    // Remove highlight from all lines
     lines.forEach(line => line.classList.remove('highlight'));
+
+    // Add highlight to the current line
     const currentLine = lines[lineIndex];
     if (currentLine) {
         currentLine.classList.add('highlight');
@@ -730,13 +736,17 @@ function highlightCurrentLine(lineIndex) {
     }
 }
 
+// Scroll to the current line
 function scrollToLine(line) {
     const lyricsContainer = document.getElementById("lyrics-container");
     const offsetTop = line.offsetTop;
     const lineHeight = line.offsetHeight;
+
+    // Adjust scroll position to center the current line in the container
     lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
 }
 
+// Update the highlighted line and scroll as the song progresses
 audio.ontimeupdate = function () {
     let progress = (audio.currentTime / audio.duration) * 100;
     progressBar.value = progress;
@@ -744,13 +754,15 @@ audio.ontimeupdate = function () {
     let seconds = Math.floor(audio.currentTime % 60);
     timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
+    // Determine which line to highlight based on the current time of the song
     const currentTimeInSeconds = Math.floor(audio.currentTime);
     const lyricsLines = document.querySelectorAll('.lyrics-line');
     let lineIndex = 0;
 
+    // Find the line corresponding to the current time
     for (let i = 0; i < lyricsLines.length; i++) {
         const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10);
+        const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
         if (lineTime <= currentTimeInSeconds) {
             lineIndex = i;
         }
@@ -759,6 +771,7 @@ audio.ontimeupdate = function () {
     highlightCurrentLine(lineIndex);
 };
 
+// Update song list dropdown
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
     songs.forEach((song, index) => {
@@ -775,10 +788,12 @@ function updateSongList() {
     }
 }
 
+// Update the selected song in the dropdown
 function updateSongListSelection() {
-    songList.value = currentSongIndex;
+    songList.value = currentSongIndex; // Set the current song in the dropdown
 }
 
+// Play selected song
 function playSong() {
     if (songList.value !== "") {
         currentSongIndex = songList.value;
@@ -787,33 +802,50 @@ function playSong() {
     }
 }
 
+// Load song info
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
     const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
 
     audio.src = qualityUrl;
+    // Remove quotes and HTML entities from song name, artist name, and album name
     document.getElementById("song-name").innerText = removeQuotes(song.name);
     document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
 
+    // Fetch lyrics
     fetchLyrics(song.id);
+
+    // Update song list selection
     updateSongListSelection();
+
+    // Apply album poster flip animation on mobile devices
+    if (isMobileDevice()) {
+        const albumPoster = document.getElementById("album-poster");
+        albumPoster.classList.add("flip-animation");
+        setTimeout(() => {
+            albumPoster.classList.remove("flip-animation");
+        }, 1000); // Animation duration
+    }
 }
 
+// Function to decode HTML entities and remove quotes
 function decodeHtmlEntities(str) {
     const txt = document.createElement("textarea");
     txt.innerHTML = str;
-    return txt.value;
+    return txt.value; // This decodes HTML entities
 }
 
+// Function to remove quotes after decoding HTML entities
 function removeQuotes(str) {
-    const decodedStr = decodeHtmlEntities(str);
-    return decodedStr.replace(/"/g, '');
+    const decodedStr = decodeHtmlEntities(str); // Decode the HTML entities
+    return decodedStr.replace(/"/g, ''); // Remove the actual quotes
 }
 
+// Toggle play/pause
 function togglePlay() {
     if (audio.paused) {
         audio.play();
@@ -824,11 +856,22 @@ function togglePlay() {
     }
 }
 
+// Seek song based on progress bar
 function seekSong() {
     const seekTo = audio.duration * (progressBar.value / 100);
     audio.currentTime = seekTo;
 }
 
+// Update progress bar as song plays
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
+
+// Switch audio quality
 function changeQuality() {
     if (audio.src) {
         loadSong();
@@ -836,26 +879,30 @@ function changeQuality() {
     }
 }
 
+// Previous song
 function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     loadSong();
     audio.play();
 }
 
+// Next song
 function nextSong() {
     currentSongIndex = (currentSongIndex + 1) % songs.length;
     loadSong();
     audio.play();
 }
 
+// Shuffle playlist
 function shufflePlaylist() {
     songs.sort(() => Math.random() - 0.5);
     updateSongList();
 }
 
+// Download song
 function downloadAudio() {
     const song = songs[currentSongIndex];
-    const audioUrl = song.downloadUrl[4].url;
+    const audioUrl = song.downloadUrl[4].url; // Adjust index if needed
 
     fetch(audioUrl)
         .then(response => {
@@ -867,10 +914,11 @@ function downloadAudio() {
         .then(blob => {
             const blobUrl = URL.createObjectURL(blob);
 
+            // Sanitize the song name to remove existing extensions
             const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
             const a = document.createElement('a');
             a.href = blobUrl;
-            a.download = `${sanitizedSongName}.mp3`;
+            a.download = `${sanitizedSongName}.mp3`; // Always use .mp3 extension
 
             document.body.appendChild(a);
             a.click();
@@ -883,10 +931,29 @@ function downloadAudio() {
         });
 }
 
+// Automatically play the next song when the current song ends
 audio.addEventListener('ended', function () {
     nextSong();
 });
 
+// Installable PWA logic
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Add a button to notify the user about installability
+});
+
+document.getElementById('installBtn').addEventListener('click', () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+        });
+    }
+});
+
+// Prevent audio pause on screen lock using the Wake Lock API
 let wakeLock = null;
 const requestWakeLock = async () => {
     try {
@@ -911,46 +978,61 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+// Request wake lock when page is loaded
+window.onload = () => {
+    requestWakeLock();
+};
+
+window.onunload = () => {
+    releaseWakeLock();
+};
+
+// Function to show the error popup when API is down
 function showErrorPopup() {
     const popup = document.getElementById('error-popup');
     popup.style.display = 'block';
 
+    // Add a click event to the "Switch to Radio" button
     const radioButton = document.getElementById('switch-to-radio');
     radioButton.onclick = () => {
-        window.location.href = 'https://tvt-swara.app/radio.html';
+        window.location.href = 'https://tvt-swara.app/radio.html'; // Redirect to radio page
     };
 
+    // Hide the popup after a few seconds
     setTimeout(() => {
         popup.style.display = 'none';
-    }, 80000);
+    }, 80000); // Hide after 80 seconds (you can adjust this)
 }
 
-// TV Remote Functionality
-window.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            prevSong();
-            break;
-        case 'ArrowDown':
-            nextSong();
-            break;
-        case 'ArrowLeft':
-            audio.currentTime -= 10;
-            break;
-        case 'ArrowRight':
-            audio.currentTime += 10;
-            break;
-        case 'Enter':
-            togglePlay();
-            break;
-        case 'Backspace':
-            toggleLyrics();
-            break;
-        default:
-            console.log(`Unhandled key: ${event.key}`);
+// Detect mobile device
+function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Add swipe gesture support
+let touchStartY = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', function (event) {
+    touchStartY = event.changedTouches[0].screenY;
+}, false);
+
+document.addEventListener('touchend', function (event) {
+    touchEndY = event.changedTouches[0].screenY;
+    handleSwipeGesture();
+}, false);
+
+function handleSwipeGesture() {
+    if (touchEndY < touchStartY) {
+        // Swipe up - Next song
+        nextSong();
+    } else if (touchEndY > touchStartY) {
+        // Swipe down - Previous song
+        prevSong();
     }
-});
+}
 </script>
+
 
 </body>
 </html>
