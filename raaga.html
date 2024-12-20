@@ -801,6 +801,23 @@ function loadSong() {
 
     fetchLyrics(song.id);
     updateSongListSelection();
+
+    updateMediaSession(song);
+}
+
+function updateMediaSession(song) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: removeQuotes(song.name),
+            artist: removeQuotes(song.artists.primary[0].name),
+            album: removeQuotes(song.album.name),
+            artwork: [
+                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
+                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
+                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
+            ]
+        });
+    }
 }
 
 function decodeHtmlEntities(str) {
@@ -838,14 +855,25 @@ function changeQuality() {
 
 function prevSong() {
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    loadSong();
-    audio.play();
+    fadeToNextSong();
 }
 
 function nextSong() {
     currentSongIndex = (currentSongIndex + 1) % songs.length;
-    loadSong();
-    audio.play();
+    fadeToNextSong();
+}
+
+function fadeToNextSong() {
+    let fadeOutInterval = setInterval(() => {
+        if (audio.volume > 0.1) {
+            audio.volume -= 0.1;
+        } else {
+            clearInterval(fadeOutInterval);
+            audio.volume = 1.0;
+            loadSong();
+            audio.play();
+        }
+    }, 500);
 }
 
 function shufflePlaylist() {
@@ -951,15 +979,16 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-// Swipe Gestures for Mobile Devices
+// Swipe Gestures for Mobile Devices within #song-info Section
 let touchStartY = 0;
 let touchEndY = 0;
 
-document.addEventListener('touchstart', (event) => {
+const songInfo = document.getElementById("song-info");
+songInfo.addEventListener('touchstart', (event) => {
     touchStartY = event.changedTouches[0].screenY;
 }, false);
 
-document.addEventListener('touchend', (event) => {
+songInfo.addEventListener('touchend', (event) => {
     touchEndY = event.changedTouches[0].screenY;
     handleGesture();
 }, false);
