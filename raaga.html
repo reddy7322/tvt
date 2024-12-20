@@ -435,7 +435,28 @@
     font-weight: bold;
 }
 
+@keyframes flipUp {
+    0% {
+        transform: rotateX(0);
+    }
+    100% {
+        transform: rotateX(-180deg);
+    }
+}
 
+@keyframes flipDown {
+    0% {
+        transform: rotateX(0);
+    }
+    100% {
+        transform: rotateX(180deg);
+    }
+}
+
+#album-poster {
+    transform-origin: center;
+    perspective: 1000px;
+}
 	    
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
@@ -736,6 +757,11 @@ function scrollToLine(line) {
     const lineHeight = line.offsetHeight;
     lyricsContainer.scrollTop = offsetTop - (lyricsContainer.offsetHeight / 2) + (lineHeight / 2);
 }
+// Updates to the JavaScript file
+document.getElementById('lyrics-container').addEventListener('wheel', (event) => {
+    const lyricsContainer = document.getElementById('lyrics-container');
+    lyricsContainer.scrollTop += event.deltaY;
+});
 
 audio.ontimeupdate = function () {
     let progress = (audio.currentTime / audio.duration) * 100;
@@ -873,7 +899,7 @@ function fadeToNextSong() {
             loadSong();
             audio.play();
         }
-    }, 500);
+    }, 0);
 }
 
 function shufflePlaylist() {
@@ -994,10 +1020,13 @@ songInfo.addEventListener('touchend', (event) => {
 }, false);
 
 function handleGesture() {
+    const albumPoster = document.getElementById("album-poster");
     if (touchEndY < touchStartY - 50) {
-        nextSong();
+        albumPoster.style.animation = "flipUp 0.8s ease-in-out";
+        setTimeout(() => nextSong(), 800);
     } else if (touchEndY > touchStartY + 50) {
-        prevSong();
+        albumPoster.style.animation = "flipDown 0.8s ease-in-out";
+        setTimeout(() => prevSong(), 800);
     }
 }
 
@@ -1007,6 +1036,21 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('pause', togglePlay);
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
+}
+// Update Mobile Notification Panel with Album Poster
+function updateMediaSession(song) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: removeQuotes(song.name),
+            artist: removeQuotes(song.artists.primary[0].name),
+            album: removeQuotes(song.album.name),
+            artwork: [
+                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
+                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
+                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
+            ]
+        });
+    }
 }
 </script>
 
