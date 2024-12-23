@@ -590,7 +590,7 @@
                 </div>
             </div>
 
-    <!-- Song Info -->
+<!-- Song Info -->
 <div id="song-info">
     <p>
         <span id="song-name">Song Name</span>
@@ -742,7 +742,7 @@ async function fetchLyrics(songId) {
         if (data.data) {
             const lyrics = data.data.lyrics.split('\n');
             let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}">${line}</p>`
+                `<p class="lyrics-line" id="line-${index}" data-time="${data.data.timestamp[index]}">${line}</p>`
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'flex'; // Centered flex display
@@ -839,7 +839,7 @@ function loadSong() {
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
 
-    // Display artist names, lyricist and music director
+    // Display artist names, lyricist, and music director
     updateArtistInfo(song);
 
     fetchLyrics(song.id);
