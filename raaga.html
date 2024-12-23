@@ -849,19 +849,35 @@ function loadSong() {
     updateMediaSession(song);
 }
 
-function updateArtistInfo(song) {
+function updateSongInfo(data) {
+    const song = data.results[0];  // Assuming we are using the first song in the "results" array
+    
+    // Update Song Name
+    const songName = document.getElementById("song-name");
+    songName.innerText = song.name || "Unknown";
+    
+    // Update Artist Names
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
+    const artistNames = song.artists.primary.map(artist => artist.name).join(', ') || 'Unknown';
     artistsSection.innerText = artistNames;
 
+    // Update Lyricist Name (We check if the lyricist exists)
     const lyricistSection = document.getElementById("lyricist");
-    const lyricist = song.lyricist ? song.lyricist.name : 'Unknown';
-    lyricistSection.innerText = lyricist;
+    const lyricists = song.artists.all.filter(artist => artist.role === "lyricist");
+    const lyricistNames = lyricists.map(lyricist => lyricist.name).join(', ') || 'Unknown';
+    lyricistSection.innerText = lyricistNames;
 
+    // Update Music Director Name (We check if the music director exists)
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirector = song.music ? song.music.name : 'Unknown';
-    musicDirectorSection.innerText = musicDirector;
+    const musicDirectors = song.artists.all.filter(artist => artist.role === "music");
+    const musicDirectorNames = musicDirectors.map(music => music.name).join(', ') || 'Unknown';
+    musicDirectorSection.innerText = musicDirectorNames;
+
+    // Update Album Name
+    const albumSection = document.getElementById("album-name");
+    albumSection.innerText = song.album.name || 'Unknown';
 }
+
 
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
