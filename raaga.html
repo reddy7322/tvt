@@ -591,18 +591,23 @@
             </div>
 
             <!-- Song Info -->
-  <div id="song-info" class="song-info-container">
-    <div class="album-art">
-        <img id="album-art" src="default-album.jpg" alt="Album Art" />
-    </div>
-    <div class="song-details">
-        <p><span id="song-name">Song Name</span></p>
-        <p>
-            <span id="song-artist">Artist Name</span>
-            <span> - </span>
-            <span id="album-name">Album Name</span>
-        </p>
-    </div>
+<!-- Song Info -->
+<div id="song-info">
+    <p>
+        <span id="song-name">Song Name</span>
+    </p>
+    <p>
+        <strong>Artists:</strong> <span id="song-artist">Artist Name</span>
+    </p>
+    <p>
+        <strong>Lyricist:</strong> <span id="lyricist">Lyricist Name</span>
+    </p>
+    <p>
+        <strong>Music Director:</strong> <span id="music-director">Music Director Name</span>
+    </p>
+    <p>
+        <strong>Album:</strong> <span id="album-name">Album Name</span>
+    </p>
 </div>
 
             <!-- Controls -->
@@ -671,7 +676,9 @@ function toggleLyrics() {
     lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
 }
 
-const queries = ['Telugu'];
+const queries = [
+    'Telugu'
+];
 
 let audio = document.getElementById("audio");
 let playIcon = document.getElementById("play-icon");
@@ -683,6 +690,7 @@ let currentSongIndex = 0;
 let songs = [];
 let currentQuality = "160";
 
+// Check if the required link exists on the page before loading content
 window.onload = function () {
     if (!document.querySelector('a[href="https://t.me/tvtelugu"]')) {
         showErrorPopup("Page security violation detected. Please access from the correct source.");
@@ -696,10 +704,12 @@ window.onload = function () {
     requestWakeLock();
 };
 
+// Prevent auto-rotation on mobile devices
 if (window.matchMedia("(max-width: 768px)").matches) {
     screen.orientation.lock("landscape").catch(err => console.error("Orientation lock failed:", err));
 }
 
+// Fetch songs based on search query
 async function searchSongs(query) {
     if (!query) return;
 
@@ -718,6 +728,7 @@ async function searchSongs(query) {
     }
 }
 
+// Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
@@ -733,8 +744,9 @@ async function fetchLyrics(songId) {
                 `<p class="lyrics-line" id="line-${index}">${line}</p>`
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
-            lyricsContainer.style.display = 'flex';
+            lyricsContainer.style.display = 'flex'; // Centered flex display
 
+            // Initialize the first line as highlighted
             highlightCurrentLine(0);
         } else {
             lyricsText.innerText = 'Lyrics not available.';
@@ -746,32 +758,14 @@ async function fetchLyrics(songId) {
     }
 }
 
-audio.ontimeupdate = function () {
-    let progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.value = progress;
-    let minutes = Math.floor(audio.currentTime / 60);
-    let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-    const currentTimeInSeconds = Math.floor(audio.currentTime);
-    const lyricsLines = document.querySelectorAll('.lyrics-line');
-    let lineIndex = 0;
-
-    for (let i = 0; i < lyricsLines.length; i++) {
-        const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10);
-        if (lineTime <= currentTimeInSeconds) {
-            lineIndex = i;
-        }
-    }
-
-    highlightCurrentLine(lineIndex);
-};
-
+// Highlight the current line based on the song's current time
 function highlightCurrentLine(lineIndex) {
     const lines = document.querySelectorAll('.lyrics-line');
+
+    // Remove highlight from all lines
     lines.forEach(line => line.classList.remove('highlight'));
 
+    // Add highlight to the current line
     const currentLine = lines[lineIndex];
     if (currentLine) {
         currentLine.classList.add('highlight');
@@ -779,9 +773,14 @@ function highlightCurrentLine(lineIndex) {
     }
 }
 
-function scrollToLine(line) {
-    line.scrollIntoView({ behavior: "smooth", block: "center" });
-}
+// Update the highlighted line and scroll as the song progresses
+audio.ontimeupdate = function () {
+    let progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = progress;
+    let minutes = Math.floor(audio.currentTime / 60);
+    let seconds = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+};
 
 function updateSongList() {
     songList.innerHTML = "<option value=''>Select a song</option>";
@@ -799,10 +798,6 @@ function updateSongList() {
     }
 }
 
-function updateSongListSelection() {
-    songList.value = currentSongIndex;
-}
-
 function playSong() {
     if (songList.value !== "") {
         currentSongIndex = songList.value;
@@ -818,22 +813,26 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+    document.getElementById("song-artist").innerText = removeQuotes(getArtistNames(song.artists.primary));
+    document.getElementById("lyricist").innerText = removeQuotes(getArtistNames(song.artists.lyricist));
+    document.getElementById("music-director").innerText = removeQuotes(getArtistNames(song.artists.music));
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
 
     fetchLyrics(song.id);
-    updateSongListSelection();
-
     updateMediaSession(song);
+}
+
+function getArtistNames(artistsArray) {
+    return artistsArray.map(artist => artist.name).join(', ');
 }
 
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: removeQuotes(getArtistNames(song.artists.primary)),
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -844,7 +843,26 @@ function updateMediaSession(song) {
     }
 }
 
-audio.addEventListener('ended', nextSong);
+function removeQuotes(str) {
+    const decodedStr = decodeHtmlEntities(str);
+    return decodedStr.replace(/"/g, '');
+}
+
+function decodeHtmlEntities(str) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = str;
+    return txt.value;
+}
+
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playIcon.innerText = "pause";
+    } else {
+        audio.pause();
+        playIcon.innerText = "play_arrow";
+    }
+}
 
 function togglePlay() {
     if (audio.paused) {
