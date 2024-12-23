@@ -590,8 +590,7 @@
                 </div>
             </div>
 
-            <!-- Song Info -->
-<!-- Song Info -->
+          <!-- Song Info -->
 <div id="song-info">
     <p>
         <span id="song-name">Song Name</span>
@@ -834,15 +833,31 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
+
+    // Display artist names, lyricist and music director
+    updateArtistInfo(song);
 
     fetchLyrics(song.id);
     updateSongListSelection();
 
     updateMediaSession(song);
+}
+
+function updateArtistInfo(song) {
+    const artistsSection = document.getElementById("song-artist");
+    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
+    artistsSection.innerText = artistNames;
+
+    const lyricistSection = document.getElementById("lyricist");
+    const lyricist = song.lyricist ? song.lyricist.name : 'Unknown';
+    lyricistSection.innerText = lyricist;
+
+    const musicDirectorSection = document.getElementById("music-director");
+    const musicDirector = song.music ? song.music.name : 'Unknown';
+    musicDirectorSection.innerText = musicDirector;
 }
 
 function updateMediaSession(song) {
