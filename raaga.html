@@ -849,7 +849,7 @@ function loadSong() {
 
 function updateArtistInfo(song) {
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
+    const artistNames = song.artists && song.artists.primary ? song.artists.primary.map(artist => artist.name).join(', ') : 'Unknown';
     artistsSection.innerText = artistNames;
 
     const lyricistSection = document.getElementById("lyricist");
@@ -1054,14 +1054,6 @@ function updateMediaSession(song) {
     }
 }
 </script>
-
-
-
-
-
-
-
-
 
 </body>
 </html>
