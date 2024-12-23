@@ -1015,31 +1015,6 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-// Swipe Gestures for Mobile Devices within #song-info Section
-let touchStartY = 0;
-let touchEndY = 0;
-
-const songInfo = document.getElementById("song-info");
-songInfo.addEventListener('touchstart', (event) => {
-    touchStartY = event.changedTouches[0].screenY;
-}, false);
-
-songInfo.addEventListener('touchend', (event) => {
-    touchEndY = event.changedTouches[0].screenY;
-    handleGesture();
-}, false);
-
-function handleGesture() {
-    const albumPoster = document.getElementById("album-poster");
-    if (touchEndY < touchStartY - 50) {
-        albumPoster.style.animation = "flipUp 0.8s ease-in-out";
-        setTimeout(() => nextSong(), 800);
-    } else if (touchEndY > touchStartY + 50) {
-        albumPoster.style.animation = "flipDown 0.8s ease-in-out";
-        setTimeout(() => prevSong(), 800);
-    }
-}
-
 // Mobile Notification Panel Buttons
 if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', togglePlay);
