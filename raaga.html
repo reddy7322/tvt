@@ -849,42 +849,20 @@ function loadSong() {
     updateMediaSession(song);
 }
 
-function updateSongInfo(data) {
-    // Check if the "results" array is available
-    if (!data || !data.results || data.results.length === 0) {
-        console.error("No song data available.");
-        return;
-    }
-
-    const song = data.results[0]; // Assuming we are using the first song in the "results" array
-
-    // Update Song Name
-    const songName = document.getElementById("song-name");
-    songName.innerText = song.name || "Unknown";
-
-    // Update Artist Names
+function updateArtistInfo(song) {
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists?.primary?.map(artist => artist.name).join(', ') || 'Unknown';
+    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
     artistsSection.innerText = artistNames;
 
-    // Update Lyricist Name (We check if the lyricist exists)
+    // Loop through the artists to find the lyricist and music director
     const lyricistSection = document.getElementById("lyricist");
-    const lyricists = song.artists?.all?.filter(artist => artist.role === "lyricist");
-    const lyricistNames = lyricists?.map(lyricist => lyricist.name).join(', ') || 'Unknown';
-    lyricistSection.innerText = lyricistNames;
+    const lyricist = song.artists.find(artist => artist.role === "lyricist");
+    lyricistSection.innerText = lyricist ? lyricist.name : 'Unknown';
 
-    // Update Music Director Name (We check if the music director exists)
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirectors = song.artists?.all?.filter(artist => artist.role === "music");
-    const musicDirectorNames = musicDirectors?.map(music => music.name).join(', ') || 'Unknown';
-    musicDirectorSection.innerText = musicDirectorNames;
-
-    // Update Album Name
-    const albumSection = document.getElementById("album-name");
-    albumSection.innerText = song.album?.name || 'Unknown';
+    const musicDirector = song.artists.find(artist => artist.role === "music");
+    musicDirectorSection.innerText = musicDirector ? musicDirector.name : 'Unknown';
 }
-
-
 
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
@@ -1063,23 +1041,7 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
-// Update Mobile Notification Panel with Album Poster
-function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
-            album: removeQuotes(song.album.name),
-            artwork: [
-                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
-                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
-                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
-            ]
-        });
-    }
-}
 </script>
-
 
 
 </body>
