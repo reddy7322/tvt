@@ -664,14 +664,7 @@ function toggleLyrics() {
 }
 
 const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
-    'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
-    'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
-    'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
-    'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+    'Telugu'
 ];
 
 let audio = document.getElementById("audio");
@@ -1009,31 +1002,6 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-// Swipe Gestures for Mobile Devices within #song-info Section
-let touchStartY = 0;
-let touchEndY = 0;
-
-const songInfo = document.getElementById("song-info");
-songInfo.addEventListener('touchstart', (event) => {
-    touchStartY = event.changedTouches[0].screenY;
-}, false);
-
-songInfo.addEventListener('touchend', (event) => {
-    touchEndY = event.changedTouches[0].screenY;
-    handleGesture();
-}, false);
-
-function handleGesture() {
-    const albumPoster = document.getElementById("album-poster");
-    if (touchEndY < touchStartY - 50) {
-        albumPoster.style.animation = "flipUp 0.8s ease-in-out";
-        setTimeout(() => nextSong(), 800);
-    } else if (touchEndY > touchStartY + 50) {
-        albumPoster.style.animation = "flipDown 0.8s ease-in-out";
-        setTimeout(() => prevSong(), 800);
-    }
-}
-
 // Mobile Notification Panel Buttons
 if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', togglePlay);
@@ -1057,6 +1025,7 @@ function updateMediaSession(song) {
     }
 }
 </script>
+
 
 
 
