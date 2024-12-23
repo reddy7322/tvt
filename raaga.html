@@ -850,33 +850,40 @@ function loadSong() {
 }
 
 function updateSongInfo(data) {
-    const song = data.results[0];  // Assuming we are using the first song in the "results" array
-    
+    // Check if the "results" array is available
+    if (!data || !data.results || data.results.length === 0) {
+        console.error("No song data available.");
+        return;
+    }
+
+    const song = data.results[0]; // Assuming we are using the first song in the "results" array
+
     // Update Song Name
     const songName = document.getElementById("song-name");
     songName.innerText = song.name || "Unknown";
-    
+
     // Update Artist Names
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists.primary.map(artist => artist.name).join(', ') || 'Unknown';
+    const artistNames = song.artists?.primary?.map(artist => artist.name).join(', ') || 'Unknown';
     artistsSection.innerText = artistNames;
 
     // Update Lyricist Name (We check if the lyricist exists)
     const lyricistSection = document.getElementById("lyricist");
-    const lyricists = song.artists.all.filter(artist => artist.role === "lyricist");
-    const lyricistNames = lyricists.map(lyricist => lyricist.name).join(', ') || 'Unknown';
+    const lyricists = song.artists?.all?.filter(artist => artist.role === "lyricist");
+    const lyricistNames = lyricists?.map(lyricist => lyricist.name).join(', ') || 'Unknown';
     lyricistSection.innerText = lyricistNames;
 
     // Update Music Director Name (We check if the music director exists)
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirectors = song.artists.all.filter(artist => artist.role === "music");
-    const musicDirectorNames = musicDirectors.map(music => music.name).join(', ') || 'Unknown';
+    const musicDirectors = song.artists?.all?.filter(artist => artist.role === "music");
+    const musicDirectorNames = musicDirectors?.map(music => music.name).join(', ') || 'Unknown';
     musicDirectorSection.innerText = musicDirectorNames;
 
     // Update Album Name
     const albumSection = document.getElementById("album-name");
-    albumSection.innerText = song.album.name || 'Unknown';
+    albumSection.innerText = song.album?.name || 'Unknown';
 }
+
 
 
 function updateMediaSession(song) {
