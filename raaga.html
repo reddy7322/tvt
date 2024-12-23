@@ -714,7 +714,7 @@ if (window.matchMedia("(max-width: 768px)").matches) {
 async function searchSongs(query) {
     if (!query) return;
 
-    let url = `https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50`;
+    let url = https://saavn.dev/api/search/songs?query=${query}&page=1&limit=50;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -731,7 +731,7 @@ async function searchSongs(query) {
 
 // Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
-    const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
+    const url = https://saavn.dev/api/songs/${songId}/lyrics;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -742,7 +742,7 @@ async function fetchLyrics(songId) {
         if (data.data) {
             const lyrics = data.data.lyrics.split('\n');
             let formattedLyrics = lyrics.map((line, index) => 
-                `<p class="lyrics-line" id="line-${index}" data-time="${data.data.timestamp[index]}">${line}</p>`
+                <p class="lyrics-line" id="line-${index}">${line}</p>
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
             lyricsContainer.style.display = 'flex'; // Centered flex display
@@ -781,7 +781,7 @@ audio.ontimeupdate = function () {
     progressBar.value = progress;
     let minutes = Math.floor(audio.currentTime / 60);
     let seconds = Math.floor(audio.currentTime % 60);
-    timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    timeDisplay.innerText = ${minutes}:${seconds < 10 ? '0' : ''}${seconds};
 
     // Determine which line to highlight based on the current time of the song
     const currentTimeInSeconds = Math.floor(audio.currentTime);
@@ -831,15 +831,15 @@ function playSong() {
 function loadSong() {
     const song = songs[currentSongIndex];
     const selectedQuality = qualitySelect.value;
-    const qualityUrl = song.downloadUrl.find(url => url.quality === `${selectedQuality}kbps`).url;
+    const qualityUrl = song.downloadUrl.find(url => url.quality === ${selectedQuality}kbps).url;
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
-    document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
+    document.getElementById("album-poster").style.backgroundImage = url(${song.image[2].url});
     playIcon.innerText = "pause";
 
-    // Display artist names, lyricist, and music director
+    // Display artist names, lyricist and music director
     updateArtistInfo(song);
 
     fetchLyrics(song.id);
@@ -850,20 +850,17 @@ function loadSong() {
 
 function updateArtistInfo(song) {
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists && song.artists.primary ? song.artists.primary.map(artist => artist.name).join(', ') : 'Unknown';
+    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
     artistsSection.innerText = artistNames;
 
     // Loop through the artists to find the lyricist and music director
     const lyricistSection = document.getElementById("lyricist");
-    const lyricist = song.artists && song.artists.find(artist => artist.role === "lyricist");
+    const lyricist = song.artists.find(artist => artist.role === "lyricist");
     lyricistSection.innerText = lyricist ? lyricist.name : 'Unknown';
 
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirector = song.artists && song.artists.find(artist => artist.role === "music");
+    const musicDirector = song.artists.find(artist => artist.role === "music");
     musicDirectorSection.innerText = musicDirector ? musicDirector.name : 'Unknown';
-    
-    const albumSection = document.getElementById("album-name");
-    albumSection.innerText = song.album && song.album.name ? song.album.name : 'Unknown';
 }
 
 function updateMediaSession(song) {
@@ -959,7 +956,7 @@ function downloadAudio() {
             const sanitizedSongName = song.name.replace(/\.[^/.]+$/, '');
             const a = document.createElement('a');
             a.href = blobUrl;
-            a.download = `${sanitizedSongName}.mp3`;
+            a.download = ${sanitizedSongName}.mp3;
 
             document.body.appendChild(a);
             a.click();
@@ -981,7 +978,7 @@ const requestWakeLock = async () => {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
     } catch (err) {
-        console.error(`${err.name}, ${err.message}`);
+        console.error(${err.name}, ${err.message});
     }
 };
 
@@ -1032,7 +1029,7 @@ window.addEventListener('keydown', (event) => {
             toggleLyrics();
             break;
         default:
-            console.log(`Unhandled key: ${event.key}`);
+            console.log(Unhandled key: ${event.key});
     }
 });
 
@@ -1044,6 +1041,7 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
 </script>
+
 
 </body>
 </html>
