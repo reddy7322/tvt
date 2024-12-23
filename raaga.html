@@ -850,17 +850,20 @@ function loadSong() {
 
 function updateArtistInfo(song) {
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
+    const artistNames = song.artists && song.artists.primary ? song.artists.primary.map(artist => artist.name).join(', ') : 'Unknown';
     artistsSection.innerText = artistNames;
 
     // Loop through the artists to find the lyricist and music director
     const lyricistSection = document.getElementById("lyricist");
-    const lyricist = song.artists.find(artist => artist.role === "lyricist");
+    const lyricist = song.artists && song.artists.find(artist => artist.role === "lyricist");
     lyricistSection.innerText = lyricist ? lyricist.name : 'Unknown';
 
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirector = song.artists.find(artist => artist.role === "music");
+    const musicDirector = song.artists && song.artists.find(artist => artist.role === "music");
     musicDirectorSection.innerText = musicDirector ? musicDirector.name : 'Unknown';
+    
+    const albumSection = document.getElementById("album-name");
+    albumSection.innerText = song.album && song.album.name ? song.album.name : 'Unknown';
 }
 
 function updateMediaSession(song) {
