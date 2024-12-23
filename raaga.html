@@ -854,14 +854,13 @@ function updateArtistInfo(song) {
     const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
     artistsSection.innerText = artistNames;
 
-    // Loop through the artists to find the lyricist and music director
     const lyricistSection = document.getElementById("lyricist");
-    const lyricist = song.artists.find(artist => artist.role === "lyricist");
-    lyricistSection.innerText = lyricist ? lyricist.name : 'Unknown';
+    const lyricist = song.lyricist ? song.lyricist.name : 'Unknown';
+    lyricistSection.innerText = lyricist;
 
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirector = song.artists.find(artist => artist.role === "music");
-    musicDirectorSection.innerText = musicDirector ? musicDirector.name : 'Unknown';
+    const musicDirector = song.music ? song.music.name : 'Unknown';
+    musicDirectorSection.innerText = musicDirector;
 }
 
 function updateMediaSession(song) {
@@ -1041,7 +1040,23 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
+// Update Mobile Notification Panel with Album Poster
+function updateMediaSession(song) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: removeQuotes(song.name),
+            artist: removeQuotes(song.artists.primary[0].name),
+            album: removeQuotes(song.album.name),
+            artwork: [
+                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
+                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
+                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
+            ]
+        });
+    }
+}
 </script>
+
 
 
 </body>
