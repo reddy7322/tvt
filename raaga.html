@@ -590,7 +590,7 @@
                 </div>
             </div>
 
-       <!-- Song Info -->
+    <!-- Song Info -->
 <div id="song-info">
     <p>
         <span id="song-name">Song Name</span>
@@ -608,6 +608,7 @@
         <strong>Album:</strong> <span id="album-name">Album Name</span>
     </p>
 </div>
+
 
 
             <!-- Controls -->
@@ -852,13 +853,14 @@ function updateArtistInfo(song) {
     const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
     artistsSection.innerText = artistNames;
 
+    // Loop through the artists to find the lyricist and music director
     const lyricistSection = document.getElementById("lyricist");
-    const lyricist = song.lyricist ? song.lyricist.name : 'Unknown';
-    lyricistSection.innerText = lyricist;
+    const lyricist = song.artists.find(artist => artist.role === "lyricist");
+    lyricistSection.innerText = lyricist ? lyricist.name : 'Unknown';
 
     const musicDirectorSection = document.getElementById("music-director");
-    const musicDirector = song.music ? song.music.name : 'Unknown';
-    musicDirectorSection.innerText = musicDirector;
+    const musicDirector = song.artists.find(artist => artist.role === "music");
+    musicDirectorSection.innerText = musicDirector ? musicDirector.name : 'Unknown';
 }
 
 function updateMediaSession(song) {
@@ -1039,7 +1041,6 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
 </script>
-
 
 </body>
 </html>
