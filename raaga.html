@@ -590,7 +590,7 @@
                 </div>
             </div>
 
-        <!-- Song Info -->
+       <!-- Song Info -->
 <div id="song-info">
     <p>
         <span id="song-name">Song Name</span>
@@ -849,7 +849,7 @@ function loadSong() {
 
 function updateArtistInfo(song) {
     const artistsSection = document.getElementById("song-artist");
-    const artistNames = song.artists && song.artists.primary ? song.artists.primary.map(artist => artist.name).join(', ') : 'Unknown';
+    const artistNames = song.artists.primary.map(artist => artist.name).join(', ');
     artistsSection.innerText = artistNames;
 
     const lyricistSection = document.getElementById("lyricist");
@@ -1038,22 +1038,8 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
-// Update Mobile Notification Panel with Album Poster
-function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
-            album: removeQuotes(song.album.name),
-            artwork: [
-                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
-                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
-                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
-            ]
-        });
-    }
-}
 </script>
+
 
 </body>
 </html>
