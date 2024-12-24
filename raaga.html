@@ -596,10 +596,11 @@
    <span id="song-artist">Artist Name</span> <span> - </span>
    <span id="album-name">Album Name</span>
    <br>
-   <span id="lyricist-name">Lyricist: Not Available</span>
+   <span id="lyricist-name">Lyricist: NA</span>
    <br>
-   <span id="music-name">Music: Not Available</span>
+   <span id="music-name">Music: NA</span>
 </div>
+
 
 
 
@@ -835,7 +836,7 @@ function loadSong() {
     fetchLyrics(song.id);
     updateSongListSelection();
 
-    // Update lyricist and music info
+    // Update lyricist and music info dynamically
     displayLyricistAndMusic(song);
 
     updateMediaSession(song);
@@ -855,7 +856,7 @@ function displayLyricistAndMusic(song) {
     const lyricist = song.artists.primary.find(artist => artist.role === 'Lyricist');
     const music = song.artists.primary.find(artist => artist.role === 'Music');
 
-    // Display the lyricist and music names, if available
+    // Update lyricist and music dynamically
     lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
     musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
 }
@@ -1004,6 +1005,7 @@ function showErrorPopup(message) {
     }, 80000);
 }
 </script>
+
 
 </body>
 </html>
