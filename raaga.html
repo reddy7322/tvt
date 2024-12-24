@@ -590,12 +590,12 @@
                 </div>
             </div>
 
-            <!-- Song Info -->
-            <div id="song-info">
-               <p><span id="song-name">Song Name</span></p>
-                  <span id="song-artist">Artist Name</span> <span> - </span>
-                  <span id="album-name">Album Name</span>
-            </div>
+          <!-- Song Info -->
+<div id="song-info">
+   <p><span id="song-name">Song Name</span></p>
+   <span id="song-artist">Artist Name</span> <span> - </span>
+   <span id="album-name">Album Name</span>
+</div>
 
             <!-- Controls -->
             <div id="controls">
@@ -821,7 +821,7 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+    document.getElementById("song-artist").innerText = getSongArtists(song);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
@@ -832,11 +832,17 @@ function loadSong() {
     updateMediaSession(song);
 }
 
+function getSongArtists(song) {
+    // Filter out the lyricists and music directors
+    const filteredArtists = song.artists.primary.filter(artist => !['Lyricist', 'Music'].includes(artist.role));
+    return filteredArtists.map(artist => removeQuotes(artist.name)).join(', ');
+}
+
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: getSongArtists(song),
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1009,22 +1015,8 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
 }
-// Update Mobile Notification Panel with Album Poster
-function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
-            album: removeQuotes(song.album.name),
-            artwork: [
-                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
-                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
-                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
-            ]
-        });
-    }
-}
 </script>
+
 
 
 
