@@ -790,6 +790,11 @@ function updateMediaSession(song) {
                 { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
             ]
         });
+
+        // Add "Close" button functionality to the media session
+        navigator.mediaSession.setActionHandler('close', () => {
+            window.close();
+        });
     }
 }
 
@@ -954,23 +959,12 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('pause', togglePlay);
     navigator.mediaSession.setActionHandler('previoustrack', prevSong);
     navigator.mediaSession.setActionHandler('nexttrack', nextSong);
-}
-// Update Mobile Notification Panel with Album Poster
-function updateMediaSession(song) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: removeQuotes(song.name),
-            artist: song.artists.primary.map(artist => removeQuotes(artist.name)).join(', '), // Display all artist names
-            album: removeQuotes(song.album.name),
-            artwork: [
-                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
-                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
-                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
-            ]
-        });
-    }
+    navigator.mediaSession.setActionHandler('close', () => {
+        window.close();
+    });
 }
 </script>
+
 
 </body>
 </html>
