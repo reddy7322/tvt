@@ -595,10 +595,6 @@
    <p><span id="song-name">Song Name</span></p>
    <span id="song-artist">Artist Name</span> <span> - </span>
    <span id="album-name">Album Name</span>
-   <br>
-   <span id="lyricist-name">Lyricist: NA</span>
-   <br>
-   <span id="music-name">Music: NA</span>
 </div>
 
 
@@ -828,7 +824,7 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = getSongArtists(song);
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
@@ -836,36 +832,14 @@ function loadSong() {
     fetchLyrics(song.id);
     updateSongListSelection();
 
-    // Update lyricist and music info dynamically
-    displayLyricistAndMusic(song);
-
     updateMediaSession(song);
-}
-
-function getSongArtists(song) {
-    // Filter out the lyricists and music directors
-    const filteredArtists = song.artists.primary.filter(artist => !['Lyricist', 'Music'].includes(artist.role));
-    return filteredArtists.map(artist => removeQuotes(artist.name)).join(', ');
-}
-
-function displayLyricistAndMusic(song) {
-    const lyricistElement = document.getElementById("lyricist-name");
-    const musicElement = document.getElementById("music-name");
-
-    // Find the lyricist and music roles
-    const lyricist = song.artists.primary.find(artist => artist.role === 'Lyricist');
-    const music = song.artists.primary.find(artist => artist.role === 'Music');
-
-    // Update lyricist and music dynamically
-    lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
-    musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
 }
 
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: getSongArtists(song),
+            artist: removeQuotes(song.artists.primary[0].name),
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1003,6 +977,55 @@ function showErrorPopup(message) {
     setTimeout(() => {
         popup.style.display = 'none';
     }, 80000);
+}
+
+// TV Remote and Mobile Gesture Enhancements
+window.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+            prevSong();
+            break;
+        case 'ArrowDown':
+            nextSong();
+            break;
+        case 'ArrowLeft':
+            audio.currentTime -= 10;
+            break;
+        case 'ArrowRight':
+            audio.currentTime += 10;
+            break;
+        case 'Enter':
+            togglePlay();
+            break;
+        case 'Backspace':
+            toggleLyrics();
+            break;
+        default:
+            console.log(`Unhandled key: ${event.key}`);
+    }
+});
+
+// Mobile Notification Panel Buttons
+if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', togglePlay);
+    navigator.mediaSession.setActionHandler('pause', togglePlay);
+    navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+    navigator.mediaSession.setActionHandler('nexttrack', nextSong);
+}
+// Update Mobile Notification Panel with Album Poster
+function updateMediaSession(song) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: removeQuotes(song.name),
+            artist: removeQuotes(song.artists.primary[0].name),
+            album: removeQuotes(song.album.name),
+            artwork: [
+                { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
+                { src: song.image[1].url, sizes: '128x128', type: 'image/png' },
+                { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
+            ]
+        });
+    }
 }
 </script>
 
