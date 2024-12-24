@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,7 +162,7 @@
     transform: translate(-50%, -50%); /* Centers the text */
     width: 98%; /* Adjust the width to fit inside the album art */
     text-align: center;
-    color: #bbb;
+    color: #e6e3e3;
     font-size: 14px;
     z-index: 10;
     padding: 10px;
@@ -195,7 +196,7 @@
         /* Song Info */
         #song-info {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         #song-name {
@@ -205,14 +206,14 @@
         }
 
         #song-artist {
-            font-size: 16px;
-            color: #999;
+            font-size: 12px;
+            color: #ffffff;
         }
 
         #album-name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
-            color: #888;
+            color: #ff0073;
             margin-top: 5px;
         }
 
@@ -590,12 +591,16 @@
                 </div>
             </div>
 
-            <!-- Song Info -->
-            <div id="song-info">
-               <p><span id="song-name">Song Name</span></p>
-                  <span id="song-artist">Artist Name</span> <span> - </span>
-                  <span id="album-name">Album Name</span>
-            </div>
+<!-- Song Info -->
+<div id="song-info">
+   <p><span id="song-name">Song Name</span></p>
+   <span id="song-artist">Artist Name</span>
+	<p></p>
+   <span id="album-name">Album Name</span>
+</div>
+
+
+
 
             <!-- Controls -->
             <div id="controls">
@@ -664,14 +669,14 @@ function toggleLyrics() {
 }
 
 const queries = [
-    'Telugu', 'Telugu 90', 'Telugu 80', 'Telugu Old', 'Telugu retro', 'Telugu Devotional', 
-    'Srinivasa Govinda', 'Sri Venkateshwara Suprabhatham', 'M. S. Subbulakshmi', 'P. Susheela',
+    'Telugu','Telugu Old', 'Telugu retro', 'Telugu Devotional', 
+    'Sri Venkateshwara Suprabhatham','P. Susheela',
     'Ghantasala', 'S. Janaki', 'Mano', 'Telugu Shreya Ghoshal', 'veturi sundararama murthy', 'veturi',
     'Telugu Devi Sri Prasad', 'Mani Sharma', 'Anoop Rubens',
     'S. P. Balasubrahmanyam', 'Ilaiyaraaja', 'Telugu K.J. Yesudas', 'Telugu M. M. Keeravani',
-    'Annamayya Keerthana', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu',
+    'Annamayya', 'Telugu G.V. Prakash Kumar', 'Telugu Anurag Kulkarni', 'Mahesh Babu','Mickey J Meyer',
     'Telugu Thaman S', 'Ram Miriyala', 'Bheems Ceciroleo', 'Telugu Yuvan Shankar Raja',
-    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk', 'new telugu remix'
+    'Ramajogayya Sastry', 'balagam', 'latest telugu', 'telugu folk'
 ];
 
 let audio = document.getElementById("audio");
@@ -828,7 +833,11 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+
+    // Display all artist names
+    const artistNames = song.artists.primary.map(artist => removeQuotes(artist.name)).join(', ');
+    document.getElementById("song-artist").innerText = artistNames;
+
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
@@ -843,7 +852,7 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: song.artists.primary.map(artist => removeQuotes(artist.name)).join(', '), // Display all artist names
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1009,31 +1018,6 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
-// Swipe Gestures for Mobile Devices within #song-info Section
-let touchStartY = 0;
-let touchEndY = 0;
-
-const songInfo = document.getElementById("song-info");
-songInfo.addEventListener('touchstart', (event) => {
-    touchStartY = event.changedTouches[0].screenY;
-}, false);
-
-songInfo.addEventListener('touchend', (event) => {
-    touchEndY = event.changedTouches[0].screenY;
-    handleGesture();
-}, false);
-
-function handleGesture() {
-    const albumPoster = document.getElementById("album-poster");
-    if (touchEndY < touchStartY - 50) {
-        albumPoster.style.animation = "flipUp 0.8s ease-in-out";
-        setTimeout(() => nextSong(), 800);
-    } else if (touchEndY > touchStartY + 50) {
-        albumPoster.style.animation = "flipDown 0.8s ease-in-out";
-        setTimeout(() => prevSong(), 800);
-    }
-}
-
 // Mobile Notification Panel Buttons
 if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', togglePlay);
@@ -1046,7 +1030,7 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: song.artists.primary.map(artist => removeQuotes(artist.name)).join(', '), // Display all artist names
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1057,10 +1041,6 @@ function updateMediaSession(song) {
     }
 }
 </script>
-
-
-
-
 
 </body>
 </html>
