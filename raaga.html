@@ -593,12 +593,15 @@
 <!-- Song Info -->
 <div id="song-info">
    <p><span id="song-name">Song Name</span></p>
-   <span id="song-artist">Artist Name</span> <span> - </span>
+   <span id="song-artist">
+       <span class="artist-name" data-artist="Artist Name">Artist Name</span>
+   </span>
+   <span> - </span>
    <span id="album-name">Album Name</span>
    <br>
-   <span id="lyricist-name">Lyricist: NA</span>
+   <span id="lyricist-name">Lyricist: Not Available</span>
    <br>
-   <span id="music-name">Music: NA</span>
+   <span id="music-name">Music: Not Available</span>
 </div>
 
 
@@ -845,7 +848,18 @@ function loadSong() {
 function getSongArtists(song) {
     // Filter out the lyricists and music directors
     const filteredArtists = song.artists.primary.filter(artist => !['Lyricist', 'Music'].includes(artist.role));
-    return filteredArtists.map(artist => removeQuotes(artist.name)).join(', ');
+    
+    // Add event listeners to artist names for click handling
+    filteredArtists.forEach(artist => {
+        artist.element.addEventListener('click', () => fetchAndPlayArtistSongs(artist.name));
+    });
+
+    return filteredArtists.map(artist => `<span class="artist-name" data-artist="${artist.name}">${removeQuotes(artist.name)}</span>`).join(', ');
+}
+
+function fetchAndPlayArtistSongs(artistName) {
+    // Search and play songs of the clicked artist
+    searchSongs(artistName);
 }
 
 function displayLyricistAndMusic(song) {
@@ -1005,7 +1019,6 @@ function showErrorPopup(message) {
     }, 80000);
 }
 </script>
-
 
 </body>
 </html>
