@@ -598,11 +598,8 @@
    </span>
    <span> - </span>
    <span id="album-name">Album Name</span>
-   <br>
-   <span id="lyricist-name">Lyricist: Not Available</span>
-   <br>
-   <span id="music-name">Music: Not Available</span>
 </div>
+
 
 
 
@@ -839,9 +836,6 @@ function loadSong() {
     fetchLyrics(song.id);
     updateSongListSelection();
 
-    // Update lyricist and music info dynamically
-    displayLyricistAndMusic(song);
-
     updateMediaSession(song);
 }
 
@@ -860,19 +854,6 @@ function getSongArtists(song) {
 function fetchAndPlayArtistSongs(artistName) {
     // Search and play songs of the clicked artist
     searchSongs(artistName);
-}
-
-function displayLyricistAndMusic(song) {
-    const lyricistElement = document.getElementById("lyricist-name");
-    const musicElement = document.getElementById("music-name");
-
-    // Find the lyricist and music roles
-    const lyricist = song.artists.primary.find(artist => artist.role === 'Lyricist');
-    const music = song.artists.primary.find(artist => artist.role === 'Music');
-
-    // Update lyricist and music dynamically
-    lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
-    musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
 }
 
 function updateMediaSession(song) {
