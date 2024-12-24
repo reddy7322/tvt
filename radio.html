@@ -441,6 +441,56 @@ window.onload = function () {
     content.style.display = "block";
 };
 
+// TV Remote and Mobile Gesture Enhancements
+window.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+            previousStation();
+            break;
+        case 'ArrowDown':
+            nextStation();
+            break;
+        case 'ArrowLeft':
+            radioAudio.currentTime -= 10;
+            break;
+        case 'ArrowRight':
+            radioAudio.currentTime += 10;
+            break;
+        case 'Enter':
+            toggleRadioPlay();
+            break;
+        case 'Backspace':
+            toggleLyrics(); // Placeholder for lyrics functionality
+            break;
+        default:
+            console.log(`Unhandled key: ${event.key}`);
+    }
+});
+
+// Mobile Notification Panel Buttons
+if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', toggleRadioPlay);
+    navigator.mediaSession.setActionHandler('pause', toggleRadioPlay);
+    navigator.mediaSession.setActionHandler('previoustrack', previousStation);
+    navigator.mediaSession.setActionHandler('nexttrack', nextStation);
+}
+
+// Update Mobile Notification Panel with Album Poster (functionality adapted to radio)
+function updateMediaSession(station) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: station.name,
+            artist: "Various Artists", // Since this is radio, we'll display a generic label
+            album: "Radio Station",
+            artwork: [
+                { src: station.poster, sizes: '96x96', type: 'image/png' },
+                { src: station.poster, sizes: '128x128', type: 'image/png' },
+                { src: station.poster, sizes: '256x256', type: 'image/png' }
+            ]
+        });
+    }
+}
+
     </script>
 
 </body>
