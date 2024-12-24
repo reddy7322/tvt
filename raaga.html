@@ -824,7 +824,7 @@ function loadSong() {
 
     audio.src = qualityUrl;
     document.getElementById("song-name").innerText = removeQuotes(song.name);
-    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary[0].name);
+    document.getElementById("song-artist").innerText = removeQuotes(song.artists.primary.join(', '));  // Display all primary artists' names
     document.getElementById("album-name").innerText = removeQuotes(song.album.name);
     document.getElementById("album-poster").style.backgroundImage = `url(${song.image[2].url})`;
     playIcon.innerText = "pause";
@@ -839,7 +839,7 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: removeQuotes(song.artists.primary.join(', ')),  // Display all primary artists' names
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1017,7 +1017,7 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: removeQuotes(song.artists.primary.join(', ')),  // Display all primary artists' names
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -1028,6 +1028,7 @@ function updateMediaSession(song) {
     }
 }
 </script>
+
 
 </body>
 </html>
