@@ -595,8 +595,11 @@
    <p><span id="song-name">Song Name</span></p>
    <span id="song-artist">Artist Name</span> <span> - </span>
    <span id="album-name">Album Name</span>
+   <br>
+   <span id="lyricist-name">Lyricist: NA</span>
+   <br>
+   <span id="music-name">Music: NA</span>
 </div>
-
 
 
 
@@ -667,7 +670,10 @@ function toggleLyrics() {
     lyricsContainer.style.display = lyricsContainer.style.display === "flex" ? "none" : "flex";
 }
 
-const queries = ['Telugu'];
+const queries = [
+    'Telugu'
+];
+
 let audio = document.getElementById("audio");
 let playIcon = document.getElementById("play-icon");
 let songList = document.getElementById("song-list");
@@ -692,6 +698,11 @@ window.onload = function () {
     requestWakeLock();
 };
 
+// Prevent auto-rotation on mobile devices
+if (window.matchMedia("(max-width: 768px)").matches) {
+    screen.orientation.lock("landscape").catch(err => console.error("Orientation lock failed:", err));
+}
+
 // Fetch songs based on search query
 async function searchSongs(query) {
     if (!query) return;
@@ -711,6 +722,7 @@ async function searchSongs(query) {
     }
 }
 
+// Fetch lyrics for the song and handle smart scrolling
 async function fetchLyrics(songId) {
     const url = `https://saavn.dev/api/songs/${songId}/lyrics`;
     try {
@@ -726,8 +738,9 @@ async function fetchLyrics(songId) {
                 `<p class="lyrics-line" id="line-${index}">${line}</p>`
             ).join('');
             lyricsText.innerHTML = formattedLyrics;
-            lyricsContainer.style.display = 'flex'; 
+            lyricsContainer.style.display = 'flex'; // Centered flex display
 
+            // Initialize the first line as highlighted
             highlightCurrentLine(0);
         } else {
             lyricsText.innerText = 'Lyrics not available.';
@@ -735,13 +748,19 @@ async function fetchLyrics(songId) {
         }
     } catch (error) {
         console.error('Error fetching lyrics:', error);
+        // Prevent showing error message, instead hide lyrics container
         document.getElementById("lyrics-container").style.display = 'none';
     }
 }
 
+// Highlight the current line based on the song's current time
 function highlightCurrentLine(lineIndex) {
     const lines = document.querySelectorAll('.lyrics-line');
+
+    // Remove highlight from all lines
     lines.forEach(line => line.classList.remove('highlight'));
+
+    // Add highlight to the current line
     const currentLine = lines[lineIndex];
     if (currentLine) {
         currentLine.classList.add('highlight');
@@ -749,6 +768,7 @@ function highlightCurrentLine(lineIndex) {
     }
 }
 
+// Update the highlighted line and scroll as the song progresses
 audio.ontimeupdate = function () {
     let progress = (audio.currentTime / audio.duration) * 100;
     progressBar.value = progress;
@@ -756,13 +776,15 @@ audio.ontimeupdate = function () {
     let seconds = Math.floor(audio.currentTime % 60);
     timeDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
+    // Determine which line to highlight based on the current time of the song
     const currentTimeInSeconds = Math.floor(audio.currentTime);
     const lyricsLines = document.querySelectorAll('.lyrics-line');
     let lineIndex = 0;
 
+    // Find the line corresponding to the current time
     for (let i = 0; i < lyricsLines.length; i++) {
         const line = lyricsLines[i];
-        const lineTime = parseInt(line.getAttribute('data-time'), 10);
+        const lineTime = parseInt(line.getAttribute('data-time'), 10); // Assuming each line has a data-time attribute
         if (lineTime <= currentTimeInSeconds) {
             lineIndex = i;
         }
@@ -813,13 +835,15 @@ function loadSong() {
 
     fetchLyrics(song.id);
     updateSongListSelection();
+
+    // Update lyricist and music info dynamically
     displayLyricistAndMusic(song);
 
-    // Update Media Session after song is loaded
     updateMediaSession(song);
 }
 
 function getSongArtists(song) {
+    // Filter out the lyricists and music directors
     const filteredArtists = song.artists.primary.filter(artist => !['Lyricist', 'Music'].includes(artist.role));
     return filteredArtists.map(artist => removeQuotes(artist.name)).join(', ');
 }
@@ -828,9 +852,11 @@ function displayLyricistAndMusic(song) {
     const lyricistElement = document.getElementById("lyricist-name");
     const musicElement = document.getElementById("music-name");
 
+    // Find the lyricist and music roles
     const lyricist = song.artists.primary.find(artist => artist.role === 'Lyricist');
     const music = song.artists.primary.find(artist => artist.role === 'Music');
 
+    // Update lyricist and music dynamically
     lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
     musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
 }
@@ -839,7 +865,7 @@ function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: removeQuotes(song.artists.primary[0].name),
+            artist: getSongArtists(song),
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -847,12 +873,6 @@ function updateMediaSession(song) {
                 { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
             ]
         });
-
-        // Add action handlers after the song is loaded
-        navigator.mediaSession.setActionHandler('play', togglePlay);
-        navigator.mediaSession.setActionHandler('pause', togglePlay);
-        navigator.mediaSession.setActionHandler('previoustrack', prevSong);
-        navigator.mediaSession.setActionHandler('nexttrack', nextSong);
     }
 }
 
@@ -985,6 +1005,7 @@ function showErrorPopup(message) {
     }, 80000);
 }
 </script>
+
 
 </body>
 </html>
