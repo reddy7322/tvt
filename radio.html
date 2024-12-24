@@ -360,6 +360,9 @@ function playStation(index) {
     currentStationIndex = index;
     let station = radioStations[index];
 
+    // Call updateMediaSession to update mobile notification panel
+    updateMediaSession(station);
+
     if (Hls.isSupported() && station.url.includes(".m3u8")) {
         let hls = new Hls();
         hls.loadSource(station.url);
@@ -383,6 +386,7 @@ function playStation(index) {
     radioStationSelect.value = index;
 }
 
+// Change radio station when selected from dropdown
 function changeRadioStation() {
     let selectedIndex = parseInt(radioStationSelect.value);
     if (!isNaN(selectedIndex)) {
@@ -390,6 +394,7 @@ function changeRadioStation() {
     }
 }
 
+// Toggle play/pause for the radio
 function toggleRadioPlay() {
     if (radioAudio.paused) {
         playRadio();
@@ -408,16 +413,19 @@ function pauseRadio() {
     radioPlayIcon.innerText = "play_arrow";
 }
 
+// Play next radio station
 function nextStation() {
     let nextIndex = (currentStationIndex + 1) % radioStations.length;
     playStation(nextIndex);
 }
 
+// Play previous radio station
 function previousStation() {
     let prevIndex = (currentStationIndex - 1 + radioStations.length) % radioStations.length;
     playStation(prevIndex);
 }
 
+// Update progress bar and time display
 radioAudio.ontimeupdate = function () {
     let currentTime = radioAudio.currentTime;
     let duration = radioAudio.duration;
@@ -429,13 +437,14 @@ radioAudio.ontimeupdate = function () {
     radioTimeDisplay.innerText = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
 };
 
+// Seek radio based on progress bar value
 function seekRadio() {
     let value = radioProgressBar.value;
     let duration = radioAudio.duration;
     radioAudio.currentTime = (value / 100) * duration;
 }
 
-// Initialize after page load
+// Initialize page after load
 window.onload = function () {
     loader.style.display = "none";
     content.style.display = "block";
@@ -475,13 +484,13 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('nexttrack', nextStation);
 }
 
-// Update Mobile Notification Panel with Album Poster (functionality adapted to radio)
+// Update Mobile Notification Panel with Station Metadata
 function updateMediaSession(station) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: station.name,
-            artist: "Various Artists", // Since this is radio, we'll display a generic label
-            album: "Radio Station",
+            title: station.name,  // Station name as title
+            artist: "Various Artists", // Generic artist label for radio
+            album: "Radio Station",  // Generic album label for radio
             artwork: [
                 { src: station.poster, sizes: '96x96', type: 'image/png' },
                 { src: station.poster, sizes: '128x128', type: 'image/png' },
@@ -490,7 +499,6 @@ function updateMediaSession(station) {
         });
     }
 }
-
     </script>
 
 </body>
