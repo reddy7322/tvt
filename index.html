@@ -631,7 +631,7 @@
             <!-- Song List and Quality Dropdown -->
             <div id="controls-row">
                 <select id="song-list" onchange="playSong()">
-                    <option value="">Select a song</option>
+                    <option value="">Queue</option>
                 </select>
                 <select id="quality-select" onchange="changeQuality()">
                     <option value="12">Low Quality</option>
@@ -800,7 +800,7 @@ audio.ontimeupdate = function () {
 };
 
 function updateSongList() {
-    songList.innerHTML = "<option value=''></option>";
+    songList.innerHTML = "<option value=''>🔻 Queue 🔻</option>";
     songs.forEach((song, index) => {
         const option = document.createElement("option");
         option.value = index;
