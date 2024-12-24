@@ -833,6 +833,9 @@ function loadSong() {
     fetchLyrics(song.id);
     updateSongListSelection();
 
+    // Update lyricist and music info dynamically
+    displayLyricistAndMusic(song);
+
     updateMediaSession(song);
 }
 
@@ -842,11 +845,24 @@ function getSongArtists(song) {
     return filteredArtists.map(artist => removeQuotes(artist.name)).join(', ');
 }
 
+function displayLyricistAndMusic(song) {
+    const lyricistElement = document.getElementById("lyricist-name");
+    const musicElement = document.getElementById("music-name");
+
+    // Find the lyricist and music roles
+    const lyricist = song.artists.primary.find(artist => artist.role === 'Lyricist');
+    const music = song.artists.primary.find(artist => artist.role === 'Music');
+
+    // Update lyricist and music dynamically
+    lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
+    musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
+}
+
 function updateMediaSession(song) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: removeQuotes(song.name),
-            artist: getSongArtists(song),
+            artist: removeQuotes(song.artists.primary[0].name),
             album: removeQuotes(song.album.name),
             artwork: [
                 { src: song.image[2].url, sizes: '96x96', type: 'image/png' },
@@ -854,6 +870,12 @@ function updateMediaSession(song) {
                 { src: song.image[0].url, sizes: '256x256', type: 'image/png' }
             ]
         });
+
+        // Mobile Notification Panel Buttons
+        navigator.mediaSession.setActionHandler('play', togglePlay);
+        navigator.mediaSession.setActionHandler('pause', togglePlay);
+        navigator.mediaSession.setActionHandler('previoustrack', prevSong);
+        navigator.mediaSession.setActionHandler('nexttrack', nextSong);
     }
 }
 
