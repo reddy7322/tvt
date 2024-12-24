@@ -800,7 +800,7 @@ audio.ontimeupdate = function () {
 };
 
 function updateSongList() {
-    songList.innerHTML = "<option value=''>Select a song</option>";
+    songList.innerHTML = "<option value=''></option>";
     songs.forEach((song, index) => {
         const option = document.createElement("option");
         option.value = index;
