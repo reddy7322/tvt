@@ -596,10 +596,11 @@
    <span id="song-artist">Artist Name</span> <span> - </span>
    <span id="album-name">Album Name</span>
    <br>
-   <span id="lyricist-name"></span>
+   <span id="lyricist-name">Lyricist: Not Available</span>
    <br>
-   <span id="music-name"></span>
+   <span id="music-name">Music: Not Available</span>
 </div>
+
 
 
             <!-- Controls -->
@@ -855,8 +856,8 @@ function displayLyricistAndMusic(song) {
     const music = song.artists.primary.find(artist => artist.role === 'Music');
 
     // Display the lyricist and music names, if available
-    lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : '';
-    musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : '';
+    lyricistElement.innerText = lyricist ? `Lyricist: ${removeQuotes(lyricist.name)}` : 'Lyricist: Not Available';
+    musicElement.innerText = music ? `Music: ${removeQuotes(music.name)}` : 'Music: Not Available';
 }
 
 function updateMediaSession(song) {
@@ -1002,46 +1003,7 @@ function showErrorPopup(message) {
         popup.style.display = 'none';
     }, 80000);
 }
-
-// TV Remote and Mobile Gesture Enhancements
-window.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            prevSong();
-            break;
-        case 'ArrowDown':
-            nextSong();
-            break;
-        case 'ArrowLeft':
-            audio.currentTime -= 10;
-            break;
-        case 'ArrowRight':
-            audio.currentTime += 10;
-            break;
-        case 'Enter':
-            togglePlay();
-            break;
-        case 'Backspace':
-            toggleLyrics();
-            break;
-        default:
-            console.log(`Unhandled key: ${event.key}`);
-    }
-});
-
-// Mobile Notification Panel Buttons
-if ('mediaSession' in navigator) {
-    navigator.mediaSession.setActionHandler('play', togglePlay);
-    navigator.mediaSession.setActionHandler('pause', togglePlay);
-    navigator.mediaSession.setActionHandler('previoustrack', prevSong);
-    navigator.mediaSession.setActionHandler('nexttrack', nextSong);
-}
 </script>
-
-
-
-
-
 
 </body>
 </html>
